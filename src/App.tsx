@@ -22,6 +22,7 @@ import { METRIC_TOOLTIPS } from './data/tooltips'
 import { AlertPanel } from './components/AlertPanel'
 import { DecisionModal } from './components/DecisionModal'
 import { StockPerformance } from './components/StockPerformance'
+import { resolveCompanyName } from './data/companyNames'
 import { buildTickerRatings, getPriceTargets } from './domain/ratings'
 import { evaluateAlert } from './domain/alertEngine'
 import type { AlertItem, Holding, PortfolioSource, ScoreComponent, TickerRatings, UserAlert } from './types'
@@ -634,13 +635,176 @@ function SignalsPage({ holdings, onSelect }: { holdings: Holding[]; onSelect: (h
   )
 }
 
-function AlertsPage({ alerts, userAlerts, holdings, onSelect, onOpenPanel }: { alerts: AlertItem[]; userAlerts: UserAlert[]; holdings: Holding[]; onSelect: (holding: Holding) => void; onOpenPanel: () => void }) {
+function getOrBuildHolding(symbol: string, holdings: Holding[]): Holding {
+  const sym = symbol.toUpperCase()
+  const inHoldings = holdings.find((h) => h.symbol.toUpperCase() === sym)
+  if (inHoldings) return inHoldings
+
+  const inDemo = scenarioHoldings(true).find((h) => h.symbol.toUpperCase() === sym)
+  if (inDemo) return inDemo
+
+  const targets = getPriceTargets(sym)
+  const price = targets.saWallStreet || targets.zacks || 100
+  return {
+    symbol: sym,
+    name: resolveCompanyName(sym) || sym,
+    sector: 'Equities',
+    price,
+    dayChange: 0,
+    quantity: 100,
+    avgCost: price * 0.95,
+    weight: 5.0,
+    rsi: 55,
+    macdBullish: true,
+    aboveSma50: true,
+    aboveSma200: true,
+    relativeVolume: 1.1,
+    breakout20d: false,
+    trendSlopePositive: true,
+    hasSignalInputs: true,
+  }
+}
+
+function AlertDetailModal({
+  alert,
+  holdings,
+  onClose,
+  onInspectSymbol,
+  onNavigate,
+  onOpenDecision,
+}: {
+  alert: AlertItem | UserAlert
+  holdings: Holding[]
+  onClose: () => void
+  onInspectSymbol: (symbol: string) => void
+  onNavigate: (page: Page) => void
+  onOpenDecision: (holding: Holding) => void
+}) {
+  const isUserAlert = 'metric' in alert && 'createdAt' in alert
+  const symbol = alert.symbol
+  const isPortfolioAlert = !symbol || symbol.toUpperCase() === 'PORTFOLIO'
+
+  return (
+    <ModalOverlay label="Alert Details" className="asset-drawer" onClose={onClose}>
+      <button className="icon-button drawer-close" onClick={onClose} aria-label="Close alert details"><X size={19}/></button>
+      
+      <div className="drawer-heading">
+        <span className="attention-icon" style={{ width: '42px', height: '42px', borderRadius: '12px', background: alert.severity === 'critical' ? 'var(--red-soft)' : alert.severity === 'warning' ? 'var(--amber-soft)' : 'var(--accent-soft)', color: alert.severity === 'critical' ? 'var(--red)' : alert.severity === 'warning' ? 'var(--amber)' : 'var(--accent-dark)', display: 'grid', placeItems: 'center' }}>
+          <Bell size={22}/>
+        </span>
+        <div>
+          <span className="eyebrow">ALERT INSPECTION &amp; DIRECTIVE</span>
+          <h2 style={{ margin: '4px 0', fontSize: '18px' }}>
+            {isUserAlert ? `${alert.symbol} · ${alert.metric} Alert` : alert.title}
+          </h2>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', margin: '14px 0' }}>
+        <StatusPill state={alert.status}/>
+        <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+          {isUserAlert ? 'User Configured Threshold' : `Triggered: ${alert.time}`}
+        </span>
+      </div>
+
+      <section className="drawer-section">
+        <span className="eyebrow">TRIGGER CONDITION &amp; REASONING</span>
+        <div style={{ background: '#f6f8f7', padding: '14px', borderRadius: '10px', marginTop: '6px', border: '1px solid var(--line)' }}>
+          <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'var(--ink)' }}>
+            {isUserAlert 
+              ? `Monitors ${alert.symbol} for threshold: ${alert.metric} ${alert.condition} ${alert.targetValue}.`
+              : (alert as AlertItem).message}
+          </p>
+        </div>
+      </section>
+
+      <section className="drawer-section">
+        <span className="eyebrow">RECOMMENDED ACTIONS</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+          {symbol && (
+            <button
+              className="ask-button"
+              style={{ justifyContent: 'center', padding: '11px 16px', fontSize: '13px' }}
+              onClick={() => {
+                onClose()
+                onInspectSymbol(symbol)
+              }}
+            >
+              <Target size={16} /> Inspect {symbol} Setup &amp; Price Targets <ArrowRight size={15}/>
+            </button>
+          )}
+
+          {isPortfolioAlert && (
+            <>
+              <button
+                className="ask-button"
+                style={{ justifyContent: 'center', padding: '11px 16px', fontSize: '13px' }}
+                onClick={() => {
+                  onClose()
+                  onNavigate('Analytics')
+                }}
+              >
+                <TrendingUp size={16} /> Open Risk Analytics &amp; Stress Testing <ArrowRight size={15}/>
+              </button>
+              <button
+                className="ask-button"
+                style={{ justifyContent: 'center', padding: '11px 16px', fontSize: '13px', background: 'var(--ink)' }}
+                onClick={() => {
+                  onClose()
+                  const h = holdings.find((x) => x.sector === 'Semiconductors') || holdings[0]
+                  onOpenDecision(h)
+                }}
+              >
+                <Target size={16} /> Open Strategy Decision Directive <ArrowRight size={15}/>
+              </button>
+            </>
+          )}
+
+          <button
+            type="button"
+            className="secondary-button"
+            style={{ justifyContent: 'center', padding: '9px 14px', fontSize: '12px' }}
+            onClick={onClose}
+          >
+            Close Alert Details
+          </button>
+        </div>
+      </section>
+    </ModalOverlay>
+  )
+}
+
+function AlertsPage({
+  alerts,
+  userAlerts,
+  holdings,
+  onSelect,
+  onNavigate,
+  onOpenDecision,
+  onOpenPanel,
+}: {
+  alerts: AlertItem[]
+  userAlerts: UserAlert[]
+  holdings: Holding[]
+  onSelect: (holding: Holding) => void
+  onNavigate: (page: Page) => void
+  onOpenDecision: (holding: Holding) => void
+  onOpenPanel: () => void
+}) {
+  const [inspectingAlert, setInspectingAlert] = useState<AlertItem | UserAlert | null>(null)
   const totalCount = alerts.length + userAlerts.length
 
-  const handleInspect = (symbol?: string) => {
-    if (!symbol) return
-    const h = holdings.find((item) => item.symbol.toUpperCase() === symbol.toUpperCase())
-    if (h) onSelect(h)
+  const handleInspectSymbol = (sym: string) => {
+    const h = getOrBuildHolding(sym, holdings)
+    onSelect(h)
+  }
+
+  const handleAction = (alert: AlertItem | UserAlert) => {
+    if (alert.symbol && alert.symbol.toUpperCase() !== 'PORTFOLIO') {
+      handleInspectSymbol(alert.symbol)
+    } else {
+      onNavigate('Analytics')
+    }
   }
 
   return (
@@ -669,19 +833,18 @@ function AlertsPage({ alerts, userAlerts, holdings, onSelect, onOpenPanel }: { a
             key={ua.id}
             role="button"
             tabIndex={0}
-            style={{ cursor: 'pointer' }}
-            onClick={() => handleInspect(ua.symbol)}
+            onClick={() => setInspectingAlert(ua)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                handleInspect(ua.symbol)
+                setInspectingAlert(ua)
               }
             }}
           >
             <span className={`attention-icon ${ua.severity}`}><Bell size={17}/></span>
             <span className="alert-copy">
               <strong>{ua.symbol} · {ua.metric} {ua.condition} {ua.targetValue}</strong>
-              <small>User configured alert threshold · Click to open {ua.symbol}</small>
+              <small>User configured alert threshold · Click to inspect</small>
             </span>
             <StatusPill state="ARMED"/>
             <time>Now</time>
@@ -689,7 +852,7 @@ function AlertsPage({ alerts, userAlerts, holdings, onSelect, onOpenPanel }: { a
               className="icon-button"
               onClick={(e) => {
                 e.stopPropagation()
-                handleInspect(ua.symbol)
+                handleAction(ua)
               }}
               title={`Inspect ${ua.symbol} in Asset Drawer`}
               aria-label={`Inspect ${ua.symbol}`}
@@ -703,14 +866,13 @@ function AlertsPage({ alerts, userAlerts, holdings, onSelect, onOpenPanel }: { a
           <div 
             className="alert-row" 
             key={alert.id}
-            role={alert.symbol ? 'button' : undefined}
-            tabIndex={alert.symbol ? 0 : undefined}
-            style={{ cursor: alert.symbol ? 'pointer' : 'default' }}
-            onClick={() => handleInspect(alert.symbol)}
+            role="button"
+            tabIndex={0}
+            onClick={() => setInspectingAlert(alert)}
             onKeyDown={(e) => {
-              if (alert.symbol && (e.key === 'Enter' || e.key === ' ')) {
+              if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                handleInspect(alert.symbol)
+                setInspectingAlert(alert)
               }
             }}
           >
@@ -725,16 +887,27 @@ function AlertsPage({ alerts, userAlerts, holdings, onSelect, onOpenPanel }: { a
               className="icon-button"
               onClick={(e) => {
                 e.stopPropagation()
-                handleInspect(alert.symbol)
+                handleAction(alert)
               }}
-              title={alert.symbol ? `Inspect ${alert.symbol} in Asset Drawer` : 'View alert'}
-              aria-label={alert.symbol ? `Inspect ${alert.symbol}` : 'View alert'}
+              title={alert.symbol ? `Inspect ${alert.symbol} in Asset Drawer` : 'View in Risk Analytics'}
+              aria-label={alert.symbol ? `Inspect ${alert.symbol}` : 'View in Risk Analytics'}
             >
               <ChevronRight size={17}/>
             </button>
           </div>
         ))}
       </section>
+
+      {inspectingAlert && (
+        <AlertDetailModal
+          alert={inspectingAlert}
+          holdings={holdings}
+          onClose={() => setInspectingAlert(null)}
+          onInspectSymbol={handleInspectSymbol}
+          onNavigate={onNavigate}
+          onOpenDecision={onOpenDecision}
+        />
+      )}
     </>
   )
 }
@@ -976,7 +1149,17 @@ export default function App() {
     if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected}/>
     if (page === 'Signals') return <SignalsPage holdings={holdings} onSelect={setSelected}/>
     if (page === 'Watchlist') return <WatchlistPage/>
-    if (page === 'Alerts') return <AlertsPage alerts={alerts} userAlerts={userAlerts} holdings={holdings} onSelect={setSelected} onOpenPanel={() => setAlertPanelOpen(true)}/>
+    if (page === 'Alerts') return (
+      <AlertsPage 
+        alerts={alerts} 
+        userAlerts={userAlerts} 
+        holdings={holdings} 
+        onSelect={setSelected} 
+        onNavigate={(p) => setPage(p)}
+        onOpenDecision={(h) => setDecisionHolding(h)}
+        onOpenPanel={() => setAlertPanelOpen(true)}
+      />
+    )
     if (page === 'Analytics') return <AnalyticsPage holdings={holdings}/>
     if (page === 'Import') return <ImportPage onChanged={reloadState}/>
     if (page === 'System') return <SystemPage/>

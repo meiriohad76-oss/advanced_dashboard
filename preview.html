@@ -287,10 +287,11 @@
         <div class="table">
           <div class="trow head" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr"><span>ALERT CONDITION</span><span>STATUS</span><span>SYMBOL</span><span>TIME</span><span>CHANNEL</span><span>ACTION</span></div>
           <div id="customAlertsList"></div>
-          <div class="trow scenario-item" id="alertItem" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openDrawer('CRDO')"><strong>Entry threshold crossed</strong><span>Triggered</span><span>CRDO</span><span>Now</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('CRDO')">Inspect ➔</button></span></div>
-          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="showPage('analytics')"><strong>Sector concentration</strong><span>Triggered</span><span>Portfolio</span><span>09:47</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();showPage('analytics')">View ➔</button></span></div>
-          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openDrawer('ANET')"><strong>20-day breakout</strong><span>Cooldown</span><span>ANET</span><span>10:18</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('ANET')">Inspect ➔</button></span></div>
-          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openDrawer('VRT')"><strong>Recover SMA50</strong><span>Armed</span><span>VRT</span><span>Monitoring</span><span>Telegram</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('VRT')">Inspect ➔</button></span></div>
+          <div class="trow scenario-item" id="alertItem" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openAlertDetail('Entry threshold crossed', 'TRIGGERED', 'Now', 'Score moved from 65 to 90 after a 20-day breakout on 1.42× volume.', 'CRDO', 'critical')"><strong>Entry threshold crossed</strong><span>Triggered</span><span>CRDO</span><span>Now</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('CRDO')" title="Inspect CRDO Setup">Inspect ➔</button></span></div>
+          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openAlertDetail('Sector concentration', 'TRIGGERED', '09:47', 'Semiconductor sector exposure is 36.2%, which exceeds the 35.0% risk limit.', null, 'warning')"><strong>Sector concentration</strong><span>Triggered</span><span>Portfolio</span><span>09:47</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();showPage('analytics')" title="View in Risk Analytics">View ➔</button></span></div>
+          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openAlertDetail('20-day breakout', 'COOLDOWN', '10:18', 'Price remains above the prior 20-day high; cooldown ends tomorrow.', 'ANET', 'info')"><strong>20-day breakout</strong><span>Cooldown</span><span>ANET</span><span>10:18</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('ANET')" title="Inspect ANET Setup">Inspect ➔</button></span></div>
+          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openAlertDetail('Recover SMA50', 'ARMED', 'Monitoring', 'Waiting for price to cross above SMA50 while above SMA200.', 'VRT', 'info')"><strong>Recover SMA50</strong><span>Armed</span><span>VRT</span><span>Monitoring</span><span>Telegram</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('VRT')" title="Inspect VRT Setup">Inspect ➔</button></span></div>
+          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openAlertDetail('Portfolio drawdown', 'ARMED', 'Monitoring', 'Notify when drawdown exceeds 8.0%; current portfolio drawdown is 1.4%.', null, 'info')"><strong>Portfolio drawdown</strong><span>Armed</span><span>Portfolio</span><span>Monitoring</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();showPage('analytics')" title="View in Risk Analytics">View ➔</button></span></div>
         </div>
       </section>
 
@@ -11886,10 +11887,36 @@ function stockPerfHtml(sym, price, dc) {
 }
 
 function openDrawer(sym){
+  if (!sym) return;
+  const upperSym = sym.toUpperCase();
   const baseHoldingsList = customHoldings || HOLDINGS;
-  const list=baseHoldingsList.map(h=>withScenario(h));
-  const base=baseHoldingsList.find(h=>h.s===sym); if(!base||base.cash)return;
-  const h=withScenario(base); const a=assess(h);
+  let base = baseHoldingsList.find(h => h.s && h.s.toUpperCase() === upperSym);
+  if (!base) {
+    base = HOLDINGS.find(h => h.s && h.s.toUpperCase() === upperSym);
+  }
+  if (!base) {
+    const t = (typeof EXTRACTED_PRICE_TARGETS !== 'undefined') ? EXTRACTED_PRICE_TARGETS[upperSym] : null;
+    const targetPrice = (t && t.saWallStreet) || (t && t.zacks) || 100;
+    base = {
+      s: upperSym,
+      n: resolveCompanyName(upperSym, upperSym),
+      sec: 'Equities',
+      price: targetPrice,
+      dc: 0,
+      w: 5.0,
+      rsi: 55,
+      macd: true,
+      s50: true,
+      s200: true,
+      rv: 1.1,
+      brk: false,
+      slope: true,
+      hasSignalInputs: true
+    };
+  }
+  const list = (customHoldings || HOLDINGS).map(h => withScenario(h));
+  const h = withScenario(base);
+  const a = assess(h);
   const body=document.getElementById('drawerBody');
   const bars=a.comps.map(c=>'<div class="bar"><div><span>'+c.l+'</span><strong>'+c.v+'<small>/'+c.m+'</small></strong></div><div class="track"><i style="width:'+(c.v/c.m*100)+'%"></i></div></div>').join('');
   const facts=a.facts.map(f=>'<li><b>✓</b> '+f+'</li>').join('');
@@ -11907,6 +11934,44 @@ function openDrawer(sym){
     '<div class="prov">✓ Source current · seeded feed · calculations local</div>';
   body.querySelector('.close').onclick=()=>document.getElementById('detail').classList.remove('show');
   document.getElementById('detail').classList.add('show');
+}
+
+
+function openAlertDetail(title, status, time, msg, symbol, severity) {
+  const modal = document.getElementById('alertDetailModal');
+  if (!modal) return;
+  document.getElementById('admTitle').textContent = title;
+  document.getElementById('admStatus').textContent = status;
+  document.getElementById('admStatus').className = 'pill ' + (status === 'TRIGGERED' ? 'triggered' : status === 'COOLDOWN' ? 'cooldown' : 'entry');
+  document.getElementById('admTime').textContent = time || 'Now';
+  document.getElementById('admMessage').textContent = msg;
+
+  const actionBtn = document.getElementById('admActionBtn');
+  const secBtn = document.getElementById('admSecondaryBtn');
+
+  if (symbol && symbol.toUpperCase() !== 'PORTFOLIO') {
+    actionBtn.style.display = 'flex';
+    actionBtn.textContent = 'Inspect ' + symbol + ' Setup & Targets ➔';
+    actionBtn.onclick = () => {
+      modal.classList.remove('show');
+      openDrawer(symbol);
+    };
+    secBtn.style.display = 'none';
+  } else {
+    actionBtn.style.display = 'flex';
+    actionBtn.textContent = 'Open Risk Analytics & Stress Testing ➔';
+    actionBtn.onclick = () => {
+      modal.classList.remove('show');
+      showPage('analytics');
+    };
+    secBtn.style.display = 'none';
+  }
+  modal.classList.add('show');
+}
+
+const btnCloseAlertDetail = document.getElementById('closeAlertDetailModal');
+if (btnCloseAlertDetail) {
+  btnCloseAlertDetail.onclick = () => document.getElementById('alertDetailModal').classList.remove('show');
 }
 
 function bindOpeners(){ document.querySelectorAll('[data-sym]').forEach(x=>x.onclick=()=>openDrawer(x.dataset.sym)); }
@@ -11998,7 +12063,7 @@ function renderUserAlerts() {
     row.style.gridTemplateColumns = '1.8fr 1fr 1fr 1fr 1fr 0.8fr';
     row.style.background = '#f4faf6';
     row.style.cursor = 'pointer';
-    row.onclick = () => openDrawer(ua.symbol);
+    row.onclick = () => openAlertDetail(ua.symbol + ' Alert', ua.status || 'ARMED', 'Now', labelStr, ua.symbol, ua.severity || 'info');
     row.innerHTML = '<strong>' + labelStr + '</strong>' +
       '<span><span class="pill entry" style="background:#e2f6ec;color:#08704a">' + (ua.status || 'ARMED') + '</span></span>' +
       '<span>' + ua.symbol + '</span>' +
@@ -12301,5 +12366,32 @@ checkBrokerAndMarketStatus();
 renderUserAlerts();
 render();
 </script>
+
+<!-- Alert Inspection Modal -->
+<div class="overlay" id="alertDetailModal">
+  <div class="modal" style="max-width:480px">
+    <button class="close" id="closeAlertDetailModal">×</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <span class="ricon" style="width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#e2f6ec;color:#08704a;font-size:18px">🔔</span>
+      <div>
+        <span class="eyebrow">ALERT INSPECTION &amp; DIRECTIVE</span>
+        <h2 id="admTitle" style="margin:2px 0 0;font-size:16px">Alert Title</h2>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
+      <span class="pill entry" id="admStatus">TRIGGERED</span>
+      <small id="admTime" style="color:var(--muted)">Now</small>
+    </div>
+    <div style="background:#f6f8f7;padding:12px;border-radius:8px;border:1px solid var(--line);margin-bottom:16px">
+      <p id="admMessage" style="margin:0;font-size:11px;line-height:1.6;color:var(--ink)">Alert trigger message.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="rbtn primary" id="admActionBtn" style="justify-content:center;padding:9px 12px">Inspect Asset Setup ➔</button>
+      <button class="rbtn" id="admSecondaryBtn" style="justify-content:center;padding:9px 12px">View in Risk Analytics ➔</button>
+      <button class="rbtn" onclick="document.getElementById('alertDetailModal').classList.remove('show')" style="justify-content:center;padding:8px 12px;margin-top:4px">Dismiss</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
