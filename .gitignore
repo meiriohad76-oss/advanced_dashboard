@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+backend/.venv/
+.venv/
+venv/
+ENV/
+
+# Production builds
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables & credentials
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Python cache & test artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases
+backend/data/*.db
+backend/data/*.db-journal
+backend/data/*.sqlite3
+
+# Logs & temporary run scripts/markers
+*.log
+session*-run.log
+session*-run.ps1
+session*-run.bat
+session*-*.marker
+session*-*.done
+
+# Archives & temporary archives
+*.zip
+*.tar.gz
+Archive.zip
+handoff/*.zip
+
+# OS & Editor files
+__MACOSX/
+.DS_Store
+Thumbs.db
+.obsidian/
+.vscode/
+.idea/

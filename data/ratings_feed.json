@@ -1,0 +1,26 @@
+{
+  "as_of": "2026-07-06T15:34:00Z",
+  "ratings": [
+    {
+      "ticker": "AEM",
+      "source": "sa_analysts",
+      "value": 3.83,
+      "label": "Buy",
+      "as_of": "2026-07-06T15:34:00Z"
+    },
+    {
+      "ticker": "AEM",
+      "source": "sa_quant",
+      "value": 2.82,
+      "label": "Hold",
+      "as_of": "2026-07-06T15:34:00Z"
+    },
+    {
+      "ticker": "AEM",
+      "source": "sa_wall_street",
+      "value": 4.09,
+      "label": "Buy",
+      "as_of": "2026-07-06T15:34:00Z"
+    }
+  ]
+}

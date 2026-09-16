@@ -1,0 +1,27 @@
+name: atlas-portfolio-poc
+
+services:
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    # Host port defaults to 8100 so it doesn't collide with the local ratings
+    # extractor on :8000 (override with ATLAS_PORT). The container still listens on
+    # 8000 internally; only the host-published port moves.
+    ports:
+      - "127.0.0.1:${ATLAS_PORT:-8100}:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "4173:80"
+
+# Production follow-on services described in the specification (PostgreSQL,
+# Redis, worker, and cloudflared) are intentionally excluded from the POC so
+# the demo remains deterministic and does not imply unverified live operations.

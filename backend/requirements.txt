@@ -1,0 +1,14 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+# pydantic 2.10.2 pins pydantic-core 2.27.1, which has no prebuilt wheel for
+# CPython 3.14 (Windows) and fails to build from source without MSVC/Rust.
+# >=2.12 pulls a version that ships a cp314 wheel; the code uses only stable
+# pydantic-v2 API, so the range is safe. Also works on 3.12.
+pydantic>=2.12,<3
+httpx==0.28.0
+# File uploads (portfolio/watchlist import). python-multipart is required by FastAPI for
+# multipart/form-data; openpyxl reads .xlsx uploads (CSV uses the stdlib). Both are pure
+# Python, so they install on Windows/py3.14 and the Pi without build tools.
+python-multipart>=0.0.9
+openpyxl>=3.1,<4
+pytest==8.3.3

@@ -1,0 +1,4 @@
+symbol,name,sector,quantity,price,avg_cost,weight,day_change,rsi,macd_bullish,above_sma_50,above_sma_200,relative_volume,breakout_20d,trend_slope_positive
+NVDA,NVIDIA,Semiconductors,380,203.34,159.10,,2.31,61,true,true,true,1.18,false,true
+MSFT,Microsoft,Software,145,519.72,438.25,,0.74,55,true,true,true,0.91,false,true
+CASH,Cash balance,Cash,1,31200,31200,,0,,,,,,,
