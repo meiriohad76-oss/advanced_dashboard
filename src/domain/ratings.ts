@@ -81,30 +81,24 @@ function buildRating(key: RatingSourceKey, display: string, raw: number | string
   return { source: key, display, valueNative: value.toFixed(1), label: labelFromNormalized(normalized), normalized, nativeScale: '1-5 (5 best)', asOf: SEED_AS_OF }
 }
 
-export const PRICE_TARGETS: Record<string, { saWallStreet: number; saHigh: number; saLow: number; zacks: number }> = {
-  CRDO: { saWallStreet: 54.00, saHigh: 60.00, saLow: 48.00, zacks: 52.50 },
-  NVDA: { saWallStreet: 148.00, saHigh: 175.00, saLow: 115.00, zacks: 145.00 },
-  MSFT: { saWallStreet: 490.00, saHigh: 520.00, saLow: 450.00, zacks: 480.00 },
-  ANET: { saWallStreet: 360.00, saHigh: 390.00, saLow: 320.00, zacks: 355.00 },
-  VRT: { saWallStreet: 105.00, saHigh: 120.00, saLow: 90.00, zacks: 100.00 },
-  GOOGL: { saWallStreet: 205.00, saHigh: 225.00, saLow: 185.00, zacks: 200.00 },
-  SPY: { saWallStreet: 610.00, saHigh: 640.00, saLow: 570.00, zacks: 600.00 },
-  AEM: { saWallStreet: 220.00, saHigh: 285.00, saLow: 170.00, zacks: 220.78 },
-}
+import { EXTRACTED_PRICE_TARGETS } from '../data/priceTargets'
+import type { PriceTargetInfo } from '../data/priceTargets'
 
-export function getPriceTargets(symbol: string, currentPrice: number) {
+export type { PriceTargetInfo }
+
+export function getPriceTargets(symbol: string, _currentPrice?: number): PriceTargetInfo {
+  void _currentPrice
   const sym = symbol.toUpperCase()
-  if (PRICE_TARGETS[sym]) {
-    return PRICE_TARGETS[sym]
-  }
-  if (!currentPrice || currentPrice <= 0) {
-    return { saWallStreet: 100, saHigh: 120, saLow: 90, zacks: 105 }
+  if (EXTRACTED_PRICE_TARGETS[sym]) {
+    return EXTRACTED_PRICE_TARGETS[sym]
   }
   return {
-    saWallStreet: round1(currentPrice * 1.16),
-    saHigh: round1(currentPrice * 1.28),
-    saLow: round1(currentPrice * 1.02),
-    zacks: round1(currentPrice * 1.14),
+    saWallStreet: null,
+    saHigh: null,
+    saLow: null,
+    zacks: null,
+    zacksHigh: null,
+    zacksLow: null,
   }
 }
 

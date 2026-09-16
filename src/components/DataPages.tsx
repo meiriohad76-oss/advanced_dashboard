@@ -331,11 +331,30 @@ export function ImportPage({ onChanged }: { onChanged: () => void }) {
   )
 }
 
-// Watchlist page: the uploaded watchlist as a simple table.
+// Watchlist page: the uploaded watchlist as a sortable table.
 export function WatchlistPage() {
   const [watch, setWatch] = useState<WatchlistData | null>(null)
+  const [sortKey, setSortKey] = useState<'symbol' | 'name' | 'sector' | 'note'>('symbol')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
   useEffect(() => { api.watchlist().then(setWatch).catch(() => setWatch(null)) }, [])
   const items: WatchlistItem[] = watch?.items ?? []
+
+  const handleSort = (key: 'symbol' | 'name' | 'sector' | 'note') => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  const sortedItems = [...items].sort((a, b) => {
+    const vA = (a[sortKey] || '').toLowerCase()
+    const vB = (b[sortKey] || '').toLowerCase()
+    return sortDir === 'asc' ? vA.localeCompare(vB) : vB.localeCompare(vA)
+  })
+
   return (
     <>
       <PageHeading eyebrow="MONITORING" title="Watchlist" copy="Symbols you are tracking but do not yet hold." />
@@ -343,8 +362,29 @@ export function WatchlistPage() {
         <section className="panel empty-state"><ListChecks size={22} /><h2>No watchlist yet</h2><p>Upload one on the Import page (symbol + optional name, sector, note).</p></section>
       ) : (
         <section className="panel table-panel">
-          <div className="table-head watchlist-head"><span>Symbol</span><span>Name</span><span>Sector</span><span>Note</span></div>
-          {items.map((item) => (
+          <div className="table-head watchlist-head">
+            <span>
+              <button type="button" className={`th-sort-btn ${sortKey === 'symbol' ? 'active' : ''}`} onClick={() => handleSort('symbol')}>
+                Symbol <span className="sort-arrow">{sortKey === 'symbol' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+              </button>
+            </span>
+            <span>
+              <button type="button" className={`th-sort-btn ${sortKey === 'name' ? 'active' : ''}`} onClick={() => handleSort('name')}>
+                Name <span className="sort-arrow">{sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+              </button>
+            </span>
+            <span>
+              <button type="button" className={`th-sort-btn ${sortKey === 'sector' ? 'active' : ''}`} onClick={() => handleSort('sector')}>
+                Sector <span className="sort-arrow">{sortKey === 'sector' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+              </button>
+            </span>
+            <span>
+              <button type="button" className={`th-sort-btn ${sortKey === 'note' ? 'active' : ''}`} onClick={() => handleSort('note')}>
+                Note <span className="sort-arrow">{sortKey === 'note' ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+              </button>
+            </span>
+          </div>
+          {sortedItems.map((item) => (
             <div className="holding-row watchlist-row" key={item.symbol}>
               <span className="asset-cell"><span className="asset-logo">{item.symbol[0]}</span><strong>{item.symbol}</strong></span>
               <span>{item.name || '—'}</span><span>{item.sector || '—'}</span><span className="watchlist-note">{item.note || '—'}</span>

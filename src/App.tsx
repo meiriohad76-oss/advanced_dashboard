@@ -199,11 +199,15 @@ function AssetDrawer({ holding, holdings, onClose, onOpenDecision }: { holding: 
             <div className="target-grid">
               <div className="target-box">
                 <span>SA Wall St Consensus Target</span>
-                <strong>{formatCurrency(targets.saWallStreet)}</strong>
-                <small className={saDiff >= 0 ? 'upside-positive' : 'upside-negative'}>
-                  {saDiff >= 0 ? '+' : ''}{formatCurrency(saDiff)} ({saDiffPct >= 0 ? '+' : ''}{saDiffPct.toFixed(1)}%)
-                </small>
-                {targets.saHigh && (
+                <strong>{targets.saWallStreet != null ? formatCurrency(targets.saWallStreet) : '—'}</strong>
+                {targets.saWallStreet != null ? (
+                  <small className={saDiff >= 0 ? 'upside-positive' : 'upside-negative'}>
+                    {saDiff >= 0 ? '+' : ''}{formatCurrency(saDiff)} ({saDiffPct >= 0 ? '+' : ''}{saDiffPct.toFixed(1)}%)
+                  </small>
+                ) : (
+                  <small style={{ color: 'var(--muted)' }}>No SA consensus target</small>
+                )}
+                {targets.saHigh != null && targets.saLow != null && (
                   <div style={{ fontSize: '8px', color: 'var(--muted)', marginTop: '4px' }}>
                     Range: ${targets.saLow} - ${targets.saHigh}
                   </div>
@@ -211,10 +215,14 @@ function AssetDrawer({ holding, holdings, onClose, onOpenDecision }: { holding: 
               </div>
               <div className="target-box">
                 <span>Zacks Target Price</span>
-                <strong>{formatCurrency(targets.zacks)}</strong>
-                <small className={zacksDiff >= 0 ? 'upside-positive' : 'upside-negative'}>
-                  {zacksDiff >= 0 ? '+' : ''}{formatCurrency(zacksDiff)} ({zacksDiffPct >= 0 ? '+' : ''}{zacksDiffPct.toFixed(1)}%)
-                </small>
+                <strong>{targets.zacks != null ? formatCurrency(targets.zacks) : '—'}</strong>
+                {targets.zacks != null ? (
+                  <small className={zacksDiff >= 0 ? 'upside-positive' : 'upside-negative'}>
+                    {zacksDiff >= 0 ? '+' : ''}{formatCurrency(zacksDiff)} ({zacksDiffPct >= 0 ? '+' : ''}{zacksDiffPct.toFixed(1)}%)
+                  </small>
+                ) : (
+                  <small style={{ color: 'var(--muted)' }}>No Zacks target</small>
+                )}
                 <div style={{ fontSize: '8px', color: 'var(--muted)', marginTop: '4px' }}>
                   Quant Revision Signal
                 </div>
@@ -251,7 +259,7 @@ function AskPanel({ holdings, onClose }: { holdings: Holding[]; onClose: () => v
   )
 }
 
-function Overview({ holdings, scenario, onSelect, onAsk, onOpenDecision }: { holdings: Holding[]; scenario: boolean; onSelect: (holding: Holding) => void; onAsk: () => void; onOpenDecision: (holding: Holding) => void }) {
+function Overview({ holdings, scenario, onSelect, onAsk, onOpenDecision, onNavigate }: { holdings: Holding[]; scenario: boolean; onSelect: (holding: Holding) => void; onAsk: () => void; onOpenDecision: (holding: Holding) => void; onNavigate?: (page: Page) => void }) {
   const [timeframe, setTimeframe] = useState<TimeframeKey>('1Y')
   const ranked = useMemo(() => holdings.filter((h) => h.symbol !== 'CASH').map((holding) => {
     const ready = holding.hasSignalInputs !== false
@@ -325,23 +333,23 @@ function Overview({ holdings, scenario, onSelect, onAsk, onOpenDecision }: { hol
         </section>
 
         <section className="panel allocation-panel">
-          <div className="section-heading"><div><span className="eyebrow">EXPOSURE</span><h2>Allocation</h2></div><button className="text-button">View analysis <ArrowRight size={14}/></button></div>
+          <div className="section-heading"><div><span className="eyebrow">EXPOSURE</span><h2>Allocation</h2></div><button className="text-button" onClick={() => onNavigate && onNavigate('Analytics')}>View analysis <ArrowRight size={14}/></button></div>
           <div className="allocation-content"><div className="donut"><div><strong>$715K</strong><span>total value</span></div></div><div className="allocation-list"><div><i className="seg semi"/><span>Semiconductors</span><strong>36.2%</strong></div><div><i className="seg software"/><span>Software</span><strong>21.3%</strong></div><div><i className="seg infra"/><span>Infrastructure</span><strong>20.0%</strong></div><div><i className="seg other"/><span>Diversifiers &amp; cash</span><strong>22.5%</strong></div></div></div>
           <div className="risk-note"><AlertTriangle size={16}/><span>Semiconductors are <strong>1.2% above</strong> the target limit.</span></div>
         </section>
 
         <section className="panel signals-panel">
-          <div className="section-heading"><div><span className="eyebrow">PRIORITIZED</span><h2>Signals to review</h2></div><button className="text-button">View all <ArrowRight size={14}/></button></div>
+          <div className="section-heading"><div><span className="eyebrow">PRIORITIZED</span><h2>Signals to review</h2></div><button className="text-button" onClick={() => onNavigate && onNavigate('Signals')}>View all <ArrowRight size={14}/></button></div>
           <div className="signal-list">{ranked.slice(0, 4).map(({ holding, displayState, displayScore, fact }, index) => <button key={holding.symbol} onClick={() => onSelect(holding)}><span className="rank">0{index + 1}</span><span className="asset-logo">{holding.symbol[0]}</span><span className="signal-name"><strong>{holding.symbol}</strong><small>{fact}</small></span><StatusPill state={displayState}/><strong className="signal-score">{displayScore > 0 ? displayScore : '—'}</strong><ChevronRight size={16}/></button>)}</div>
         </section>
 
         <section className="panel attention-panel">
           <div className="section-heading"><div><span className="eyebrow">WHAT CHANGED</span><h2>Attention feed</h2></div><span className="live-indicator"><i/> Live</span></div>
           <div className="attention-list">
-            {scenario && <button onClick={() => onOpenDecision(holdings[0])}><span className="attention-icon critical"><Target size={17}/></span><span><strong>CRDO moved to Strong Entry</strong><small>Score 65 → 90 · breakout confirmed</small></span><time>Now</time></button>}
-            <button onClick={() => onOpenDecision(holdings[0])}><span className="attention-icon warning"><AlertTriangle size={17}/></span><span><strong>Concentration threshold exceeded</strong><small>Semiconductors reached 36.2%</small></span><time>12m</time></button>
-            <button><span className="attention-icon"><TrendingUp size={17}/></span><span><strong>Portfolio extended its lead</strong><small>Relative return vs SPY is now +7.3%</small></span><time>34m</time></button>
-            <button><span className="attention-icon"><Database size={17}/></span><span><strong>Daily data validation passed</strong><small>11 symbols · no gaps detected</small></span><time>1h</time></button>
+            {scenario && <button onClick={() => { const h = holdings.find(item => item.symbol === 'CRDO') || holdings[0]; onOpenDecision(h); }}><span className="attention-icon critical"><Target size={17}/></span><span><strong>CRDO moved to Strong Entry</strong><small>Score 65 → 90 · breakout confirmed</small></span><time>Now</time></button>}
+            <button onClick={() => { const h = holdings.find(item => item.sector === 'Semiconductors') || holdings[0]; onOpenDecision(h); }}><span className="attention-icon warning"><AlertTriangle size={17}/></span><span><strong>Concentration threshold exceeded</strong><small>Semiconductors reached 36.2%</small></span><time>12m</time></button>
+            <button onClick={() => onNavigate && onNavigate('Analytics')}><span className="attention-icon"><TrendingUp size={17}/></span><span><strong>Portfolio extended its lead</strong><small>Relative return vs SPY is now +7.3%</small></span><time>34m</time></button>
+            <button onClick={() => onNavigate && onNavigate('System')}><span className="attention-icon"><Database size={17}/></span><span><strong>Daily data validation passed</strong><small>11 symbols · no gaps detected</small></span><time>1h</time></button>
           </div>
         </section>
       </div>
@@ -349,42 +357,292 @@ function Overview({ holdings, scenario, onSelect, onAsk, onOpenDecision }: { hol
   )
 }
 
+type PortfolioSortKey = 'symbol' | 'price' | 'quantity' | 'avgCost' | 'marketValue' | 'weight' | 'dayChange' | 'unrealizedPct' | 'unrealizedVal' | 'state' | 'score'
+
 function PortfolioPage({ holdings, onSelect }: { holdings: Holding[]; onSelect: (holding: Holding) => void }) {
+  const [search, setSearch] = useState('')
+  const [sortKey, setSortKey] = useState<PortfolioSortKey>('weight')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  const handleSort = (key: PortfolioSortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir(key === 'symbol' || key === 'state' ? 'asc' : 'desc')
+    }
+  }
+
+  const filtered = useMemo(() => {
+    return holdings.filter((h) => {
+      if (!search.trim()) return true
+      const q = search.toLowerCase()
+      return h.symbol.toLowerCase().includes(q) || (h.name && h.name.toLowerCase().includes(q)) || (h.sector && h.sector.toLowerCase().includes(q))
+    })
+  }, [holdings, search])
+
+  const sortedHoldings = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      let vA: number | string = 0
+      let vB: number | string = 0
+      switch (sortKey) {
+        case 'symbol':
+          return sortDir === 'asc' ? a.symbol.localeCompare(b.symbol) : b.symbol.localeCompare(a.symbol)
+        case 'price':
+          vA = a.price
+          vB = b.price
+          break
+        case 'quantity':
+          vA = a.quantity
+          vB = b.quantity
+          break
+        case 'avgCost':
+          vA = a.avgCost
+          vB = b.avgCost
+          break
+        case 'marketValue':
+          vA = a.quantity * a.price
+          vB = b.quantity * b.price
+          break
+        case 'weight':
+          vA = a.weight
+          vB = b.weight
+          break
+        case 'dayChange':
+          vA = a.dayChange
+          vB = b.dayChange
+          break
+        case 'unrealizedPct': {
+          const cA = a.avgCost || a.price
+          const cB = b.avgCost || b.price
+          vA = cA > 0 ? ((a.price - cA) / cA) * 100 : 0
+          vB = cB > 0 ? ((b.price - cB) / cB) * 100 : 0
+          break
+        }
+        case 'unrealizedVal': {
+          const cA = a.avgCost || a.price
+          const cB = b.avgCost || b.price
+          vA = (a.price - cA) * a.quantity
+          vB = (b.price - cB) * b.quantity
+          break
+        }
+        case 'state': {
+          const sA = assessHolding(a).state
+          const sB = assessHolding(b).state
+          return sortDir === 'asc' ? sA.localeCompare(sB) : sB.localeCompare(sA)
+        }
+        case 'score': {
+          vA = assessHolding(a).score
+          vB = assessHolding(b).score
+          break
+        }
+      }
+      return sortDir === 'asc' ? (vA as number) - (vB as number) : (vB as number) - (vA as number)
+    })
+  }, [filtered, sortKey, sortDir])
+
+  const renderSortArrow = (key: PortfolioSortKey) => (
+    <span className="sort-arrow">{sortKey === key ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+  )
+
   return (
     <>
       <PageHeading eyebrow="CURRENT POSITION" title="Portfolio" copy="A complete view of exposure, position sizing, cost basis, performance, and signal state."/>
       <section className="panel table-panel">
         <div className="table-toolbar">
-          <div className="search-box"><Search size={16}/><input placeholder="Search holdings"/></div>
-          <button className="secondary-button">Export CSV</button>
+          <div className="search-box">
+            <Search size={16}/>
+            <input 
+              value={search} 
+              onChange={(e) => setSearch(e.target.value)} 
+              placeholder="Search holdings by symbol, name, or sector…"
+            />
+          </div>
+          <button className="secondary-button" onClick={() => {
+            const rows = ['Symbol,Name,Sector,Price,Shares,AvgCost,Weight,DayChange,Value']
+            holdings.forEach((h) => rows.push(`${h.symbol},"${h.name || ''}",${h.sector},${h.price},${h.quantity},${h.avgCost},${h.weight}%,${h.dayChange}%,${(h.quantity * h.price).toFixed(2)}`))
+            const blob = new Blob([rows.join('\n')], { type: 'text/csv' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'atlas_portfolio.csv'
+            a.click()
+          }}>Export CSV</button>
         </div>
         <div className="table-head extended">
-          <span>Asset</span>
-          <span>Price</span>
-          <span><Tooltip content={METRIC_TOOLTIPS.shares}>Shares</Tooltip></span>
-          <span><Tooltip content={METRIC_TOOLTIPS.costBasis}>Avg Cost</Tooltip></span>
-          <span><Tooltip content={METRIC_TOOLTIPS.totalCost}>Market Value</Tooltip></span>
-          <span>Weight</span>
-          <span>Today</span>
-          <span><Tooltip content={METRIC_TOOLTIPS.unrealizedPct}>Unrealized %</Tooltip></span>
-          <span><Tooltip content={METRIC_TOOLTIPS.unrealizedVal}>Unrealized Value</Tooltip></span>
-          <span>State</span>
-          <span>Score</span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'symbol' ? 'active' : ''}`} onClick={() => handleSort('symbol')}>
+              Asset {renderSortArrow('symbol')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'price' ? 'active' : ''}`} onClick={() => handleSort('price')}>
+              Price {renderSortArrow('price')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'quantity' ? 'active' : ''}`} onClick={() => handleSort('quantity')}>
+              <Tooltip content={METRIC_TOOLTIPS.shares}>Shares</Tooltip> {renderSortArrow('quantity')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'avgCost' ? 'active' : ''}`} onClick={() => handleSort('avgCost')}>
+              <Tooltip content={METRIC_TOOLTIPS.costBasis}>Avg Cost</Tooltip> {renderSortArrow('avgCost')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'marketValue' ? 'active' : ''}`} onClick={() => handleSort('marketValue')}>
+              <Tooltip content={METRIC_TOOLTIPS.totalCost}>Market Value</Tooltip> {renderSortArrow('marketValue')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'weight' ? 'active' : ''}`} onClick={() => handleSort('weight')}>
+              Weight {renderSortArrow('weight')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'dayChange' ? 'active' : ''}`} onClick={() => handleSort('dayChange')}>
+              Today {renderSortArrow('dayChange')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'unrealizedPct' ? 'active' : ''}`} onClick={() => handleSort('unrealizedPct')}>
+              <Tooltip content={METRIC_TOOLTIPS.unrealizedPct}>Unrealized %</Tooltip> {renderSortArrow('unrealizedPct')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'unrealizedVal' ? 'active' : ''}`} onClick={() => handleSort('unrealizedVal')}>
+              <Tooltip content={METRIC_TOOLTIPS.unrealizedVal}>Unrealized Value</Tooltip> {renderSortArrow('unrealizedVal')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'state' ? 'active' : ''}`} onClick={() => handleSort('state')}>
+              State {renderSortArrow('state')}
+            </button>
+          </span>
+          <span>
+            <button type="button" className={`th-sort-btn ${sortKey === 'score' ? 'active' : ''}`} onClick={() => handleSort('score')}>
+              Score {renderSortArrow('score')}
+            </button>
+          </span>
         </div>
-        {holdings.map((holding) => <HoldingRow key={holding.symbol} holding={holding} onSelect={onSelect}/>)}
+        {sortedHoldings.map((holding) => <HoldingRow key={holding.symbol} holding={holding} onSelect={onSelect}/>)}
       </section>
     </>
   )
 }
 
+type SignalSortKey = 'score' | 'symbol' | 'dayChange' | 'state'
+
 function SignalsPage({ holdings, onSelect }: { holdings: Holding[]; onSelect: (holding: Holding) => void }) {
-  const ranked = holdings.filter((h) => h.symbol !== 'CASH').map((holding) => ({ holding, assessment: assessHolding(holding), ready: holding.hasSignalInputs !== false }))
-    .sort((a, b) => (Number(b.ready) - Number(a.ready)) || (b.assessment.score - a.assessment.score))
-  return <><PageHeading eyebrow="EXPLAINABLE PRIORITIZATION" title="Signal center" copy="Ranked setups with every contributing rule visible."/><div className="signal-cards">{ranked.map(({ holding, assessment, ready }, index) => <button className={`signal-card ${ready ? '' : 'muted'}`} key={holding.symbol} onClick={() => onSelect(holding)}><span className="signal-card-rank">{ready ? String(index + 1).padStart(2, '0') : '—'}</span><div className="signal-card-main"><div><span className="asset-logo">{holding.symbol[0]}</span><span><strong>{holding.symbol}</strong>{holding.name && holding.name !== holding.symbol && <small>{holding.name}</small>}</span></div><span className="signal-card-tags"><PortfolioFitTag holding={holding} holdings={holdings}/><RatingsConsensusChip symbol={holding.symbol}/>{ready && <StatusPill state={assessment.state}/>}</span></div>{ready ? <><div className="signal-card-score"><strong>{assessment.score}</strong><span>/ 100</span></div><div className="mini-components">{assessment.components.map((component) => <div key={component.label}><span>{component.label}</span><i><b style={{width: `${component.score/component.max*100}%`}}/></i></div>)}</div><p>{assessment.facts.slice(0, 2).join(' · ')}</p><span className="review-link">Review explanation <ArrowRight size={15}/></span></> : <><div className="signal-card-nodata"><Database size={15}/> Signals need market data</div><p>Add RSI / MACD / SMA columns to score this holding.</p></>}</button>)}</div></>
+  const [sortKey, setSortKey] = useState<SignalSortKey>('score')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  const handleSort = (key: SignalSortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir(key === 'symbol' || key === 'state' ? 'asc' : 'desc')
+    }
+  }
+
+  const ranked = useMemo(() => {
+    const list = holdings.filter((h) => h.symbol !== 'CASH').map((holding) => ({ 
+      holding, 
+      assessment: assessHolding(holding), 
+      ready: holding.hasSignalInputs !== false 
+    }))
+    return list.sort((a, b) => {
+      if (sortKey === 'score') {
+        const diff = (Number(b.ready) - Number(a.ready)) || (sortDir === 'desc' ? b.assessment.score - a.assessment.score : a.assessment.score - b.assessment.score)
+        return diff
+      }
+      if (sortKey === 'symbol') {
+        return sortDir === 'asc' ? a.holding.symbol.localeCompare(b.holding.symbol) : b.holding.symbol.localeCompare(a.holding.symbol)
+      }
+      if (sortKey === 'dayChange') {
+        return sortDir === 'desc' ? b.holding.dayChange - a.holding.dayChange : a.holding.dayChange - b.holding.dayChange
+      }
+      if (sortKey === 'state') {
+        return sortDir === 'asc' ? a.assessment.state.localeCompare(b.assessment.state) : b.assessment.state.localeCompare(a.assessment.state)
+      }
+      return 0
+    })
+  }, [holdings, sortKey, sortDir])
+
+  return (
+    <>
+      <div className="page-title-row">
+        <div>
+          <span className="eyebrow">EXPLAINABLE PRIORITIZATION</span>
+          <h1>Signal center</h1>
+          <p>Ranked setups with every contributing rule visible.</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Sort by:</span>
+          <button type="button" className={`secondary-button ${sortKey === 'score' ? 'active' : ''}`} style={{ padding: '6px 10px', fontSize: '11px', fontWeight: sortKey === 'score' ? 700 : 500 }} onClick={() => handleSort('score')}>
+            Score {sortKey === 'score' ? (sortDir === 'desc' ? '▼' : '▲') : ''}
+          </button>
+          <button type="button" className={`secondary-button ${sortKey === 'symbol' ? 'active' : ''}`} style={{ padding: '6px 10px', fontSize: '11px', fontWeight: sortKey === 'symbol' ? 700 : 500 }} onClick={() => handleSort('symbol')}>
+            Symbol {sortKey === 'symbol' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+          </button>
+          <button type="button" className={`secondary-button ${sortKey === 'dayChange' ? 'active' : ''}`} style={{ padding: '6px 10px', fontSize: '11px', fontWeight: sortKey === 'dayChange' ? 700 : 500 }} onClick={() => handleSort('dayChange')}>
+            Today % {sortKey === 'dayChange' ? (sortDir === 'desc' ? '▼' : '▲') : ''}
+          </button>
+          <button type="button" className={`secondary-button ${sortKey === 'state' ? 'active' : ''}`} style={{ padding: '6px 10px', fontSize: '11px', fontWeight: sortKey === 'state' ? 700 : 500 }} onClick={() => handleSort('state')}>
+            State {sortKey === 'state' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+          </button>
+        </div>
+      </div>
+      <div className="signal-cards">
+        {ranked.map(({ holding, assessment, ready }, index) => (
+          <button className={`signal-card ${ready ? '' : 'muted'}`} key={holding.symbol} onClick={() => onSelect(holding)}>
+            <span className="signal-card-rank">{ready ? String(index + 1).padStart(2, '0') : '—'}</span>
+            <div className="signal-card-main">
+              <div>
+                <span className="asset-logo">{holding.symbol[0]}</span>
+                <span><strong>{holding.symbol}</strong>{holding.name && holding.name !== holding.symbol && <small>{holding.name}</small>}</span>
+              </div>
+              <span className="signal-card-tags">
+                <PortfolioFitTag holding={holding} holdings={holdings}/>
+                <RatingsConsensusChip symbol={holding.symbol}/>
+                {ready && <StatusPill state={assessment.state}/>}
+              </span>
+            </div>
+            {ready ? (
+              <>
+                <div className="signal-card-score"><strong>{assessment.score}</strong><span>/ 100</span></div>
+                <div className="mini-components">
+                  {assessment.components.map((component) => (
+                    <div key={component.label}><span>{component.label}</span><i><b style={{width: `${component.score/component.max*100}%`}}/></i></div>
+                  ))}
+                </div>
+                <p>{assessment.facts.slice(0, 2).join(' · ')}</p>
+                <span className="review-link">Review explanation <ArrowRight size={15}/></span>
+              </>
+            ) : (
+              <>
+                <div className="signal-card-nodata"><Database size={15}/> Signals need market data</div>
+                <p>Add RSI / MACD / SMA columns to score this holding.</p>
+              </>
+            )}
+          </button>
+        ))}
+      </div>
+    </>
+  )
 }
 
-function AlertsPage({ alerts, userAlerts, onOpenPanel }: { alerts: AlertItem[]; userAlerts: UserAlert[]; onOpenPanel: () => void }) {
+function AlertsPage({ alerts, userAlerts, holdings, onSelect, onOpenPanel }: { alerts: AlertItem[]; userAlerts: UserAlert[]; holdings: Holding[]; onSelect: (holding: Holding) => void; onOpenPanel: () => void }) {
   const totalCount = alerts.length + userAlerts.length
+
+  const handleInspect = (symbol?: string) => {
+    if (!symbol) return
+    const h = holdings.find((item) => item.symbol.toUpperCase() === symbol.toUpperCase())
+    if (h) onSelect(h)
+  }
+
   return (
     <>
       <PageHeading eyebrow="CONTROLLED NOTIFICATIONS" title="Alerts" copy="Every trigger is persisted, explained, and protected from repeat firing."/>
@@ -406,25 +664,74 @@ function AlertsPage({ alerts, userAlerts, onOpenPanel }: { alerts: AlertItem[]; 
         </div>
         
         {userAlerts.map((ua) => (
-          <div className="alert-row" key={ua.id}>
+          <div 
+            className="alert-row" 
+            key={ua.id}
+            role="button"
+            tabIndex={0}
+            style={{ cursor: 'pointer' }}
+            onClick={() => handleInspect(ua.symbol)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleInspect(ua.symbol)
+              }
+            }}
+          >
             <span className={`attention-icon ${ua.severity}`}><Bell size={17}/></span>
             <span className="alert-copy">
               <strong>{ua.symbol} · {ua.metric} {ua.condition} {ua.targetValue}</strong>
-              <small>User configured alert threshold</small>
+              <small>User configured alert threshold · Click to open {ua.symbol}</small>
             </span>
             <StatusPill state="ARMED"/>
             <time>Now</time>
-            <button className="icon-button"><ChevronRight size={17}/></button>
+            <button 
+              className="icon-button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleInspect(ua.symbol)
+              }}
+              title={`Inspect ${ua.symbol} in Asset Drawer`}
+              aria-label={`Inspect ${ua.symbol}`}
+            >
+              <ChevronRight size={17}/>
+            </button>
           </div>
         ))}
 
         {alerts.map((alert) => (
-          <div className="alert-row" key={alert.id}>
+          <div 
+            className="alert-row" 
+            key={alert.id}
+            role={alert.symbol ? 'button' : undefined}
+            tabIndex={alert.symbol ? 0 : undefined}
+            style={{ cursor: alert.symbol ? 'pointer' : 'default' }}
+            onClick={() => handleInspect(alert.symbol)}
+            onKeyDown={(e) => {
+              if (alert.symbol && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault()
+                handleInspect(alert.symbol)
+              }
+            }}
+          >
             <span className={`attention-icon ${alert.severity}`}><Bell size={17}/></span>
-            <span className="alert-copy"><strong>{alert.symbol ? `${alert.symbol} · ` : ''}{alert.title}</strong><small>{alert.message}</small></span>
+            <span className="alert-copy">
+              <strong>{alert.symbol ? `${alert.symbol} · ` : ''}{alert.title}</strong>
+              <small>{alert.message}</small>
+            </span>
             <StatusPill state={alert.status}/>
             <time>{alert.time}</time>
-            <button className="icon-button"><ChevronRight size={17}/></button>
+            <button 
+              className="icon-button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleInspect(alert.symbol)
+              }}
+              title={alert.symbol ? `Inspect ${alert.symbol} in Asset Drawer` : 'View alert'}
+              aria-label={alert.symbol ? `Inspect ${alert.symbol}` : 'View alert'}
+            >
+              <ChevronRight size={17}/>
+            </button>
           </div>
         ))}
       </section>
@@ -669,11 +976,11 @@ export default function App() {
     if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected}/>
     if (page === 'Signals') return <SignalsPage holdings={holdings} onSelect={setSelected}/>
     if (page === 'Watchlist') return <WatchlistPage/>
-    if (page === 'Alerts') return <AlertsPage alerts={alerts} userAlerts={userAlerts} onOpenPanel={() => setAlertPanelOpen(true)}/>
+    if (page === 'Alerts') return <AlertsPage alerts={alerts} userAlerts={userAlerts} holdings={holdings} onSelect={setSelected} onOpenPanel={() => setAlertPanelOpen(true)}/>
     if (page === 'Analytics') return <AnalyticsPage holdings={holdings}/>
     if (page === 'Import') return <ImportPage onChanged={reloadState}/>
     if (page === 'System') return <SystemPage/>
-    return <Overview holdings={holdings} scenario={scenario} onSelect={setSelected} onAsk={() => setAskOpen(true)} onOpenDecision={(h) => setDecisionHolding(h)}/>
+    return <Overview holdings={holdings} scenario={scenario} onSelect={setSelected} onAsk={() => setAskOpen(true)} onOpenDecision={(h) => setDecisionHolding(h)} onNavigate={(p) => setPage(p)}/>
   }
 
   return (

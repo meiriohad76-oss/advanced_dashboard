@@ -151,6 +151,13 @@
     .drawer{position:static!important;max-width:100%!important;width:100%!important;box-shadow:none!important;border:none!important;padding:0!important;background:#fff!important}
     .print-only-footer{display:block!important}
   }
+
+  .th-sort-btn{cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:4px}
+  .th-sort-btn:hover{color:var(--ink);text-decoration:underline}
+  .sort-arrow{font-size:9px;color:var(--accent);margin-left:2px}
+  .alert-inspect-btn{border:1px solid #cce5d8;background:#fff;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:650;color:var(--accent-dark);cursor:pointer;display:inline-flex;align-items:center;gap:3px}
+  .alert-inspect-btn:hover{background:var(--accent-soft);border-color:var(--accent)}
+
 </style>
 
 </head>
@@ -243,16 +250,28 @@
           <section class="panel"><div class="ph"><div><span class="eyebrow">PRIORITIZED</span><h2>Signals to review</h2></div></div><div class="rows" id="overviewSignals"></div></section>
           <section class="panel feed"><div class="ph"><div><span class="eyebrow">WHAT CHANGED</span><h2>Attention feed</h2></div><div class="market">Live</div></div>
             <div class="rows">
-              <button class="row scenario-item" id="scenarioItem"><span class="icon">◎</span><span class="name"><strong>CRDO moved to Strong Entry</strong><small>Score 65 → 90 · breakout confirmed</small></span><time>Now</time></button>
-              <button class="row"><span class="icon warn">!</span><span class="name"><strong>Concentration threshold exceeded</strong><small>Semiconductors reached 36.2%</small></span><time>12m</time></button>
-              <button class="row"><span class="icon">↗</span><span class="name"><strong>Portfolio extended its lead</strong><small>Relative return vs SPY is now +7.3%</small></span><time>34m</time></button>
-              <button class="row"><span class="icon">✓</span><span class="name"><strong>Daily validation passed</strong><small>11 symbols · no gaps detected</small></span><time>1h</time></button>
+              <button class="row scenario-item" id="scenarioItem" onclick="openDrawer('CRDO')"><span class="icon">◎</span><span class="name"><strong>CRDO moved to Strong Entry</strong><small>Score 65 → 90 · breakout confirmed</small></span><time>Now</time></button>
+              <button class="row" onclick="showPage('analytics')"><span class="icon warn">!</span><span class="name"><strong>Concentration threshold exceeded</strong><small>Semiconductors reached 36.2%</small></span><time>12m</time></button>
+              <button class="row" onclick="showPage('analytics')"><span class="icon">↗</span><span class="name"><strong>Portfolio extended its lead</strong><small>Relative return vs SPY is now +7.3%</small></span><time>34m</time></button>
+              <button class="row" onclick="showPage('system')"><span class="icon">✓</span><span class="name"><strong>Daily validation passed</strong><small>11 symbols · no gaps detected</small></span><time>1h</time></button>
             </div></section>
         </div>
       </section>
 
       <section id="portfolio" class="page"><div class="heading"><div><span class="eyebrow">CURRENT POSITION</span><h1>Portfolio</h1><p>Exposure, position sizing, cost basis, performance, and signal state in one view. Click any holding for its explanation and external ratings.</p></div></div>
-        <div class="table"><div class="trow head extended" style="grid-template-columns:1.3fr .6fr .6fr .65fr .75fr .5fr .6fr .55fr .65fr .7fr .4fr"><span>ASSET</span><span>PRICE</span><span>SHARES</span><span>AVG COST</span><span>MARKET VALUE</span><span>WEIGHT</span><span>TODAY</span><span>UNREALIZED %</span><span>UNREALIZED VALUE</span><span>STATE</span><span>SCORE</span></div><div id="portfolioRows"></div></div>
+        <div class="table"><div class="trow head extended" style="grid-template-columns:1.3fr .6fr .6fr .65fr .75fr .5fr .6fr .55fr .65fr .7fr .4fr">
+            <span class="th-sort-btn" onclick="setPortfolioSort('s')">ASSET <span id="sort-s" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('price')">PRICE <span id="sort-price" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('qty')">SHARES <span id="sort-qty" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('avgCost')">AVG COST <span id="sort-avgCost" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('mv')">MARKET VALUE <span id="sort-mv" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('w')">WEIGHT <span id="sort-w" class="sort-arrow">▼</span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('dc')">TODAY <span id="sort-dc" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('pnlPct')">UNREALIZED % <span id="sort-pnlPct" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('pnl')">UNREALIZED VALUE <span id="sort-pnl" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('state')">STATE <span id="sort-state" class="sort-arrow"></span></span>
+            <span class="th-sort-btn" onclick="setPortfolioSort('score')">SCORE <span id="sort-score" class="sort-arrow"></span></span>
+          </div><div id="portfolioRows"></div></div>
       </section>
 
 
@@ -268,10 +287,10 @@
         <div class="table">
           <div class="trow head" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr"><span>ALERT CONDITION</span><span>STATUS</span><span>SYMBOL</span><span>TIME</span><span>CHANNEL</span><span>ACTION</span></div>
           <div id="customAlertsList"></div>
-          <div class="trow scenario-item" id="alertItem" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr"><strong>Entry threshold crossed</strong><span>Triggered</span><span>CRDO</span><span>Now</span><span>Dashboard</span><span>—</span></div>
-          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr"><strong>Sector concentration</strong><span>Triggered</span><span>Portfolio</span><span>09:47</span><span>Dashboard</span><span>—</span></div>
-          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr"><strong>20-day breakout</strong><span>Cooldown</span><span>ANET</span><span>10:18</span><span>Dashboard</span><span>—</span></div>
-          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr"><strong>Recover SMA50</strong><span>Armed</span><span>VRT</span><span>Monitoring</span><span>Telegram</span><span>—</span></div>
+          <div class="trow scenario-item" id="alertItem" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openDrawer('CRDO')"><strong>Entry threshold crossed</strong><span>Triggered</span><span>CRDO</span><span>Now</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('CRDO')">Inspect ➔</button></span></div>
+          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="showPage('analytics')"><strong>Sector concentration</strong><span>Triggered</span><span>Portfolio</span><span>09:47</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();showPage('analytics')">View ➔</button></span></div>
+          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openDrawer('ANET')"><strong>20-day breakout</strong><span>Cooldown</span><span>ANET</span><span>10:18</span><span>Dashboard</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('ANET')">Inspect ➔</button></span></div>
+          <div class="trow" style="grid-template-columns:1.8fr 1fr 1fr 1fr 1fr 0.8fr;cursor:pointer" onclick="openDrawer('VRT')"><strong>Recover SMA50</strong><span>Armed</span><span>VRT</span><span>Monitoring</span><span>Telegram</span><span><button class="alert-inspect-btn" onclick="event.stopPropagation();openDrawer('VRT')">Inspect ➔</button></span></div>
         </div>
       </section>
 
@@ -11667,6 +11686,34 @@ if (shockSlider) {
   };
 }
 
+let portfolioSortKey = 'w';
+let portfolioSortDir = 'desc';
+
+function showPage(pageId) {
+  const navs = [...document.querySelectorAll('.nav button')];
+  const pages = [...document.querySelectorAll('.page')];
+  navs.forEach(x => x.classList.toggle('active', x.dataset.page === pageId));
+  pages.forEach(p => p.classList.toggle('show', p.id === pageId));
+}
+
+function setPortfolioSort(key) {
+  if (portfolioSortKey === key) {
+    portfolioSortDir = portfolioSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    portfolioSortKey = key;
+    portfolioSortDir = (key === 's' || key === 'state') ? 'asc' : 'desc';
+  }
+  // Update indicator UI
+  const keys = ['s', 'price', 'qty', 'avgCost', 'mv', 'w', 'dc', 'pnlPct', 'pnl', 'state', 'score'];
+  keys.forEach(k => {
+    const elArrow = document.getElementById('sort-' + k);
+    if (elArrow) {
+      elArrow.textContent = (k === portfolioSortKey) ? (portfolioSortDir === 'asc' ? '▲' : '▼') : '';
+    }
+  });
+  render();
+}
+
 function render(){
   const baseList = customHoldings || HOLDINGS;
   const list = baseList.map(h => withScenario(h));
@@ -11684,23 +11731,57 @@ function render(){
 
   const ov=document.getElementById('overviewSignals'); ov.innerHTML='';
   ranked.slice(0,4).forEach(({h,displayState,displayScore,fact},i)=>{
-    ov.appendChild(el('<button class="row" data-sym="'+h.s+'"><span class="rank">0'+(i+1)+'</span><span class="logo">'+h.s[0]+'</span><span class="name"><strong>'+h.s+'</strong><small>'+fact+'</small></span><span class="rowtags">'+chipHtml(h.s)+fitChipHtml(h,list)+'<span class="pill '+displayState.toLowerCase().replace(/\s+/g,'-')+'">'+displayState+'</span></span><strong class="score">'+(displayScore > 0 ? displayScore : '—')+'</strong></button>'));
+    ov.appendChild(el('<button class="row" data-sym="'+h.s+'"><span class="rank">0'+(i+1)+'</span><span class="logo">'+h.s[0]+'</span><span class="name"><strong>'+h.s+'</strong><small>'+fact+'</small></span><span class="rowtags">'+chipHtml(h.s)+fitChipHtml(h,list)+'<span class="pill '+displayState.toLowerCase().replace(/\\s+/g,'-')+'">'+displayState+'</span></span><strong class="score">'+(displayScore > 0 ? displayScore : '—')+'</strong></button>'));
+  });
+
+  // Calculate items for sorting
+  const items = list.map(h => {
+    if (h.cash) {
+      return { h, isCash: true, s: h.s, price: 0, qty: 0, avgCost: 0, mv: 71552, w: h.w, dc: 0, pnlPct: 0, pnl: 0, state: '', score: -1 };
+    }
+    const a = assess(h);
+    const ready = h.hasSignalInputs !== false;
+    const r = ratings(h.s);
+    const displayScore = ready ? a.score : (r.consensus !== null ? Math.round(r.consensus) : 0);
+    const displayState = ready ? a.state : (r.consensusLabel ? r.consensusLabel.toUpperCase() : 'NO SETUP');
+    const qty = h.qty || 1000;
+    const cost = h.avgCost || (h.price * 0.88);
+    const mv = (h.qty && h.price) ? (h.qty * h.price) : 50000;
+    const totalCost = (h.qty && cost) ? (h.qty * cost) : (mv * 0.88);
+    const pnl = mv - totalCost;
+    const pnlPct = totalCost > 0 ? (pnl / totalCost) * 100 : 0;
+    return {
+      h, isCash: false, s: h.s, price: h.price, qty, avgCost: cost, mv, w: h.w, dc: h.dc, pnlPct, pnl, state: displayState, score: displayScore, a, ready, r
+    };
+  });
+
+  // Sort items
+  items.sort((a, b) => {
+    if (a.isCash) return 1;
+    if (b.isCash) return -1;
+    let valA = a[portfolioSortKey];
+    let valB = b[portfolioSortKey];
+    if (typeof valA === 'string') {
+      return portfolioSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+    return portfolioSortDir === 'asc' ? (valA - valB) : (valB - valA);
   });
 
   const pr=document.getElementById('portfolioRows'); pr.innerHTML='';
-  list.forEach(h=>{
+  items.forEach(item => {
+    const h = item.h;
     if(h.cash){
       pr.appendChild(el('<div class="trow extended" style="grid-template-columns:1.3fr .6fr .6fr .65fr .75fr .5fr .6fr .55fr .65fr .7fr .4fr"><strong>CASH · Cash balance</strong><span>—</span><span>—</span><span>—</span><span>$71,552</span><span>'+h.w.toFixed(1)+'%</span><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span></div>'));
       return;
     }
-    const a=assess(h);
-    const ready = h.hasSignalInputs !== false;
-    const r = ratings(h.s);
+    const a = item.a;
+    const ready = item.ready;
+    const r = item.r;
     let stateCell = '<span>' + a.state + '</span>';
     let scoreCell = '<span class="score" style="text-align:left">' + a.score + '</span>';
     if (!ready) {
       if (r.consensus !== null) {
-        const stateKey = r.consensusLabel ? r.consensusLabel.toLowerCase().replace(/\s+/g, '-') : '';
+        const stateKey = r.consensusLabel ? r.consensusLabel.toLowerCase().replace(/\\s+/g, '-') : '';
         const stateText = r.consensusLabel ? r.consensusLabel.toUpperCase() : 'NO RATING';
         stateCell = '<span><span class="pill ' + stateKey + '">' + stateText + '</span></span>';
         scoreCell = '<span class="score" style="text-align:left">' + Math.round(r.consensus) + '</span>';
@@ -11710,17 +11791,11 @@ function render(){
       }
     }
     const nameLabel = (h.n && h.n !== h.s) ? (' · ' + h.n) : '';
-    const qty = h.qty ? h.qty.toLocaleString('en-US', {maximumFractionDigits: 2}) : '1,000';
-    const cost = h.avgCost ? h.avgCost : (h.price * 0.88);
-    const mv = (h.qty && h.price) ? (h.qty * h.price) : 50000;
-    const totalCost = (h.qty && cost) ? (h.qty * cost) : (mv * 0.88);
-    const pnl = mv - totalCost;
-    const pnlPct = totalCost > 0 ? (pnl / totalCost) * 100 : 0;
-    const pnlColor = pnl >= 0 ? '#08704a' : '#ca4f4b';
+    const qtyStr = item.qty.toLocaleString('en-US', {maximumFractionDigits: 2});
+    const pnlColor = item.pnl >= 0 ? '#08704a' : '#ca4f4b';
 
-    pr.appendChild(el('<button class="trow extended" data-sym="'+h.s+'" style="grid-template-columns:1.3fr .6fr .6fr .65fr .75fr .5fr .6fr .55fr .65fr .7fr .4fr"><strong>'+h.s+nameLabel+'</strong><span>'+money(h.price)+'</span><span>'+qty+'</span><span>'+money(cost)+'</span><span>'+money(mv)+'</span><span>'+h.w.toFixed(1)+'%</span><span style="color:'+(h.dc>=0?'#08704a':'#ca4f4b')+'">'+(h.dc>=0?'+':'')+h.dc.toFixed(2)+'%</span><span style="color:'+pnlColor+'">'+(pnlPct>=0?'+':'')+pnlPct.toFixed(2)+'%</span><span style="color:'+pnlColor+'">'+(pnl>=0?'+':'')+money(pnl)+'</span>'+stateCell+scoreCell+'</button>'));
+    pr.appendChild(el('<button class="trow extended" data-sym="'+h.s+'" style="grid-template-columns:1.3fr .6fr .6fr .65fr .75fr .5fr .6fr .55fr .65fr .7fr .4fr"><strong>'+h.s+nameLabel+'</strong><span>'+money(h.price)+'</span><span>'+qtyStr+'</span><span>'+money(item.avgCost)+'</span><span>'+money(item.mv)+'</span><span>'+h.w.toFixed(1)+'%</span><span style="color:'+(h.dc>=0?'#08704a':'#ca4f4b')+'">'+(h.dc>=0?'+':'')+h.dc.toFixed(2)+'%</span><span style="color:'+pnlColor+'">'+(item.pnlPct>=0?'+':'')+item.pnlPct.toFixed(2)+'%</span><span style="color:'+pnlColor+'">'+(item.pnl>=0?'+':'')+money(item.pnl)+'</span>'+stateCell+scoreCell+'</button>'));
   });
-
 
   const sc=document.getElementById('signalCards'); sc.innerHTML='';
   ranked.forEach(({h,a,ready},i)=>{
@@ -11728,7 +11803,7 @@ function render(){
     const bodyHtml = ready
       ? '<div class="cscore"><strong>'+a.score+'</strong><span>/ 100</span></div><p>'+a.facts.slice(0,2).join(' · ')+'</p>'
       : '<div style="color:var(--muted);font-size:10px;padding:12px 0;">Signals need market data (RSI/MACD)</div><p>Holdings fit and street consensus active.</p>';
-    sc.appendChild(el('<button class="card" data-sym="'+h.s+'"><span class="crank">'+(ready ? String(i+1).padStart(2,'0') : '—')+'</span><div class="cmain"><div><span class="logo">'+h.s[0]+'</span><span><strong>'+h.s+'</strong><small>'+smallName+'</small></span></div><span class="rowtags">'+chipHtml(h.s)+fitChipHtml(h,list)+(ready ? ('<span class="pill '+a.state.toLowerCase().replace(' ','-')+'">'+a.state+'</span>') : '')+'</span></div>'+bodyHtml+'</button>'));
+    sc.appendChild(el('<button class="card" data-sym="'+h.s+'"><span class="crank">'+(ready ? String(i+1).padStart(2,'0') : '—')+'</span><div class="cmain"><div><span class="logo">'+h.s[0]+'</span><span><strong>'+h.s+'</strong><small>'+smallName+'</small></span></div><span class="rowtags">'+chipHtml(h.s)+fitChipHtml(h,list)+(ready ? ('<span class="pill '+a.state.toLowerCase().replace(/\\s+/g,'-')+'">'+a.state+'</span>') : '')+'</span></div>'+bodyHtml+'</button>'));
   });
 
   bindOpeners();
@@ -11747,33 +11822,43 @@ function gaugeHtml(sym){
   return '<div class="dsection"><div class="gauge-head"><div><span class="eyebrow">EXTERNAL RATINGS</span><h3 style="font-size:12px;margin:2px 0">Street &amp; quant consensus <span class="placeholder-tag">SEEDED / PLACEHOLDER</span></h3></div>'+chip+'</div><div class="meters">'+meters+'</div><div class="prov">◫ Seeded placeholders · normalized to a common Strong&nbsp;Sell→Strong&nbsp;Buy axis · replaced by the extractor on import</div></div>';
 }
 
+const EXTRACTED_PRICE_TARGETS = {"NVDA":{"saWallStreet":225.0,"saHigh":260.0,"saLow":175.0,"zacks":220.0,"zacksHigh":null,"zacksLow":null},"GOOGL":{"saWallStreet":250.0,"saHigh":275.0,"saLow":220.0,"zacks":245.0,"zacksHigh":null,"zacksLow":null},"AAOI":{"saWallStreet":163.4,"saHigh":220.0,"saLow":109.0,"zacks":163.4,"zacksHigh":null,"zacksLow":null},"ABBNY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":98.0,"zacksHigh":null,"zacksLow":null},"ABBV":{"saWallStreet":274.36,"saHigh":328.0,"saLow":200.0,"zacks":273.0,"zacksHigh":null,"zacksLow":null},"ABT":{"saWallStreet":118.42,"saHigh":135.0,"saLow":103.0,"zacks":119.84,"zacksHigh":null,"zacksLow":null},"AEM":{"saWallStreet":214.89,"saHigh":300.0,"saLow":87.0,"zacks":220.78,"zacksHigh":null,"zacksLow":null},"AEP":{"saWallStreet":144.48,"saHigh":173.0,"saLow":129.0,"zacks":143.19,"zacksHigh":null,"zacksLow":null},"AIQUY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":45.9,"zacksHigh":null,"zacksLow":null},"ALNY":{"saWallStreet":375.76,"saHigh":536.0,"saLow":230.0,"zacks":390.0,"zacksHigh":null,"zacksLow":null},"AMGN":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":377.07,"zacksHigh":null,"zacksLow":null},"AMKR":{"saWallStreet":76.4,"saHigh":92.0,"saLow":65.0,"zacks":73.13,"zacksHigh":null,"zacksLow":null},"ANET":{"saWallStreet":241.04,"saHigh":289.0,"saLow":185.0,"zacks":242.0,"zacksHigh":null,"zacksLow":null},"APD":{"saWallStreet":343.37,"saHigh":365.0,"saLow":314.0,"zacks":340.86,"zacksHigh":null,"zacksLow":null},"ARGX":{"saWallStreet":1085.78,"saHigh":1350.0,"saLow":770.0,"zacks":1077.43,"zacksHigh":null,"zacksLow":null},"ASML":{"saWallStreet":2165.44,"saHigh":2864.31,"saLow":898.54,"zacks":2414.86,"zacksHigh":null,"zacksLow":null},"AZN":{"saWallStreet":213.69,"saHigh":240.0,"saLow":184.0,"zacks":211.32,"zacksHigh":null,"zacksLow":null},"B":{"saWallStreet":51.74,"saHigh":63.0,"saLow":29.0,"zacks":52.53,"zacksHigh":null,"zacksLow":null},"BA":{"saWallStreet":274.69,"saHigh":305.0,"saLow":246.0,"zacks":274.32,"zacksHigh":null,"zacksLow":null},"BASFY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":13.13,"zacksHigh":null,"zacksLow":null},"BHP":{"saWallStreet":73.64,"saHigh":91.0,"saLow":60.0,"zacks":76.36,"zacksHigh":null,"zacksLow":null},"BIIB":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":236.52,"zacksHigh":null,"zacksLow":null},"BKR":{"saWallStreet":71.39,"saHigh":85.0,"saLow":51.0,"zacks":72.43,"zacksHigh":null,"zacksLow":null},"BMRN":{"saWallStreet":89.52,"saHigh":124.0,"saLow":60.0,"zacks":87.83,"zacksHigh":null,"zacksLow":null},"BMY":{"saWallStreet":66.21,"saHigh":80.0,"saLow":40.0,"zacks":66.04,"zacksHigh":null,"zacksLow":null},"BNTX":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":124.44,"zacksHigh":null,"zacksLow":null},"BP":{"saWallStreet":47.6,"saHigh":64.0,"saLow":37.0,"zacks":47.25,"zacksHigh":null,"zacksLow":null},"BSX":{"saWallStreet":62.69,"saHigh":94.0,"saLow":44.0,"zacks":62.31,"zacksHigh":null,"zacksLow":null},"BTI":{"saWallStreet":70.43,"saHigh":75.0,"saLow":63.0,"zacks":68.28,"zacksHigh":null,"zacksLow":null},"BUD":{"saWallStreet":97.03,"saHigh":111.0,"saLow":85.0,"zacks":98.13,"zacksHigh":null,"zacksLow":null},"CAT":{"saWallStreet":972.95,"saHigh":1225.0,"saLow":575.0,"zacks":1002.57,"zacksHigh":null,"zacksLow":null},"CEG":{"saWallStreet":349.96,"saHigh":441.0,"saLow":290.0,"zacks":356.43,"zacksHigh":null,"zacksLow":null},"CIEN":{"saWallStreet":504.13,"saHigh":660.0,"saLow":325.0,"zacks":520.97,"zacksHigh":null,"zacksLow":null},"CL":{"saWallStreet":98.95,"saHigh":110.0,"saLow":87.0,"zacks":98.05,"zacksHigh":null,"zacksLow":null},"CLS":{"saWallStreet":477.22,"saHigh":550.0,"saLow":415.0,"zacks":468.29,"zacksHigh":null,"zacksLow":null},"CNQ":{"saWallStreet":48.21,"saHigh":55.3,"saLow":44.06,"zacks":51.08,"zacksHigh":null,"zacksLow":null},"COHR":{"saWallStreet":415.36,"saHigh":500.0,"saLow":280.0,"zacks":414.75,"zacksHigh":null,"zacksLow":null},"COP":{"saWallStreet":142.63,"saHigh":189.0,"saLow":115.0,"zacks":140.76,"zacksHigh":null,"zacksLow":null},"COST":{"saWallStreet":1077.31,"saHigh":1315.0,"saLow":740.0,"zacks":1101.94,"zacksHigh":null,"zacksLow":null},"CRDO":{"saWallStreet":281.39,"saHigh":350.0,"saLow":185.0,"zacks":282.26,"zacksHigh":null,"zacksLow":null},"CRH":{"saWallStreet":138.65,"saHigh":165.0,"saLow":105.0,"zacks":142.09,"zacksHigh":null,"zacksLow":null},"CRM":{"saWallStreet":273.37,"saHigh":475.0,"saLow":160.0,"zacks":276.9,"zacksHigh":null,"zacksLow":null},"CRSP":{"saWallStreet":87.56,"saHigh":291.0,"saLow":44.0,"zacks":86.47,"zacksHigh":null,"zacksLow":null},"CRWD":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":194.1,"zacksHigh":null,"zacksLow":null},"CRWV":{"saWallStreet":144.46,"saHigh":317.0,"saLow":39.0,"zacks":140.3,"zacksHigh":null,"zacksLow":null},"CTVA":{"saWallStreet":92.4,"saHigh":103.0,"saLow":78.0,"zacks":92.16,"zacksHigh":null,"zacksLow":null},"CVLT":{"saWallStreet":161.15,"saHigh":200.0,"saLow":130.0,"zacks":158.36,"zacksHigh":null,"zacksLow":null},"CVS":{"saWallStreet":115.8,"saHigh":148.0,"saLow":103.0,"zacks":113.27,"zacksHigh":null,"zacksLow":null},"CVX":{"saWallStreet":216.96,"saHigh":236.0,"saLow":175.0,"zacks":216.42,"zacksHigh":null,"zacksLow":null},"D":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":70.45,"zacksHigh":null,"zacksLow":null},"DANOY":{"saWallStreet":18.82,"saHigh":21.3,"saLow":16.5,"zacks":20.7,"zacksHigh":null,"zacksLow":null},"DE":{"saWallStreet":648.03,"saHigh":812.0,"saLow":500.0,"zacks":651.02,"zacksHigh":null,"zacksLow":null},"DEO":{"saWallStreet":104.0,"saHigh":136.0,"saLow":76.0,"zacks":101.67,"zacksHigh":null,"zacksLow":null},"DHR":{"saWallStreet":227.96,"saHigh":310.0,"saLow":195.0,"zacks":223.55,"zacksHigh":null,"zacksLow":null},"DUK":{"saWallStreet":137.74,"saHigh":147.0,"saLow":129.0,"zacks":138.6,"zacksHigh":null,"zacksLow":null},"EADSY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":63.01,"zacksHigh":null,"zacksLow":null},"ECL":{"saWallStreet":324.67,"saHigh":360.0,"saLow":295.0,"zacks":323.41,"zacksHigh":null,"zacksLow":null},"ED":{"saWallStreet":111.21,"saHigh":130.0,"saLow":94.0,"zacks":112.62,"zacksHigh":null,"zacksLow":null},"ELV":{"saWallStreet":449.1,"saHigh":492.0,"saLow":393.0,"zacks":447.85,"zacksHigh":null,"zacksLow":null},"ENB":{"saWallStreet":52.21,"saHigh":59.71,"saLow":45.36,"zacks":56.98,"zacksHigh":null,"zacksLow":null},"ENGIY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":33.79,"zacksHigh":null,"zacksLow":null},"ENLAY":{"saWallStreet":11.62,"saHigh":11.66,"saLow":11.58,"zacks":11.57,"zacksHigh":null,"zacksLow":null},"EOG":{"saWallStreet":158.81,"saHigh":196.0,"saLow":127.0,"zacks":157.96,"zacksHigh":null,"zacksLow":null},"EONGY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":22.74,"zacksHigh":null,"zacksLow":null},"ERO":{"saWallStreet":40.07,"saHigh":44.0,"saLow":33.0,"zacks":37.71,"zacksHigh":null,"zacksLow":null},"ETN":{"saWallStreet":471.47,"saHigh":534.0,"saLow":333.0,"zacks":480.91,"zacksHigh":null,"zacksLow":null},"ETR":{"saWallStreet":123.88,"saHigh":139.0,"saLow":91.0,"zacks":125.23,"zacksHigh":null,"zacksLow":null},"EXC":{"saWallStreet":49.33,"saHigh":58.0,"saLow":41.0,"zacks":49.94,"zacksHigh":null,"zacksLow":null},"EXEL":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":51.94,"zacksHigh":null,"zacksLow":null},"FCX":{"saWallStreet":71.73,"saHigh":82.0,"saLow":30.0,"zacks":72.74,"zacksHigh":null,"zacksLow":null},"GE":{"saWallStreet":404.9,"saHigh":455.0,"saLow":347.0,"zacks":397.43,"zacksHigh":null,"zacksLow":null},"GEV":{"saWallStreet":1226.42,"saHigh":1450.0,"saLow":836.0,"zacks":1260.78,"zacksHigh":null,"zacksLow":null},"GILD":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":158.86,"zacksHigh":null,"zacksLow":null},"GLNCY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":17.33,"zacksHigh":null,"zacksLow":null},"HALO":{"saWallStreet":97.33,"saHigh":115.0,"saLow":70.0,"zacks":86.89,"zacksHigh":null,"zacksLow":null},"HIMS":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":30.25,"zacksHigh":null,"zacksLow":null},"HTHIY":{"saWallStreet":38.71,"saHigh":38.71,"saLow":38.71,"zacks":38.7,"zacksHigh":null,"zacksLow":null},"HWM":{"saWallStreet":328.93,"saHigh":375.0,"saLow":256.56,"zacks":312.45,"zacksHigh":null,"zacksLow":null},"IBDRY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":97.02,"zacksHigh":null,"zacksLow":null},"ILMN":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":196.28,"zacksHigh":null,"zacksLow":null},"INCY":{"saWallStreet":124.96,"saHigh":155.0,"saLow":86.0,"zacks":126.73,"zacksHigh":null,"zacksLow":null},"INSM":{"saWallStreet":200.5,"saHigh":243.0,"saLow":169.0,"zacks":196.18,"zacksHigh":null,"zacksLow":null},"IONQ":{"saWallStreet":69.25,"saHigh":100.0,"saLow":49.0,"zacks":69.25,"zacksHigh":null,"zacksLow":null},"IREN":{"saWallStreet":77.84,"saHigh":131.0,"saLow":43.0,"zacks":78.62,"zacksHigh":null,"zacksLow":null},"ISRG":{"saWallStreet":477.25,"saHigh":685.0,"saLow":324.0,"zacks":480.87,"zacksHigh":null,"zacksLow":null},"JAPAY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":26.5,"zacksHigh":null,"zacksLow":null},"JNJ":{"saWallStreet":272.5,"saHigh":305.0,"saLow":190.0,"zacks":275.83,"zacksHigh":null,"zacksLow":null},"KMI":{"saWallStreet":35.62,"saHigh":43.0,"saLow":31.0,"zacks":36.15,"zacksHigh":null,"zacksLow":null},"KO":{"saWallStreet":94.7,"saHigh":104.0,"saLow":75.0,"zacks":95.67,"zacksHigh":null,"zacksLow":null},"KTOS":{"saWallStreet":104.2,"saHigh":150.0,"saLow":60.0,"zacks":105.45,"zacksHigh":null,"zacksLow":null},"LHX":{"saWallStreet":340.62,"saHigh":405.0,"saLow":269.0,"zacks":367.94,"zacksHigh":null,"zacksLow":null},"LIN":{"saWallStreet":548.0,"saHigh":612.0,"saLow":400.0,"zacks":550.82,"zacksHigh":null,"zacksLow":null},"LLY":{"saWallStreet":1292.53,"saHigh":1600.0,"saLow":850.0,"zacks":1290.52,"zacksHigh":null,"zacksLow":null},"LMT":{"saWallStreet":637.84,"saHigh":756.0,"saLow":503.0,"zacks":650.65,"zacksHigh":null,"zacksLow":null},"LRLCY":{"saWallStreet":99.33,"saHigh":101.0,"saLow":97.0,"zacks":105.5,"zacksHigh":null,"zacksLow":null},"MDGL":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":675.65,"zacksHigh":null,"zacksLow":null},"MDLZ":{"saWallStreet":69.13,"saHigh":77.0,"saLow":55.0,"zacks":68.9,"zacksHigh":null,"zacksLow":null},"MDT":{"saWallStreet":98.44,"saHigh":121.0,"saLow":78.0,"zacks":97.04,"zacksHigh":null,"zacksLow":null},"META":{"saWallStreet":756.95,"saHigh":1000.0,"saLow":580.0,"zacks":754.58,"zacksHigh":null,"zacksLow":null},"MNST":{"saWallStreet":98.13,"saHigh":113.0,"saLow":70.0,"zacks":97.09,"zacksHigh":null,"zacksLow":null},"MO":{"saWallStreet":70.55,"saHigh":82.0,"saLow":59.0,"zacks":70.0,"zacksHigh":null,"zacksLow":null},"MPC":{"saWallStreet":316.61,"saHigh":376.0,"saLow":186.0,"zacks":317.0,"zacksHigh":null,"zacksLow":null},"MRK":{"saWallStreet":136.85,"saHigh":155.0,"saLow":105.0,"zacks":137.08,"zacksHigh":null,"zacksLow":null},"MRNA":{"saWallStreet":50.84,"saHigh":79.0,"saLow":25.0,"zacks":52.25,"zacksHigh":null,"zacksLow":null},"MSFT":{"saWallStreet":563.05,"saHigh":870.0,"saLow":400.0,"zacks":545.85,"zacksHigh":null,"zacksLow":null},"MTZ":{"saWallStreet":505.25,"saHigh":581.0,"saLow":453.0,"zacks":503.67,"zacksHigh":null,"zacksLow":null},"NBIX":{"saWallStreet":210.76,"saHigh":253.0,"saLow":164.0,"zacks":210.14,"zacksHigh":null,"zacksLow":null},"NEE":{"saWallStreet":98.53,"saHigh":116.0,"saLow":55.0,"zacks":97.63,"zacksHigh":null,"zacksLow":null},"NEM":{"saWallStreet":132.87,"saHigh":170.0,"saLow":67.0,"zacks":133.27,"zacksHigh":null,"zacksLow":null},"NGG":{"saWallStreet":90.89,"saHigh":99.5,"saLow":71.0,"zacks":88.88,"zacksHigh":null,"zacksLow":null},"NGLOY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":26.5,"zacksHigh":null,"zacksLow":null},"NOC":{"saWallStreet":648.05,"saHigh":815.0,"saLow":538.0,"zacks":663.45,"zacksHigh":null,"zacksLow":null},"NOW":{"saWallStreet":142.97,"saHigh":248.0,"saLow":72.0,"zacks":146.16,"zacksHigh":null,"zacksLow":null},"NSRGY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":105.0,"zacksHigh":null,"zacksLow":null},"NUE":{"saWallStreet":283.56,"saHigh":305.0,"saLow":231.0,"zacks":282.6,"zacksHigh":null,"zacksLow":null},"NVO":{"saWallStreet":47.17,"saHigh":63.6,"saLow":40.29,"zacks":47.87,"zacksHigh":null,"zacksLow":null},"NVS":{"saWallStreet":155.37,"saHigh":180.0,"saLow":123.0,"zacks":148.05,"zacksHigh":null,"zacksLow":null},"OKE":{"saWallStreet":96.29,"saHigh":108.0,"saLow":88.0,"zacks":96.29,"zacksHigh":null,"zacksLow":null},"ONDS":{"saWallStreet":19.42,"saHigh":25.0,"saLow":13.0,"zacks":19.42,"zacksHigh":null,"zacksLow":null},"ORCL":{"saWallStreet":239.1,"saHigh":400.0,"saLow":110.0,"zacks":251.0,"zacksHigh":null,"zacksLow":null},"PAAS":{"saWallStreet":65.25,"saHigh":94.0,"saLow":49.0,"zacks":65.17,"zacksHigh":null,"zacksLow":null},"PCG":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":22.93,"zacksHigh":null,"zacksLow":null},"PEG":{"saWallStreet":86.97,"saHigh":97.0,"saLow":75.0,"zacks":88.61,"zacksHigh":null,"zacksLow":null},"PEP":{"saWallStreet":155.0,"saHigh":183.0,"saLow":124.0,"zacks":155.29,"zacksHigh":null,"zacksLow":null},"PFE":{"saWallStreet":28.64,"saHigh":35.75,"saLow":25.0,"zacks":28.83,"zacksHigh":null,"zacksLow":null},"PG":{"saWallStreet":160.7,"saHigh":186.0,"saLow":145.0,"zacks":161.67,"zacksHigh":null,"zacksLow":null},"PH":{"saWallStreet":1133.59,"saHigh":1358.0,"saLow":680.0,"zacks":1050.26,"zacksHigh":null,"zacksLow":null},"PM":{"saWallStreet":207.27,"saHigh":230.0,"saLow":175.0,"zacks":207.23,"zacksHigh":null,"zacksLow":null},"PR":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":24.74,"zacksHigh":null,"zacksLow":null},"PSX":{"saWallStreet":214.26,"saHigh":255.0,"saLow":138.0,"zacks":209.16,"zacksHigh":null,"zacksLow":null},"QBTS":{"saWallStreet":35.24,"saHigh":43.0,"saLow":22.0,"zacks":35.73,"zacksHigh":null,"zacksLow":null},"REGN":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":842.11,"zacksHigh":null,"zacksLow":null},"RHHBY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":57.77,"zacksHigh":null,"zacksLow":null},"RIO":{"saWallStreet":105.85,"saHigh":125.0,"saLow":88.0,"zacks":104.64,"zacksHigh":null,"zacksLow":null},"RTX":{"saWallStreet":232.27,"saHigh":265.0,"saLow":183.98,"zacks":232.91,"zacksHigh":null,"zacksLow":null},"RVMD":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":209.41,"zacksHigh":null,"zacksLow":null},"RWEOY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":80.1,"zacksHigh":null,"zacksLow":null},"RYCEY":{"saWallStreet":22.94,"saHigh":24.62,"saLow":20.5,"zacks":24.62,"zacksHigh":null,"zacksLow":null},"SAFRY":{"saWallStreet":113.74,"saHigh":123.18,"saLow":104.3,"zacks":123.18,"zacksHigh":null,"zacksLow":null},"SBGSY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":78.7,"zacksHigh":null,"zacksLow":null},"SHECY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":6.0,"zacksHigh":null,"zacksLow":null},"SHEL":{"saWallStreet":98.03,"saHigh":120.6,"saLow":81.6,"zacks":99.32,"zacksHigh":null,"zacksLow":null},"SHW":{"saWallStreet":390.1,"saHigh":420.0,"saLow":340.0,"zacks":389.0,"zacksHigh":null,"zacksLow":null},"SIEGY":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":177.0,"zacksHigh":null,"zacksLow":null},"SLB":{"saWallStreet":61.97,"saHigh":71.0,"saLow":43.0,"zacks":63.59,"zacksHigh":null,"zacksLow":null},"SO":{"saWallStreet":100.67,"saHigh":114.0,"saLow":79.0,"zacks":101.93,"zacksHigh":null,"zacksLow":null},"SRE":{"saWallStreet":104.64,"saHigh":118.0,"saLow":93.0,"zacks":105.47,"zacksHigh":null,"zacksLow":null},"SU":{"saWallStreet":70.68,"saHigh":75.48,"saLow":67.73,"zacks":74.87,"zacksHigh":null,"zacksLow":null},"SYK":{"saWallStreet":382.04,"saHigh":465.0,"saLow":315.0,"zacks":379.81,"zacksHigh":null,"zacksLow":null},"TGT":{"saWallStreet":137.9,"saHigh":170.0,"saLow":92.0,"zacks":137.63,"zacksHigh":null,"zacksLow":null},"TMO":{"saWallStreet":631.42,"saHigh":750.0,"saLow":520.0,"zacks":635.29,"zacksHigh":null,"zacksLow":null},"TRGP":{"saWallStreet":298.9,"saHigh":335.0,"saLow":257.0,"zacks":296.86,"zacksHigh":null,"zacksLow":null},"TRP":{"saWallStreet":66.36,"saHigh":72.51,"saLow":57.77,"zacks":72.53,"zacksHigh":null,"zacksLow":null},"TSM":{"saWallStreet":551.26,"saHigh":700.0,"saLow":440.0,"zacks":514.14,"zacksHigh":null,"zacksLow":null},"TTE":{"saWallStreet":95.0,"saHigh":107.0,"saLow":81.0,"zacks":91.75,"zacksHigh":null,"zacksLow":null},"UBER":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":103.93,"zacksHigh":null,"zacksLow":null},"UL":{"saWallStreet":73.11,"saHigh":76.37,"saLow":69.24,"zacks":73.75,"zacksHigh":null,"zacksLow":null},"UNH":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":481.52,"zacksHigh":null,"zacksLow":null},"UNP":{"saWallStreet":329.25,"saHigh":375.0,"saLow":245.0,"zacks":334.18,"zacksHigh":null,"zacksLow":null},"USAR":{"saWallStreet":37.5,"saHigh":45.0,"saLow":30.0,"zacks":37.14,"zacksHigh":null,"zacksLow":null},"UTHR":{"saWallStreet":656.15,"saHigh":738.0,"saLow":515.0,"zacks":670.15,"zacksHigh":null,"zacksLow":null},"VALE":{"saWallStreet":16.8,"saHigh":21.0,"saLow":12.0,"zacks":16.44,"zacksHigh":null,"zacksLow":null},"VLO":{"saWallStreet":309.79,"saHigh":365.0,"saLow":190.0,"zacks":314.17,"zacksHigh":null,"zacksLow":null},"VRT":{"saWallStreet":338.15,"saHigh":427.0,"saLow":236.0,"zacks":338.87,"zacksHigh":null,"zacksLow":null},"VRTX":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":559.08,"zacksHigh":null,"zacksLow":null},"VST":{"saWallStreet":222.11,"saHigh":313.0,"saLow":106.0,"zacks":222.81,"zacksHigh":null,"zacksLow":null},"WMB":{"saWallStreet":84.7,"saHigh":99.0,"saLow":69.0,"zacks":84.68,"zacksHigh":null,"zacksLow":null},"WMT":{"saWallStreet":137.97,"saHigh":155.0,"saLow":81.0,"zacks":140.45,"zacksHigh":null,"zacksLow":null},"WPM":{"saWallStreet":172.35,"saHigh":215.0,"saLow":145.0,"zacks":165.84,"zacksHigh":null,"zacksLow":null},"XEL":{"saWallStreet":92.39,"saHigh":102.0,"saLow":74.0,"zacks":93.72,"zacksHigh":null,"zacksLow":null},"XOM":{"saWallStreet":168.32,"saHigh":185.0,"saLow":142.0,"zacks":162.8,"zacksHigh":null,"zacksLow":null},"ZBRA":{"saWallStreet":null,"saHigh":null,"saLow":null,"zacks":343.29,"zacksHigh":null,"zacksLow":null}};
+
 function targetsHtml(sym, price){
-  const map = {
-    CRDO: { sa: 54, saHigh: 60, saLow: 48, zacks: 52.5 },
-    NVDA: { sa: 148, saHigh: 175, saLow: 115, zacks: 145 },
-    MSFT: { sa: 490, saHigh: 520, saLow: 450, zacks: 480 },
-    ANET: { sa: 360, saHigh: 390, saLow: 320, zacks: 355 },
-    VRT: { sa: 105, saHigh: 120, saLow: 90, zacks: 100 },
-    GOOGL: { sa: 205, saHigh: 225, saLow: 185, zacks: 200 },
-    SPY: { sa: 610, saHigh: 640, saLow: 570, zacks: 600 },
-    AEM: { sa: 220.00, saHigh: 285.00, saLow: 170.00, zacks: 220.78 },
-  };
-  const t = map[sym.toUpperCase()] || { sa: Math.round(price * 1.16), saHigh: Math.round(price * 1.28), saLow: Math.round(price * 1.02), zacks: Math.round(price * 1.14) };
-  const saDiff = t.sa - price;
-  const saPct = ((saDiff / price) * 100).toFixed(1);
-  const zDiff = t.zacks - price;
-  const zPct = ((zDiff / price) * 100).toFixed(1);
-  const saClass = saDiff >= 0 ? 'upside-pos' : 'upside-neg';
-  const zClass = zDiff >= 0 ? 'upside-pos' : 'upside-neg';
+  const t = EXTRACTED_PRICE_TARGETS[sym.toUpperCase()] || { saWallStreet: null, saHigh: null, saLow: null, zacks: null };
+  const hasSa = t.saWallStreet !== null && t.saWallStreet !== undefined;
+  const hasZacks = t.zacks !== null && t.zacks !== undefined;
+
+  let saBox = '';
+  if (hasSa) {
+    const saDiff = t.saWallStreet - price;
+    const saPct = ((saDiff / price) * 100).toFixed(1);
+    const saClass = saDiff >= 0 ? 'upside-pos' : 'upside-neg';
+    const rangeStr = (t.saLow != null && t.saHigh != null) ? ('<div style="font-size:8px;color:var(--muted);margin-top:4px">Range: $' + t.saLow + ' - $' + t.saHigh + '</div>') : '';
+    saBox = '<div class="target-box"><span>SA Wall St Consensus Target</span><strong>' + money(t.saWallStreet) + '</strong><small class="' + saClass + '">' + (saDiff>=0?'+':'') + money(saDiff) + ' (' + (saPct>=0?'+':'') + saPct + '%)</small>' + rangeStr + '</div>';
+  } else {
+    saBox = '<div class="target-box"><span>SA Wall St Consensus Target</span><strong>—</strong><small style="color:var(--muted)">No SA consensus target</small></div>';
+  }
+
+  let zacksBox = '';
+  if (hasZacks) {
+    const zDiff = t.zacks - price;
+    const zPct = ((zDiff / price) * 100).toFixed(1);
+    const zClass = zDiff >= 0 ? 'upside-pos' : 'upside-neg';
+    zacksBox = '<div class="target-box"><span>Zacks Target Price</span><strong>' + money(t.zacks) + '</strong><small class="' + zClass + '">' + (zDiff>=0?'+':'') + money(zDiff) + ' (' + (zPct>=0?'+':'') + zPct + '%)</small><div style="font-size:8px;color:var(--muted);margin-top:4px">Quant Revision Signal</div></div>';
+  } else {
+    zacksBox = '<div class="target-box"><span>Zacks Target Price</span><strong>—</strong><small style="color:var(--muted)">No Zacks target</small><div style="font-size:8px;color:var(--muted);margin-top:4px">Quant Revision Signal</div></div>';
+  }
 
   return '<div class="target-card">' +
     '<div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow">ANALYST TARGETS &amp; SPREAD</span></div>' +
     '<div class="target-grid">' +
-      '<div class="target-box"><span>SA Wall St Target</span><strong>' + money(t.sa) + '</strong><small class="' + saClass + '">' + (saDiff>=0?'+':'') + money(saDiff) + ' (' + (saPct>=0?'+':'') + saPct + '%)</small><div style="font-size:8px;color:var(--muted);margin-top:4px">Range: $' + t.saLow + ' - $' + t.saHigh + '</div></div>' +
-      '<div class="target-box"><span>Zacks Target Price</span><strong>' + money(t.zacks) + '</strong><small class="' + zClass + '">' + (zDiff>=0?'+':'') + money(zDiff) + ' (' + (zPct>=0?'+':'') + zPct + '%)</small><div style="font-size:8px;color:var(--muted);margin-top:4px">Quant Revision Signal</div></div>' +
+      saBox +
+      zacksBox +
     '</div>' +
   '</div>';
 }
+
 
 function stockPerfHtml(sym, price, dc) {
   const isPos = dc >= 0;
@@ -11894,7 +11979,7 @@ function renderUserAlerts() {
   const container = document.getElementById('customAlertsList');
   if (!container) return;
   container.innerHTML = '';
-  
+
   userAlertsList.forEach((ua, index) => {
     const isInd = ua.metric === 'MACD' || ua.metric.startsWith('SMA');
     const isAbove = ua.condition.includes('ABOVE');
@@ -11912,12 +11997,17 @@ function renderUserAlerts() {
     row.className = 'trow';
     row.style.gridTemplateColumns = '1.8fr 1fr 1fr 1fr 1fr 0.8fr';
     row.style.background = '#f4faf6';
+    row.style.cursor = 'pointer';
+    row.onclick = () => openDrawer(ua.symbol);
     row.innerHTML = '<strong>' + labelStr + '</strong>' +
       '<span><span class="pill entry" style="background:#e2f6ec;color:#08704a">' + (ua.status || 'ARMED') + '</span></span>' +
       '<span>' + ua.symbol + '</span>' +
       '<span>Now</span>' +
       '<span>Dashboard / User</span>' +
-      '<span><button onclick="deleteUserAlert(' + index + ')" style="border:0;background:transparent;color:var(--red);cursor:pointer;font-size:11px;font-weight:700">✕ Delete</button></span>';
+      '<span>' +
+        '<button onclick="event.stopPropagation();openDrawer(\'' + ua.symbol + '\')" class="alert-inspect-btn" title="Inspect ' + ua.symbol + '">Inspect ➔</button>' +
+        '<button onclick="event.stopPropagation();deleteUserAlert(' + index + ')" style="border:0;background:transparent;color:var(--red);cursor:pointer;font-size:11px;font-weight:700;margin-left:6px">✕</button>' +
+      '</span>';
     container.appendChild(row);
   });
 }

@@ -49,8 +49,8 @@ describe('ratings engine', () => {
   it('provides accurate Zacks and Wall Street targets for AEM', () => {
     const targets = getPriceTargets('AEM', 180.48)
     expect(targets.zacks).toBe(220.78)
-    expect(targets.saWallStreet).toBe(220.00)
-    expect(targets.saHigh).toBe(285.00)
-    expect(targets.saLow).toBe(170.00)
+    expect(targets.saWallStreet).toBe(214.89)
+    expect(targets.saHigh).toBe(300.0)
+    expect(targets.saLow).toBe(87.0)
   })
 })
