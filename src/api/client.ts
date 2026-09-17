@@ -103,6 +103,7 @@ export const api = {
   marketQuote: (symbol: string) => request<Quote>(`/api/v1/market/quote/${encodeURIComponent(symbol)}`),
   marketQuotes: (symbols: string[]) => request<Record<string, Quote>>('/api/v1/market/quotes', { method: 'POST', body: JSON.stringify({ symbols }) }),
   marketRefresh: () => request<MarketRefreshResponse>('/api/v1/market/refresh', { method: 'POST' }),
+  syncAutoRatings: () => request<RatingsStatus>('/api/v1/ratings/sync-auto', { method: 'POST' }),
   brokerAlpacaStatus: () => request<BrokerAlpacaStatus>('/api/v1/broker/alpaca/status'),
   brokerAlpacaSync: () => request<BrokerAlpacaSyncResult>('/api/v1/broker/alpaca/sync', { method: 'POST' }),
 }

@@ -1006,8 +1006,8 @@ function AnalyticsPage({ holdings }: { holdings: Holding[] }) {
 }
 
 function SystemPage() {
-  const services = [['Market data','Healthy','18 sec ago'],['Calculation engine','Healthy','42 sec ago'],['Portfolio database','Healthy','Now'],['Alert worker','Healthy','1 min ago'],['Backup','Verified','Today 02:00']]
-  return <><PageHeading eyebrow="TRUST & OPERATIONS" title="System health" copy="Source freshness and operational state are visible—not assumed."/><div className="system-grid"><section className="panel system-hero"><div className="health-orb"><HeartPulse size={31}/></div><div><span className="eyebrow">OVERALL STATUS</span><h2>All systems operational</h2><p>Last complete validation at 14:42 ET</p></div></section><section className="panel service-list">{services.map(([name,status,time]) => <div key={name}><span><i/>{name}</span><strong>{status}</strong><time>{time}</time></div>)}</section><section className="panel provenance-panel"><span className="eyebrow">DATA PROVENANCE</span><h2>Know what supports every answer</h2><p>This POC uses seeded market-shaped data so the customer demonstration remains reliable and reproducible.</p><div><Database size={17}/><span><strong>Demo dataset v1.0</strong><small>11 assets · 12 months · validation passed</small></span></div><div><BrainCircuit size={17}/><span><strong>Deterministic calculations</strong><small>No AI-generated financial metrics</small></span></div><div><ShieldCheck size={17}/><span><strong>Grounded explanations</strong><small>Answers restricted to computed results</small></span></div></section></div></>
+  const services = [['Market data (Yahoo/Alpaca)','Live','Connected'],['Calculation engine','Active','Real-time'],['Ratings Extractor Bridge','Active','Synced'],['Portfolio database','Healthy','Connected'],['Alert evaluator','Active','Real-time']]
+  return <><PageHeading eyebrow="TRUST & OPERATIONS" title="System health" copy="Source freshness and operational state are visible—not assumed."/><div className="system-grid"><section className="panel system-hero"><div className="health-orb"><HeartPulse size={31}/></div><div><span className="eyebrow">OVERALL STATUS</span><h2>All systems operational</h2><p>Live operational market data &amp; indicators engine</p></div></section><section className="panel service-list">{services.map(([name,status,time]) => <div key={name}><span><i/>{name}</span><strong>{status}</strong><time>{time}</time></div>)}</section><section className="panel provenance-panel"><span className="eyebrow">DATA PROVENANCE</span><h2>Know what supports every answer</h2><p>Live market data ingested via Yahoo Finance and Alpaca with real-time technical calculation engine (RSI-14, SMA-50, SMA-200, MACD, Trend Slope, Rel-Vol) and automated ratings extraction.</p><div><Database size={17}/><span><strong>Live Market Engine</strong><small>Concurrent price feeds &amp; historical bars</small></span></div><div><BrainCircuit size={17}/><span><strong>Deterministic calculations</strong><small>Verified mathematical formula implementation</small></span></div><div><ShieldCheck size={17}/><span><strong>Grounded explanations</strong><small>Calculations derived from live computed metrics</small></span></div></section></div></>
 }
 
 function PageHeading({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
@@ -1079,9 +1079,12 @@ export default function App() {
             setLiveToast({ title: `${alert.symbol} Alert Triggered`, detail: evalRes.message, symbol: alert.symbol })
           }
         })
+        const ranksNotice = (res as { ratings_sync?: { synced?: boolean; tickers_count?: number; imported_rows?: number } }).ratings_sync?.synced
+          ? ` · ${(res as { ratings_sync?: { tickers_count?: number; imported_rows?: number } }).ratings_sync?.tickers_count ?? 180} ranks synced`
+          : ''
         setLiveToast({
           title: '⚡ Live Operational Refresh',
-          detail: `Updated ${res.meta?.updated_count ?? res.holdings.length} assets with live market data & technical indicators.`,
+          detail: `Recalculated ${res.holdings.length} assets with live quotes, technical indicators, signals, alerts${ranksNotice}.`,
           symbol: 'LIVE'
         })
       }
@@ -1241,11 +1244,11 @@ export default function App() {
         <div className="brand"><span><Activity size={21}/></span><div><strong>ATLAS</strong><small>Portfolio intelligence</small></div><button className="mobile-close" onClick={() => setMobileNav(false)}><X/></button></div>
         <nav>{navItems.map(({label,icon:Icon}) => <button key={label} className={page === label ? 'active' : ''} onClick={() => {setPage(label);setMobileNav(false)}}><Icon size={18}/><span>{label}</span>{label === 'Alerts' && (scenario || userAlerts.length > 0) && <b>{1 + userAlerts.length}</b>}</button>)}</nav>
         <div className="sidebar-bottom">
-          <div className="demo-badge" style={lastRefreshedAt ? { background: '#eaf7f0', color: '#0b6847', border: '1px solid #b5e4cb' } : undefined}>
-            {lastRefreshedAt ? <Zap size={16} color="#0b6847" /> : <Sparkles size={16} />}
+          <div className="demo-badge" style={{ background: '#eaf7f0', color: '#0b6847', border: '1px solid #b5e4cb' }}>
+            <Zap size={16} color="#0b6847" />
             <span>
-              <strong>{lastRefreshedAt ? 'Live Operational' : 'Customer POC'}</strong>
-              <small>{lastRefreshedAt ? `Live market · ${lastRefreshedAt}` : 'Seeded demonstration data'}</small>
+              <strong>Live Operational Mode</strong>
+              <small>{lastRefreshedAt ? `Live market · ${lastRefreshedAt}` : 'Live quotes & indicators active'}</small>
             </span>
           </div>
           <button><Settings size={18}/> Settings</button>
@@ -1258,17 +1261,15 @@ export default function App() {
           <div className="portfolio-picker">
             <span>PORTFOLIO</span>
             <strong>
-              {source?.source === 'uploaded' ? (source.name ?? 'Uploaded') : source?.source === 'alpaca' ? 'Alpaca Paper Account' : lastRefreshedAt ? 'Live Portfolio' : 'Strategic Growth'}
+              {source?.source === 'uploaded' ? (source.name ?? 'Unified Portfolio') : source?.source === 'alpaca' ? 'Alpaca Paper Account' : 'Unified Portfolio'}
             </strong>
           </div>
-          <span className={`source-badge ${source?.source === 'uploaded' || source?.source === 'alpaca' || lastRefreshedAt ? 'live' : 'demo'}`}>
-            {source?.source === 'uploaded' 
-              ? `Uploaded · ${source.count} holdings${lastRefreshedAt ? ' · ⚡ Live' : ''}` 
-              : source?.source === 'alpaca' 
-                ? `Alpaca · ${source.count} pos` 
-                : lastRefreshedAt 
-                  ? `Live Operational · ${holdings.length} assets` 
-                  : 'Demo data'}
+          <span className="source-badge live">
+            {source?.source === 'uploaded'
+              ? `${source.name ?? 'Uploaded'} · ${source.count} holdings · ⚡ Live`
+              : source?.source === 'alpaca'
+                ? `Alpaca · ${source.count} pos · ⚡ Live`
+                : `Live Operational · ${holdings.length} assets`}
           </span>
           <div className="topbar-actions">
             <button

@@ -28,12 +28,18 @@ PROVIDER_SOURCE: dict[tuple[str, str], str] = {
     ("seeking_alpha", "analysts"): "sa_analysts",
     ("seeking_alpha", "wall_street"): "sa_wall_street",
     ("zacks", "rank"): "zacks",
-    # Investing.com categorical technical summary — accepted if the extractor emits it.
+    ("zacks", "quote"): "zacks",
+    # Investing.com categorical technical summary & forecast — accepted if the extractor emits it.
     ("investing", "technical"): "investing",
     ("investing", "summary"): "investing",
     ("investing", "rating"): "investing",
+    ("investing", "forecast"): "investing",
     ("investing_com", "technical"): "investing",
+    ("investing_com", "forecast"): "investing",
     ("investing_pro", "technical"): "investing",
+    ("investing_pro", "forecast"): "investing",
+    ("investing_pro", "summary"): "investing",
+    ("investing_pro", "rating"): "investing",
 }
 
 # Sources whose native value is a categorical string rather than a number.
@@ -59,6 +65,8 @@ def extract_snapshots(obj: Any) -> list[dict]:
     return []
 
 
+import re
+
 def _source_key(snapshot: dict) -> str | None:
     provider = str(snapshot.get("provider", "")).strip().lower()
     rating_type = str(snapshot.get("rating_type", "")).strip().lower()
@@ -73,15 +81,43 @@ def snapshot_to_row(snapshot: dict, as_of: str) -> dict | None:
         return None
     label = snapshot.get("rating")
     if source in _CATEGORICAL:
-        value: Any = str(label).strip() if label is not None else None
+        val = str(label).strip() if label is not None else ""
+        if val in {"Strong Buy", "Buy", "Hold", "Neutral", "Sell", "Strong Sell"}:
+            value: Any = val
+        else:
+            try:
+                buy = int(snapshot.get("buy_count") or 0)
+                hold = int(snapshot.get("hold_count") or 0)
+                sell = int(snapshot.get("sell_count") or 0)
+                total = buy + hold + sell
+                if total > 0:
+                    if buy / total >= 0.65:
+                        value = "Strong Buy"
+                    elif buy / total >= 0.45 or (buy > sell and buy >= hold):
+                        value = "Buy"
+                    elif sell / total >= 0.5:
+                        value = "Strong Sell" if sell / total >= 0.7 else "Sell"
+                    else:
+                        value = "Neutral"
+                    label = value
+                else:
+                    value = None
+            except (TypeError, ValueError):
+                value = None
     else:
         raw_score = snapshot.get("score")
+        if source == "zacks" and (raw_score is None or raw_score == ""):
+            match = re.search(r"Rank\s*#?([1-5])", str(label or ""), re.IGNORECASE)
+            if match:
+                raw_score = match.group(1)
         try:
             value = float(raw_score)
         except (TypeError, ValueError):
             return None
         if source == "zacks":
             value = round(value)
+            if not (1 <= value <= 5):
+                return None
     if value is None or value == "":
         return None
     row = {"ticker": str(snapshot.get("ticker", "")).strip().upper(), "source": source,

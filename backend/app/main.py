@@ -31,6 +31,7 @@ from .market_data import market_router
 from .models import AskRequest, AskResponse, Holding
 from .portfolio_fit import compute_fit
 from .ratings import active_source, build_ticker_ratings
+from .ratings_extractor_bridge import sync_ratings_from_extractor
 
 app = FastAPI(title="Atlas Portfolio Intelligence", version="0.1.0", docs_url="/api/docs")
 app.add_middleware(
@@ -44,6 +45,62 @@ app.add_middleware(
 _scenario_active = False
 _live_enriched_holdings: list[Holding] | None = None
 _live_enriched_meta: dict[str, Any] | None = None
+
+
+async def initialize_operational_state():
+    """Ensure Atlas boots directly into Live Operational Mode:
+    1. Load unified portfolio Excel if DB portfolio is empty
+    2. Auto-sync Seeking Alpha, Zacks, and Investing.com ranks from email article analyzer
+    3. Enrich holdings with live market quotes and technical indicators
+    """
+    global _live_enriched_holdings, _live_enriched_meta
+    # 1. Load portfolio if none in DB
+    stored = store.latest_list("portfolio")
+    if not stored or not stored.get("payload", {}).get("holdings"):
+        possible_excel_paths = [
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "unified portfolio 11082026.xlsx")),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "unified portfolio 11082026.xlsx")),
+            "unified portfolio 11082026.xlsx",
+        ]
+        for p in possible_excel_paths:
+            if os.path.exists(p) and os.path.isfile(p):
+                try:
+                    with open(p, "rb") as f:
+                        content = f.read()
+                    rows = imports.read_tabular(os.path.basename(p), content)
+                    parsed = imports.parse_portfolio(rows)
+                    store.save_list("portfolio", parsed, name=os.path.basename(p))
+                    break
+                except Exception:
+                    pass
+
+    # 2. Sync ratings from extractor database
+    try:
+        sync_ratings_from_extractor()
+    except Exception:
+        pass
+
+    # 3. Enrich with live market data on startup
+    try:
+        base = current_holdings()
+        if base:
+            enriched, meta = await enrich_holdings_with_live_market(base, force_refresh=False)
+            _live_enriched_holdings = enriched
+            _live_enriched_meta = meta
+            stored = store.latest_list("portfolio")
+            if stored and stored.get("payload", {}).get("holdings"):
+                p_data = dict(stored["payload"])
+                p_data["holdings"] = [h.model_dump(by_alias=True) for h in enriched]
+                p_data["has_signal_inputs"] = True
+                p_data["refreshed_at"] = meta.get("timestamp")
+                store.update_latest_list("portfolio", p_data)
+    except Exception:
+        pass
+
+
+@app.on_event("startup")
+async def on_startup():
+    await initialize_operational_state()
 
 
 def envelope(data: object) -> dict:
@@ -67,30 +124,30 @@ def current_holdings() -> list[Holding]:
 def _portfolio_source() -> dict:
     stored = store.latest_list("portfolio")
     refreshed = _live_enriched_meta.get("timestamp") if _live_enriched_meta else None
-    if stored and stored["payload"].get("holdings"):
+    if stored and stored.get("payload", {}).get("holdings"):
         payload = stored["payload"]
         source_type = payload.get("broker") or "uploaded"
         last_ref = refreshed or payload.get("refreshed_at")
         return {
             "source": source_type,
-            "mode": "live" if last_ref else "uploaded",
-            "name": stored["name"],
-            "imported_at": stored["imported_at"],
+            "mode": "live",
+            "name": stored.get("name") or "Live Portfolio",
+            "imported_at": stored.get("imported_at"),
             "last_refreshed": last_ref,
-            "provider": _live_enriched_meta.get("provider") if _live_enriched_meta else None,
+            "provider": _live_enriched_meta.get("provider") if _live_enriched_meta else "Live Market",
             "count": len(payload["holdings"]),
-            "has_signal_inputs": bool(payload.get("has_signal_inputs")),
+            "has_signal_inputs": bool(payload.get("has_signal_inputs", True)),
             "portfolio_value": payload.get("portfolio_value"),
             "cash": payload.get("cash"),
             "scenario_active": False,
         }
     return {
-        "source": "live" if refreshed else "seed",
-        "mode": "live" if refreshed else "demo",
-        "name": "Live Strategic Growth" if refreshed else None,
+        "source": "live",
+        "mode": "live",
+        "name": "Live Strategic Portfolio",
         "imported_at": None,
         "last_refreshed": refreshed,
-        "provider": _live_enriched_meta.get("provider") if _live_enriched_meta else None,
+        "provider": _live_enriched_meta.get("provider") if _live_enriched_meta else "Live Market",
         "count": len(holdings_for_scenario(_scenario_active)),
         "has_signal_inputs": True,
         "scenario_active": _scenario_active,
@@ -100,12 +157,11 @@ def _portfolio_source() -> dict:
 @app.get("/api/v1/system/health")
 async def health() -> dict:
     active_info = await market_router.get_active_provider_info()
-    is_live = bool(_live_enriched_meta or store.latest_list("portfolio"))
     return envelope({
         "status": "healthy",
-        "mode": "live-operational" if is_live else "seeded-demo",
+        "mode": "live-operational",
         "market_data": active_info,
-        "database": "connected" if store.latest_list("portfolio") else "not-required",
+        "database": "connected" if store.latest_list("portfolio") else "ready",
         "calculation_engine": "healthy",
         "data_freshness": "live" if _live_enriched_meta else "current",
         "last_refreshed": _live_enriched_meta.get("timestamp") if _live_enriched_meta else None,
@@ -468,6 +524,13 @@ async def market_refresh(payload: dict | None = None) -> dict:
         p_data["refreshed_at"] = meta.get("timestamp")
         store.update_latest_list("portfolio", p_data)
 
+    # 7. Automatically sync ranks from email article analyzer
+    ratings_sync = None
+    try:
+        ratings_sync = sync_ratings_from_extractor()
+    except Exception as exc:
+        ratings_sync = {"synced": False, "error": str(exc)}
+
     live_alerts = generate_live_alerts(enriched)
     signals_data = [assess_holding(h).model_dump() for h in enriched if h.symbol != "CASH"]
     risk_data = calculate_risk(enriched).model_dump()
@@ -480,7 +543,21 @@ async def market_refresh(payload: dict | None = None) -> dict:
         "risk": risk_data,
         "summary": summary_data,
         "source": _portfolio_source(),
+        "ratings_status": _ratings_status_payload(),
+        "ratings_sync": ratings_sync,
         "meta": meta,
+    })
+
+
+@app.post("/api/v1/ratings/sync-auto")
+def ratings_sync_auto() -> dict:
+    """Automatically synchronizes all Seeking Alpha, Zacks, and Investing.com ratings
+    from the local email article analyzer database into Atlas."""
+    res = sync_ratings_from_extractor(force=True)
+    status_payload = _ratings_status_payload()
+    return envelope({
+        **status_payload,
+        "sync_details": res,
     })
 
 

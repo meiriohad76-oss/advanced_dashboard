@@ -1,10 +1,16 @@
 import json
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.ratings import build_ticker_ratings, normalize_five, normalize_zacks
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def _isolated_db(tmp_path, monkeypatch):
+    monkeypatch.setenv("ATLAS_DB", str(tmp_path / "test.db"))
 
 
 def test_normalization_direction_is_consistent():

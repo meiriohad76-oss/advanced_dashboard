@@ -1,4 +1,5 @@
 import json
+import pytest
 
 from app import ratings
 from app.ratings_ingest import (
@@ -9,6 +10,11 @@ from app.ratings_ingest import (
 )
 
 AS_OF = "2026-07-06T15:34:00Z"
+
+
+@pytest.fixture(autouse=True)
+def _isolated_db(tmp_path, monkeypatch):
+    monkeypatch.setenv("ATLAS_DB", str(tmp_path / "test.db"))
 
 # Real snapshot shapes emitted by the extraction project (from its sa/zacks tests).
 SA_QUANT = {"ticker": "AEM", "provider": "seeking_alpha", "rating_type": "quant", "rating": "Hold", "score": 2.82}
