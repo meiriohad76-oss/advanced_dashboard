@@ -85,9 +85,19 @@ async def fetch_symbol_technical_data(client: httpx.AsyncClient, symbol: str) ->
         if cur_p <= 0:
             return None
 
-        prev_close = meta.get("previousClose") or meta.get("chartPreviousClose")
-        if prev_close is None and len(closes) >= 2:
+        # Prior trading day close calculation:
+        # In Yahoo Finance /chart endpoint with range=1y:
+        # - closes[-1] is the latest / today's bar (regularMarketPrice)
+        # - closes[-2] is the prior trading session's close (yesterday)
+        # - meta.get("previousClose") is the prior trading day close (when provided by Yahoo)
+        # WARNING: meta.get("chartPreviousClose") is the close before the start of the 1y chart period
+        # (i.e. 1 year ago!), NOT yesterday's close! Do NOT use chartPreviousClose as prior day close.
+        prev_close = meta.get("previousClose")
+        if (prev_close is None or float(prev_close) <= 0) and len(closes) >= 2:
             prev_close = closes[-2]
+        elif prev_close is None or float(prev_close) <= 0:
+            prev_close = meta.get("chartPreviousClose")
+
         day_change = None
         if prev_close and float(prev_close) > 0:
             day_change = round(((cur_p - float(prev_close)) / float(prev_close)) * 100.0, 2)

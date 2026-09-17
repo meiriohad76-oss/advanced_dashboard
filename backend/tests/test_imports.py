@@ -152,4 +152,26 @@ def test_multisheet_excel_prefers_holdings_with_quantity():
     assert res["holdings"][1]["quantity"] == 50
 
 
+def test_day_change_column_resolution_ignores_total_change():
+    """Verify daily change does not accidentally map to Total Change or Total % Change."""
+    rows = [
+        {
+            "Symbol": "NVDA",
+            "Price": "200.0",
+            "Shares": "10",
+            "Cost": "150.0",
+            "Change %": "0.025",  # Daily change of +2.5% in decimal
+            "Total % Change": "0.333",  # Total gain of +33.3%
+            "Total Change": "500.0",  # Total $500 gain
+        }
+    ]
+    res = parse_portfolio(rows)
+    holding = res["holdings"][0]
+    assert holding["symbol"] == "NVDA"
+    assert holding["dayChange"] == 2.5
+    assert holding["dayChange"] != 33.3
+    assert holding["dayChange"] != 500.0
+
+
+
 

@@ -44,20 +44,29 @@ class YahooMarketDataProvider(MarketDataProvider):
         async def _fetch_one(client: httpx.AsyncClient, sym: str) -> None:
             async with sem:
                 try:
-                    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d"
+                    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=5d"
                     res = await client.get(url)
                     if res.status_code != 200:
                         return
                     data = res.json()
-                    meta = data.get("chart", {}).get("result", [{}])[0].get("meta", {})
+                    chart_res = data.get("chart", {}).get("result", [{}])[0]
+                    meta = chart_res.get("meta", {})
                     price = meta.get("regularMarketPrice")
                     if price is None:
                         return
 
-                    prev_close = meta.get("previousClose") or meta.get("chartPreviousClose")
+                    quotes = chart_res.get("indicators", {}).get("quote", [{}])[0]
+                    closes = [float(c) for c in quotes.get("close", []) if c is not None]
+
+                    prev_close = meta.get("previousClose")
+                    if (prev_close is None or float(prev_close) <= 0) and len(closes) >= 2:
+                        prev_close = closes[-2]
+                    elif prev_close is None or float(prev_close) <= 0:
+                        prev_close = meta.get("chartPreviousClose")
+
                     day_change_pct = None
-                    if prev_close and prev_close > 0:
-                        day_change_pct = round(((price - prev_close) / prev_close) * 100.0, 2)
+                    if prev_close and float(prev_close) > 0:
+                        day_change_pct = round(((float(price) - float(prev_close)) / float(prev_close)) * 100.0, 2)
 
                     volume = meta.get("regularMarketVolume")
 

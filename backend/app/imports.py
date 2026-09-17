@@ -57,7 +57,13 @@ PORTFOLIO_ALIASES: dict[str, list[str]] = {
     "price": ["price", "last", "last_price", "market_price", "current_price", "close", "mark", "unit_price", "latest_price"],
     "avg_cost": ["avg_cost", "avgcost", "average_cost", "cost", "cost_basis", "costbasis", "avg_price", "average_price", "unit_cost", "purchase_price"],
     "weight": ["weight", "weight_pct", "allocation", "allocation_pct", "pct", "percent", "target_weight", "portfolio_pct", "weighting"],
-    "day_change": ["day_change", "daychange", "change_pct", "day_change_pct", "todays_change", "change", "daily_change"],
+    "day_change": [
+        "today_s_pct_gain", "todays_pct_gain", "today_s_gain_pct", "todays_gain_pct",
+        "today_s_change_pct", "todays_change_pct", "today_pct_change", "todays_pct_change",
+        "day_change_pct", "daily_change_pct", "daychange_pct", "change_pct",
+        "today_s_gain", "todays_gain", "today_s_change", "todays_change", "today_change",
+        "daily_change", "day_change", "daychange",
+    ],
     "rsi": ["rsi", "rsi_14"],
     "macd_bullish": ["macd_bullish", "macd", "macdbullish", "macd_signal"],
     "above_sma_50": ["above_sma_50", "above_sma50", "sma50", "above_50d", "above_ma50", "ma50"],
@@ -89,7 +95,8 @@ class ImportError_(ValueError):
 
 
 def _norm(header: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "_", str(header).strip().lower()).strip("_")
+    clean = str(header).strip().lower().replace("%", "_pct_")
+    return re.sub(r"[^a-z0-9]+", "_", clean).strip("_")
 
 
 def _resolve_columns(headers: list[str], aliases: dict[str, list[str]]) -> dict[str, str]:
@@ -103,11 +110,16 @@ def _resolve_columns(headers: list[str], aliases: dict[str, list[str]]) -> dict[
         # Pass 1: exact match
         for name in names:
             if name in norm_to_original:
-                mapping[field] = norm_to_original[name]
+                orig = norm_to_original[name]
+                if field == "day_change" and any(bad in _norm(orig) for bad in ("total", "unrealized", "overall", "cumul", "all_time")):
+                    continue
+                mapping[field] = orig
                 break
         # Pass 2: substring match on normalized header
         if field not in mapping:
             for norm, orig in norm_to_original.items():
+                if field == "day_change" and any(bad in norm for bad in ("total", "unrealized", "overall", "cumul", "all_time")):
+                    continue
                 if any(name in norm for name in names):
                     mapping[field] = orig
                     break
@@ -433,6 +445,13 @@ def parse_portfolio(rows: list[dict[str, Any]]) -> dict[str, Any]:
             raise ImportError_("Cannot compute exposure: provide a 'weight' column, or 'quantity' and 'price' (or 'market_value') so weights can be derived.")
         for item in staged:
             item["weight"] = round((item["market_value"] or 0.0) / total_mv * 100.0, 4)
+
+    # Auto-scale day_change if values are stored as decimal fractions (e.g. 0.015 for 1.5% in Excel percentage cells)
+    non_zero_changes = [abs(item["day_change"]) for item in staged if item.get("day_change") is not None and item["day_change"] != 0.0]
+    if non_zero_changes and max(non_zero_changes) <= 0.25:
+        for item in staged:
+            if item.get("day_change") is not None:
+                item["day_change"] = round(item["day_change"] * 100.0, 2)
 
     holdings: list[Holding] = []
     for item in staged:
