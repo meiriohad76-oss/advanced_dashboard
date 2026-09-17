@@ -442,10 +442,16 @@ export interface DailyBriefing {
 
 // Backtest
 export interface BacktestParams {
+  symbol?: string
   entry_score?: number
   exit_score?: number
   lookback?: '6mo' | '1y' | '2y' | '3y'
   initial_capital?: number
+  take_profit_pct?: number
+  stop_loss_pct?: number
+  max_holding_days?: number
+  rsi_min?: number
+  rsi_max?: number
 }
 
 export interface BacktestMetrics {
@@ -460,16 +466,23 @@ export interface BacktestMetrics {
   win_rate_pct: number
   profit_factor: number
   trades_count: number
+  avg_trade_return_pct?: number
+  avg_holding_days?: number
 }
 
 export interface BacktestTrade {
+  symbol?: string
   entry_date: string
   exit_date: string
   duration_days: number
   return_pct: number
-  entry_equity: number
-  exit_equity: number
+  entry_price?: number
+  exit_price?: number
+  entry_equity?: number
+  exit_equity?: number
   win: boolean
+  exit_reason?: 'TARGET' | 'STOP_LOSS' | 'TIME_STOP' | 'SIGNAL_EXIT' | 'OPEN_END' | string
+  entry_score?: number
 }
 
 export interface BacktestCurvePoint {
@@ -479,19 +492,50 @@ export interface BacktestCurvePoint {
   drawdown_pct: number
   score: number
   in_position: boolean
+  price?: number
 }
 
 export interface BacktestResult {
   parameters: {
+    symbol?: string
     entry_score: number
     exit_score: number
     lookback: string
     trading_days: number
     initial_capital: number
+    take_profit_pct?: number
+    stop_loss_pct?: number
+    max_holding_days?: number
+    rsi_min?: number
+    rsi_max?: number
   }
   metrics: BacktestMetrics
   trades: BacktestTrade[]
   equity_curve: BacktestCurvePoint[]
+}
+
+export interface SchedulerStatus {
+  enabled: boolean
+  active?: boolean
+  interval_seconds: number
+  interval_minutes: number
+  last_checked: string | null
+  last_sync: string | null
+  last_run_timestamp?: string | null
+  last_status: string
+  runs_completed: number
+  new_records_detected: number
+  analyzer_db_detected: boolean
+  market_session?: string
+  next_scheduled_run?: string
+  history?: Array<{
+    timestamp: string
+    status: string
+    session?: string
+    records_added?: number
+    shifts_count?: number
+    error?: string
+  }>
 }
 
 

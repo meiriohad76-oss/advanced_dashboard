@@ -138,22 +138,6 @@ export const api = {
       body: JSON.stringify(settings),
     }),
   testNotifications: () => request<import('../types').NotificationTestResult>('/api/v1/notifications/test', { method: 'POST' }),
-  schedulerStatus: () => request<{
-    enabled: boolean
-    interval_seconds: number
-    interval_minutes: number
-    last_checked: string | null
-    last_sync: string | null
-    last_status: string
-    runs_completed: number
-    new_records_detected: number
-    analyzer_db_detected: boolean
-  }>('/api/v1/scheduler/status'),
-  toggleScheduler: (enabled?: boolean) =>
-    request<{ enabled: boolean }>('/api/v1/scheduler/toggle', {
-      method: 'POST',
-      body: JSON.stringify({ enabled }),
-    }),
   brokerAlpacaStatus: () => request<BrokerAlpacaStatus>('/api/v1/broker/alpaca/status'),
   brokerAlpacaSync: () => request<BrokerAlpacaSyncResult>('/api/v1/broker/alpaca/sync', { method: 'POST' }),
   placeBrokerOrder: (order: { symbol: string; quantity: number; side: 'buy' | 'sell'; type?: string; limit_price?: number }) =>
@@ -201,6 +185,22 @@ export const api = {
     request<Record<string, unknown>>('/api/v1/notifications/telegram/send-trade-prompt', {
       method: 'POST',
       body: JSON.stringify(params),
+    }),
+  schedulerStatus: () =>
+    request<import('../types').SchedulerStatus>('/api/v1/scheduler/status'),
+  schedulerToggle: (enabled?: boolean) =>
+    request<import('../types').SchedulerStatus>('/api/v1/scheduler/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ enabled }),
+    }),
+  toggleScheduler: (enabled?: boolean) =>
+    request<import('../types').SchedulerStatus>('/api/v1/scheduler/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ enabled }),
+    }),
+  schedulerRunNow: () =>
+    request<{ synced: boolean; session?: string; next_scheduled?: string; details?: any; shifts?: any[]; reason?: string }>('/api/v1/scheduler/run-now', {
+      method: 'POST',
     }),
 }
 

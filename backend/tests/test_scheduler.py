@@ -22,3 +22,11 @@ def test_scheduler_status_and_toggle():
     toggle_on = client.post("/api/v1/scheduler/toggle", json={"enabled": True})
     assert toggle_on.status_code == 200
     assert toggle_on.json()["data"]["enabled"] is True
+
+
+def test_scheduler_run_now():
+    res = client.post("/api/v1/scheduler/run-now")
+    assert res.status_code == 200
+    data = res.json()["data"]
+    assert "synced" in data
+    assert "session" in data

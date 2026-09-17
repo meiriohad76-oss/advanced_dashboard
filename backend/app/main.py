@@ -669,22 +669,41 @@ async def analytics_benchmark_comparison(range: str = "1y") -> dict:
     return envelope(data)
 
 
+@app.post("/api/v1/scheduler/run-now")
+async def scheduler_run_now() -> dict:
+    """Manually trigger an immediate background extraction, quote refresh, and alert check cycle."""
+    res = await sync_runner.run_sync_cycle()
+    return envelope(res)
+
+
 @app.post("/api/v1/analytics/backtest")
 def analytics_backtest(payload: dict | None = None) -> dict:
-    """Run quantitative strategy backtest simulation over historical lookback periods (§13, §14)."""
+    """Run quantitative 5-Point Entry Criteria strategy backtest simulation (§13, §14)."""
     p = payload or {}
+    symbol = str(p.get("symbol", "SPY"))
     entry_score = int(p.get("entry_score", 75))
     exit_score = int(p.get("exit_score", 50))
     lookback = str(p.get("lookback", "1y"))
     initial_capital = float(p.get("initial_capital", 100000.0))
+    take_profit_pct = float(p.get("take_profit_pct", 15.0))
+    stop_loss_pct = float(p.get("stop_loss_pct", 5.0))
+    max_holding_days = int(p.get("max_holding_days", 20))
+    rsi_min = float(p.get("rsi_min", 38.0))
+    rsi_max = float(p.get("rsi_max", 58.0))
 
     holdings = current_holdings()
     res = backtest_service.run_backtest(
         holdings=holdings,
+        symbol=symbol,
         entry_score=entry_score,
         exit_score=exit_score,
         lookback=lookback,
         initial_capital=initial_capital,
+        take_profit_pct=take_profit_pct,
+        stop_loss_pct=stop_loss_pct,
+        max_holding_days=max_holding_days,
+        rsi_min=rsi_min,
+        rsi_max=rsi_max,
     )
     return envelope(res)
 

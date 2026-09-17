@@ -25,11 +25,12 @@ import { resolveCompanyName } from '../data/companyNames'
 import { getPriceTargets } from '../domain/ratings'
 import { buildTickerRatings } from '../domain/ratings'
 import { assessCandidateEntry } from '../domain/entryAnalysis'
-import type { Holding, Quote, TickerRatings, UserAlert, WatchlistData, WatchlistItem } from '../types'
+import type { Holding, Quote, SchedulerStatus, TickerRatings, UserAlert, WatchlistData, WatchlistItem } from '../types'
 
 interface WatchlistEntryRadarProps {
   onSelectHolding: (holding: Holding) => void
   onOpenAlertPanel?: () => void
+  onOpenBacktest?: (symbol?: string) => void
   existingHoldings?: Holding[]
   userAlerts?: UserAlert[]
   onAddUserAlert?: (alert: Omit<UserAlert, 'id' | 'createdAt' | 'status'>) => void
@@ -42,6 +43,7 @@ type SortField = 'entry_score' | 'ratings' | 'upside' | 'rsi' | 'symbol' | 'chan
 export function WatchlistEntryRadar({
   onSelectHolding,
   onOpenAlertPanel,
+  onOpenBacktest,
   existingHoldings = [],
   userAlerts = [],
   onAddUserAlert,
@@ -52,6 +54,9 @@ export function WatchlistEntryRadar({
   const [ratingsMap, setRatingsMap] = useState<Record<string, TickerRatings>>({})
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [schedulerStatus, setSchedulerStatus] = useState<SchedulerStatus | null>(null)
+  const [syncingNow, setSyncingNow] = useState(false)
+  const [syncMsg, setSyncMsg] = useState<string | null>(null)
 
   // Quick-add state
   const [newSymbol, setNewSymbol] = useState('')
@@ -88,6 +93,52 @@ export function WatchlistEntryRadar({
   useEffect(() => {
     loadWatchlist()
   }, [])
+
+  // Poll scheduler status
+  useEffect(() => {
+    let mounted = true
+    const loadScheduler = async () => {
+      try {
+        const res = await api.schedulerStatus()
+        if (mounted && res) {
+          setSchedulerStatus(res)
+        }
+      } catch {
+        // Scheduler offline or network issue
+      }
+    }
+    loadScheduler()
+    const interval = setInterval(loadScheduler, 30000)
+    return () => {
+      mounted = false
+      clearInterval(interval)
+    }
+  }, [])
+
+  const handleRunSchedulerNow = async () => {
+    setSyncingNow(true)
+    setSyncMsg(null)
+    try {
+      const res = await api.schedulerRunNow()
+      if (res && res.synced !== false) {
+        const shiftsCount = res.shifts?.length || 0
+        setSyncMsg(`Sync cycle complete: session ${res.session || 'Active'}${shiftsCount > 0 ? `, ${shiftsCount} rating shifts` : ''}.`)
+        // Refresh radar quotes and ratings
+        await fetchMarketAndRatings(items.map((it) => it.symbol.toUpperCase()))
+        const statusRes = await api.schedulerStatus()
+        if (statusRes) {
+          setSchedulerStatus(statusRes)
+        }
+      } else {
+        setSyncMsg(`Sync idle: ${res?.reason || 'No new records'}`)
+      }
+    } catch (err: any) {
+      setSyncMsg(`Sync failed: ${err.message || 'Error executing cycle'}`)
+    } finally {
+      setSyncingNow(false)
+      setTimeout(() => setSyncMsg(null), 6000)
+    }
+  }
 
   const items: WatchlistItem[] = useMemo(() => watchlistData?.items ?? [], [watchlistData])
 
@@ -366,19 +417,107 @@ export function WatchlistEntryRadar({
           <h1>Watchlist &amp; Entry Radar</h1>
           <p>Analyze multi-source ratings, technical momentum, and 5-point criteria to trigger high-conviction entry point alerts before buying.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          {/* Scheduler status badge */}
+          {schedulerStatus && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'var(--surface-hover)',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                border: '1px solid var(--border)',
+                fontSize: '12px',
+              }}
+              title={`Market Session: ${schedulerStatus.market_session || 'Open'} | Last Run: ${schedulerStatus.last_run_timestamp || schedulerStatus.last_sync ? new Date(schedulerStatus.last_run_timestamp || schedulerStatus.last_sync!).toLocaleTimeString() : 'Never'}`}
+            >
+              <span
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: (schedulerStatus.active ?? schedulerStatus.enabled) ? 'var(--green)' : 'var(--muted)',
+                  display: 'inline-block',
+                }}
+              />
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
+                Auto-Sync: {(schedulerStatus.active ?? schedulerStatus.enabled) ? 'Active' : 'Off'}
+              </span>
+              {schedulerStatus.next_scheduled_run && (
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                  ({schedulerStatus.next_scheduled_run})
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Sync Now manual trigger */}
+          <button
+            type="button"
+            className="secondary-button"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={handleRunSchedulerNow}
+            disabled={syncingNow || refreshing}
+            title="Trigger immediate market data & ratings sync cycle"
+          >
+            <RefreshCw size={14} className={syncingNow ? 'spinning' : ''} />
+            {syncingNow ? 'Syncing...' : 'Sync Now'}
+          </button>
+
+          {/* Backtest 5-Point Strategy Trigger */}
+          {onOpenBacktest && (
+            <button
+              type="button"
+              className="secondary-button"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                borderColor: 'var(--accent)',
+                color: 'var(--accent)',
+                fontWeight: 600,
+              }}
+              onClick={() => onOpenBacktest()}
+              title="Open the 5-Point Entry Criteria Backtester"
+            >
+              🧪 Backtest Criteria
+            </button>
+          )}
+
           <button
             type="button"
             className="secondary-button"
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             onClick={() => fetchMarketAndRatings(items.map((it) => it.symbol.toUpperCase()))}
-            disabled={refreshing}
+            disabled={refreshing || syncingNow}
           >
             <RefreshCw size={14} className={refreshing ? 'spinning' : ''} />
-            {refreshing ? 'Refreshing...' : 'Refresh Quotes & Ranks'}
+            {refreshing ? 'Refreshing...' : 'Refresh Quotes'}
           </button>
         </div>
       </div>
+
+      {syncMsg && (
+        <div
+          style={{
+            marginBottom: '16px',
+            padding: '10px 16px',
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.35)',
+            borderRadius: '8px',
+            color: 'var(--green)',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          <CheckCircle2 size={16} />
+          <span>{syncMsg}</span>
+        </div>
+      )}
 
       {/* KPI Summary Cards */}
       <div className="kpi-grid" style={{ marginBottom: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
@@ -821,6 +960,17 @@ export function WatchlistEntryRadar({
                         </span>
                       )}
                     </button>
+                    {onOpenBacktest && (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        title={`Backtest 5-Point Entry Strategy on ${candidate.symbol}`}
+                        style={{ padding: '6px 10px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        onClick={() => onOpenBacktest(candidate.symbol)}
+                      >
+                        🧪 Backtest
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="icon-button"

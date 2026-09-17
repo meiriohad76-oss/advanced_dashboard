@@ -1259,6 +1259,12 @@ export default function App() {
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
   const [briefingOpen, setBriefingOpen] = useState(false)
   const [backtestOpen, setBacktestOpen] = useState(false)
+  const [backtestTicker, setBacktestTicker] = useState<string | undefined>(undefined)
+
+  const handleOpenBacktest = (symbol?: string) => {
+    setBacktestTicker(symbol)
+    setBacktestOpen(true)
+  }
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
@@ -1505,6 +1511,7 @@ export default function App() {
         userAlerts={userAlerts}
         onAddUserAlert={handleAddUserAlertFromCandidate}
         onDeleteUserAlert={handleDeleteAlert}
+        onOpenBacktest={handleOpenBacktest}
       />
     )
     if (page === 'Alerts') return (
@@ -1518,7 +1525,7 @@ export default function App() {
         onOpenPanel={() => setAlertPanelOpen(true)}
       />
     )
-    if (page === 'Analytics') return <AnalyticsPage holdings={holdings} onOpenBacktest={() => setBacktestOpen(true)}/>
+    if (page === 'Analytics') return <AnalyticsPage holdings={holdings} onOpenBacktest={() => handleOpenBacktest()}/>
     if (page === 'Import') return <ImportPage onChanged={reloadState}/>
     if (page === 'System') return <SystemPage onOpenNotifications={() => setNotificationModalOpen(true)}/>
     return <Overview holdings={holdings} scenario={scenario} onSelect={setSelected} onAsk={() => setAskOpen(true)} onOpenDecision={(h) => setDecisionHolding(h)} onNavigate={(p) => setPage(p)}/>
@@ -1626,7 +1633,15 @@ export default function App() {
       {notificationModalOpen && <NotificationSettingsModal onClose={() => setNotificationModalOpen(false)} />}
       {rebalanceModalOpen && <RebalanceModal onClose={() => setRebalanceModalOpen(false)} onSuccess={reloadState} />}
       {briefingOpen && <MorningBriefingModal onClose={() => setBriefingOpen(false)} />}
-      {backtestOpen && <BacktestModal onClose={() => setBacktestOpen(false)} />}
+      {backtestOpen && (
+        <BacktestModal
+          onClose={() => {
+            setBacktestOpen(false)
+            setBacktestTicker(undefined)
+          }}
+          initialSymbol={backtestTicker}
+        />
+      )}
       {askOpen && <AskPanel holdings={holdings} onClose={() => setAskOpen(false)}/>} 
       {scenario && (
         <div className="scenario-toast">
