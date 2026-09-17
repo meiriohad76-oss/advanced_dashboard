@@ -93,6 +93,17 @@ export const api = {
   portfolioSource: () => request<PortfolioSource>('/api/v1/portfolio/source'),
   importPortfolio: (file: File) => upload<PortfolioSource>('/api/v1/portfolio/import', file),
   resetPortfolio: () => request<PortfolioSource>('/api/v1/portfolio/reset', { method: 'POST' }),
+  getSavedPortfolios: () =>
+    request<{ portfolios: import('../types').SavedPortfolioItem[]; total_saved: number; active_id: number | null }>('/api/v1/portfolios/saved'),
+  activateSavedPortfolio: (id: number) =>
+    request<DemoState>(`/api/v1/portfolios/saved/${id}/activate`, { method: 'POST' }),
+  renameSavedPortfolio: (id: number, name: string) =>
+    request<{ id: number; name: string; renamed: boolean }>(`/api/v1/portfolios/saved/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
+    }),
+  deleteSavedPortfolio: (id: number) =>
+    request<{ deleted_id: number; status: string }>(`/api/v1/portfolios/saved/${id}`, { method: 'DELETE' }),
   watchlist: () => request<WatchlistData>('/api/v1/watchlist'),
   importWatchlist: (file: File) => upload<WatchlistData>('/api/v1/watchlist/import', file),
   resetWatchlist: () => request<WatchlistData>('/api/v1/watchlist/reset', { method: 'POST' }),

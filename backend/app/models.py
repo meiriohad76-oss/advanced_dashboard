@@ -16,20 +16,20 @@ class SignalState(str, Enum):
 
 class Holding(BaseModel):
     symbol: str
-    name: str
-    sector: str
-    quantity: float
-    price: float
-    avg_cost: float = Field(alias="avgCost")
-    day_change: float = Field(alias="dayChange")
-    weight: float
-    rsi: float
-    macd_bullish: bool = Field(alias="macdBullish")
-    above_sma_50: bool = Field(alias="aboveSma50")
-    above_sma_200: bool = Field(alias="aboveSma200")
-    relative_volume: float = Field(alias="relativeVolume")
-    breakout_20d: bool = Field(alias="breakout20d")
-    trend_slope_positive: bool = Field(alias="trendSlopePositive")
+    name: str = ""
+    sector: str = "Uncategorized"
+    quantity: float = 0.0
+    price: float = 0.0
+    avg_cost: float = Field(default=0.0, alias="avgCost")
+    day_change: float = Field(default=0.0, alias="dayChange")
+    weight: float = 0.0
+    rsi: float = 50.0
+    macd_bullish: bool = Field(default=False, alias="macdBullish")
+    above_sma_50: bool = Field(default=False, alias="aboveSma50")
+    above_sma_200: bool = Field(default=False, alias="aboveSma200")
+    relative_volume: float = Field(default=1.0, alias="relativeVolume")
+    breakout_20d: bool = Field(default=False, alias="breakout20d")
+    trend_slope_positive: bool = Field(default=False, alias="trendSlopePositive")
     # False when an uploaded holding carries no technical columns — the UI then shows
     # "signals need market data" instead of a fabricated score. Seed/demo holdings are True.
     has_signal_inputs: bool = Field(default=True, alias="hasSignalInputs")

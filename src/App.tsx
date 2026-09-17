@@ -33,6 +33,7 @@ import { MorningBriefingModal } from './components/MorningBriefingModal'
 import { BacktestModal } from './components/BacktestModal'
 import { QuickActionsMenu } from './components/QuickActionsMenu'
 import { CommandPalette } from './components/CommandPalette'
+import { PortfolioSwitcher } from './components/PortfolioSwitcher'
 import { resolveCompanyName } from './data/companyNames'
 import { buildTickerRatings, getPriceTargets } from './domain/ratings'
 import { evaluateAlert } from './domain/alertEngine'
@@ -1510,12 +1511,10 @@ export default function App() {
       <div className="main-column">
         <header className="topbar">
           <button className="menu-button" onClick={() => setMobileNav(true)}><Menu size={20}/></button>
-          <div className="portfolio-picker">
-            <span>PORTFOLIO</span>
-            <strong>
-              {source?.source === 'uploaded' ? (source.name ?? 'Unified Portfolio') : source?.source === 'alpaca' ? 'Alpaca Paper Account' : 'Unified Portfolio'}
-            </strong>
-          </div>
+          <PortfolioSwitcher
+            currentSource={source}
+            onPortfolioChanged={reloadState}
+          />
           <span className="source-badge live">
             {source?.source === 'uploaded'
               ? `${source.name ?? 'Uploaded'} · ${source.count} holdings · ⚡ Live`

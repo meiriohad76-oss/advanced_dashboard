@@ -114,12 +114,12 @@ def envelope(data: object) -> dict:
 
 def current_holdings() -> list[Holding]:
     """The holdings the dashboard serves. If live enriched holdings are available,
-    they take precedence. Otherwise an uploaded portfolio (persisted in the DB),
+    they take precedence. Otherwise an active uploaded portfolio (persisted in the DB),
     otherwise the seeded demo book (with the scenario toggle)."""
     if _live_enriched_holdings is not None:
         return _live_enriched_holdings
     stored = store.latest_list("portfolio")
-    if stored and stored["payload"].get("holdings"):
+    if stored and stored.get("is_active") and stored["payload"].get("holdings"):
         return [Holding(**item) for item in stored["payload"]["holdings"]]
     return holdings_for_scenario(_scenario_active)
 
@@ -127,11 +127,12 @@ def current_holdings() -> list[Holding]:
 def _portfolio_source() -> dict:
     stored = store.latest_list("portfolio")
     refreshed = _live_enriched_meta.get("timestamp") if _live_enriched_meta else None
-    if stored and stored.get("payload", {}).get("holdings"):
+    if stored and stored.get("is_active") and stored.get("payload", {}).get("holdings"):
         payload = stored["payload"]
         source_type = payload.get("broker") or "uploaded"
         last_ref = refreshed or payload.get("refreshed_at")
         return {
+            "id": stored.get("id"),
             "source": source_type,
             "mode": "live",
             "name": stored.get("name") or "Live Portfolio",
@@ -145,6 +146,7 @@ def _portfolio_source() -> dict:
             "scenario_active": False,
         }
     return {
+        "id": None,
         "source": "live",
         "mode": "live",
         "name": "Live Strategic Portfolio",
@@ -303,17 +305,77 @@ async def portfolio_import(file: UploadFile = File(...)) -> dict:
 
 @app.post("/api/v1/portfolio/reset")
 def portfolio_reset() -> dict:
-    """Discard the uploaded portfolio and revert to the seeded demo book."""
+    """Discard active portfolio and revert to the seeded demo book."""
     global _live_enriched_holdings, _live_enriched_meta
     _live_enriched_holdings = None
     _live_enriched_meta = None
-    store.clear_list("portfolio")
+    store.deactivate_all("portfolio")
     return envelope(_portfolio_source())
 
 
 @app.get("/api/v1/portfolio/source")
 def portfolio_source() -> dict:
     return envelope(_portfolio_source())
+
+
+@app.get("/api/v1/portfolios/saved")
+def portfolios_saved_list() -> dict:
+    """List all saved portfolios with summary info and active status."""
+    portfolios = store.list_saved_portfolios("portfolio")
+    return envelope({
+        "portfolios": portfolios,
+        "total_saved": len(portfolios),
+        "active_id": next((p["id"] for p in portfolios if p["is_active"]), None),
+    })
+
+
+@app.post("/api/v1/portfolios/saved/{portfolio_id}/activate")
+async def portfolios_saved_activate(portfolio_id: int) -> dict:
+    """Activate a specific saved portfolio and re-enrich market indicators."""
+    global _live_enriched_holdings, _live_enriched_meta
+    activated = store.activate_portfolio(portfolio_id, "portfolio")
+    if not activated:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
+
+    _live_enriched_holdings = None
+    _live_enriched_meta = None
+
+    raw_holdings = [Holding(**h) for h in activated["payload"].get("holdings", [])]
+    try:
+        enriched, meta = await enrich_holdings_with_live_market(raw_holdings, force_refresh=False)
+        activated["payload"]["holdings"] = [h.model_dump(by_alias=True) for h in enriched]
+        activated["payload"]["refreshed_at"] = meta.get("timestamp")
+        store.update_latest_list("portfolio", activated["payload"])
+        _live_enriched_holdings = enriched
+        _live_enriched_meta = meta
+    except Exception:
+        pass
+
+    return demo_state()
+
+
+@app.patch("/api/v1/portfolios/saved/{portfolio_id}")
+def portfolios_saved_rename(portfolio_id: int, payload: dict) -> dict:
+    """Rename a saved portfolio."""
+    new_name = payload.get("name", "").strip()
+    if not new_name:
+        raise HTTPException(status_code=400, detail="Name cannot be empty")
+    ok = store.rename_portfolio(portfolio_id, new_name)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
+    return envelope({"id": portfolio_id, "name": new_name, "renamed": True})
+
+
+@app.delete("/api/v1/portfolios/saved/{portfolio_id}")
+def portfolios_saved_delete(portfolio_id: int) -> dict:
+    """Delete a saved portfolio."""
+    global _live_enriched_holdings, _live_enriched_meta
+    ok = store.delete_portfolio(portfolio_id, "portfolio")
+    if not ok:
+        raise HTTPException(status_code=404, detail="Portfolio not found")
+    _live_enriched_holdings = None
+    _live_enriched_meta = None
+    return envelope({"deleted_id": portfolio_id, "status": "deleted"})
 
 
 # ---- Watchlist (new; also uploaded from CSV/Excel) ----

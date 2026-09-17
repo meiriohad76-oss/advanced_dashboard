@@ -31,10 +31,20 @@ export interface PortfolioSource {
   provider?: string | null
   count: number
   has_signal_inputs: boolean
-  scenario_active: boolean
+  id?: number | null
+  scenario_active?: boolean
   portfolio_value?: number
   cash?: number
   warnings?: string[]
+}
+
+export interface SavedPortfolioItem {
+  id: number
+  name: string
+  imported_at: string
+  count: number
+  total_value: number
+  is_active: boolean
 }
 
 export interface Quote {
