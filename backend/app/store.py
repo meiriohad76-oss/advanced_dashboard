@@ -251,6 +251,63 @@ def clear_list(kind: str, path: str | None = None) -> None:
         conn.close()
 
 
+def add_watchlist_item(item: dict[str, Any], path: str | None = None) -> dict[str, Any]:
+    """Add or update a single symbol in the active watchlist."""
+    symbol = str(item.get("symbol", "")).strip().upper()
+    if not symbol:
+        raise ValueError("Symbol is required")
+
+    stored = latest_list("watchlist", path=path)
+    if stored and isinstance(stored.get("payload"), dict):
+        payload = dict(stored["payload"])
+        items = list(payload.get("items", []))
+    else:
+        payload = {"items": [], "source": "created"}
+        items = []
+
+    # Update if exists, else append
+    existing_idx = next((i for i, it in enumerate(items) if it.get("symbol", "").upper() == symbol), None)
+    new_entry = {
+        "symbol": symbol,
+        "name": item.get("name") or (items[existing_idx].get("name") if existing_idx is not None else symbol),
+        "sector": item.get("sector") or (items[existing_idx].get("sector") if existing_idx is not None else "Equities"),
+        "note": item.get("note") if "note" in item else (items[existing_idx].get("note") if existing_idx is not None else ""),
+    }
+
+    if existing_idx is not None:
+        items[existing_idx].update(new_entry)
+    else:
+        items.append(new_entry)
+
+    payload["items"] = items
+    if stored:
+        update_latest_list("watchlist", payload, path=path)
+    else:
+        save_list("watchlist", payload, name="Candidate Radar", path=path)
+
+    return new_entry
+
+
+def remove_watchlist_item(symbol: str, path: str | None = None) -> bool:
+    """Remove a symbol from the active watchlist."""
+    sym = symbol.strip().upper()
+    stored = latest_list("watchlist", path=path)
+    if not stored or not isinstance(stored.get("payload"), dict):
+        return False
+
+    payload = dict(stored["payload"])
+    items = list(payload.get("items", []))
+    original_len = len(items)
+    filtered = [it for it in items if it.get("symbol", "").upper() != sym]
+
+    if len(filtered) == original_len:
+        return False
+
+    payload["items"] = filtered
+    update_latest_list("watchlist", payload, path=path)
+    return True
+
+
 def evaluate_freshness(extracted_at: str, now: datetime, threshold_days: int = STALE_THRESHOLD_DAYS) -> dict[str, Any]:
     """Pure freshness check: age in days and whether it exceeds the threshold.
 

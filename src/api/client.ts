@@ -105,6 +105,15 @@ export const api = {
   deleteSavedPortfolio: (id: number) =>
     request<{ deleted_id: number; status: string }>(`/api/v1/portfolios/saved/${id}`, { method: 'DELETE' }),
   watchlist: () => request<WatchlistData>('/api/v1/watchlist'),
+  addWatchlistSymbol: (symbol: string, note?: string, name?: string, sector?: string) =>
+    request<{ item: import('../types').WatchlistItem; watchlist: WatchlistData }>('/api/v1/watchlist/items', {
+      method: 'POST',
+      body: JSON.stringify({ symbol, note, name, sector }),
+    }),
+  removeWatchlistSymbol: (symbol: string) =>
+    request<{ symbol: string; removed: boolean; watchlist: WatchlistData }>(`/api/v1/watchlist/items/${encodeURIComponent(symbol)}`, {
+      method: 'DELETE',
+    }),
   importWatchlist: (file: File) => upload<WatchlistData>('/api/v1/watchlist/import', file),
   resetWatchlist: () => request<WatchlistData>('/api/v1/watchlist/reset', { method: 'POST' }),
   pollRatings: (url?: string) => request<RatingsStatus>(`/api/v1/ratings/poll${url ? `?url=${encodeURIComponent(url)}` : ''}`, { method: 'POST' }),

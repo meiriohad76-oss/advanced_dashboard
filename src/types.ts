@@ -101,12 +101,36 @@ export interface WatchlistItem {
 }
 
 export interface WatchlistData {
-  source: 'uploaded' | 'empty'
+  source: 'uploaded' | 'default' | 'empty' | 'created'
   name: string | null
   imported_at: string | null
   items: WatchlistItem[]
   count: number
   warnings?: string[]
+}
+
+export interface EntryCriteria {
+  ratingBullish: boolean
+  rsiInBuyZone: boolean
+  trendAligned: boolean
+  volumeActive: boolean
+  upsideAttractive: boolean
+}
+
+export type EntrySignalState = 'STRONG ENTRY' | 'ENTRY' | 'APPROACHING' | 'WATCH' | 'WAIT FOR DIP' | 'NO SETUP'
+
+export interface EntryAssessment {
+  score: number
+  state: EntrySignalState
+  criteria: EntryCriteria
+  facts: string[]
+  components: {
+    ratings: { score: number; max: number; detail: string }
+    trend: { score: number; max: number; detail: string }
+    momentum: { score: number; max: number; detail: string }
+    setup: { score: number; max: number; detail: string }
+    upside: { score: number; max: number; detail: string }
+  }
 }
 
 export interface ScoreComponent {

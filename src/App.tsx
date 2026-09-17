@@ -13,6 +13,7 @@ import { RatingsBanner } from './components/RatingsBanner'
 import { RatingsConsensusChip } from './components/RatingsConsensusChip'
 import { PortfolioFitPanel, PortfolioFitTag } from './components/PortfolioFit'
 import { ImportPage, WatchlistPage } from './components/DataPages'
+import { WatchlistEntryRadar } from './components/WatchlistEntryRadar'
 import { ModalOverlay } from './components/ModalOverlay'
 import { TimeframeSelector } from './components/TimeframeSelector'
 import { getTimeframeSeries } from './domain/timeframe'
@@ -1477,11 +1478,33 @@ export default function App() {
     setUserAlerts((prev) => prev.filter((a) => a.id !== id))
   }
 
+  const handleAddUserAlertFromCandidate = (alert: Omit<UserAlert, 'id' | 'createdAt' | 'status'>) => {
+    const fullAlert: UserAlert = {
+      ...alert,
+      id: `alert-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      createdAt: new Date().toISOString(),
+      status: 'ARMED',
+    }
+    setUserAlerts((prev) => [fullAlert, ...prev])
+    setLiveToast({
+      title: 'Entry Alert Armed',
+      detail: `${alert.symbol} alert monitoring initialized.`,
+      symbol: alert.symbol,
+    })
+  }
+
   const renderPage = () => {
     if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected} onRefresh={handleRefreshAllData} refreshing={refreshingLive} onOpenRebalance={() => setRebalanceModalOpen(true)}/>
     if (page === 'Signals') return <SignalsPage holdings={holdings} onSelect={setSelected}/>
     if (page === 'Catalysts') return <CatalystRadar holdings={holdings} onSelectHolding={setSelected}/>
-    if (page === 'Watchlist') return <WatchlistPage/>
+    if (page === 'Watchlist') return (
+      <WatchlistEntryRadar
+        onSelectHolding={(h) => setSelected(getOrBuildHolding(h.symbol, holdings))}
+        onOpenAlertPanel={() => setAlertPanelOpen(true)}
+        existingHoldings={holdings}
+        onAddUserAlert={handleAddUserAlertFromCandidate}
+      />
+    )
     if (page === 'Alerts') return (
       <AlertsPage 
         alerts={alerts} 

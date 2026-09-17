@@ -24,6 +24,7 @@ from fastapi.responses import StreamingResponse
 from . import alerts, analytics_service, backtest_service, bars_service, briefing_service, catalysts_service, imports, notifications, ratings_ingest, store
 from .broker.alpaca_broker import alpaca_broker, calculate_portfolio_rebalance
 from .company_names import resolve_company_name
+from .sectors import resolve_sector
 from .data import BASE_ALERTS, SCENARIO_ALERT, holdings_for_scenario
 from .engine import assess_holding, calculate_risk
 from .live_enricher import enrich_holdings_with_live_market, generate_live_alerts
@@ -383,20 +384,60 @@ def portfolios_saved_delete(portfolio_id: int) -> dict:
     return envelope({"deleted_id": portfolio_id, "status": "deleted"})
 
 
-# ---- Watchlist (new; also uploaded from CSV/Excel) ----
+# ---- Watchlist (Candidate Entry Point Radar) ----
+
+DEFAULT_WATCHLIST_CANDIDATES = [
+    {"symbol": "NVDA", "name": "NVIDIA", "sector": "Semiconductors", "note": "Market leader; track pullbacks near 50 SMA"},
+    {"symbol": "CRM", "name": "Salesforce", "sector": "Software", "note": "Enterprise AI agent monetization catalyst"},
+    {"symbol": "CRDO", "name": "Credo Technology", "sector": "Semiconductors", "note": "High-speed optical DSP momentum"},
+    {"symbol": "VRT", "name": "Vertiv Holdings", "sector": "Infrastructure", "note": "AI liquid cooling infrastructure leader"},
+    {"symbol": "ANET", "name": "Arista Networks", "sector": "Infrastructure", "note": "Cloud networking breakout candidate"},
+    {"symbol": "GOOGL", "name": "Alphabet", "sector": "Software", "note": "Cloud growth + Gemini enterprise adoption"},
+    {"symbol": "AEM", "name": "Agnico Eagle Mines", "sector": "Metals & Mining", "note": "Gold producer hedge; strong cash flow"},
+    {"symbol": "NOW", "name": "ServiceNow", "sector": "Software", "note": "Workflow automation leader"},
+]
+
 
 def _watchlist_payload() -> dict:
     stored = store.latest_list("watchlist")
-    if stored and stored["payload"].get("items"):
+    if stored and stored.get("payload") and stored["payload"].get("items"):
         payload = stored["payload"]
-        return {"source": "uploaded", "name": stored["name"], "imported_at": stored["imported_at"],
+        return {"source": "uploaded", "name": stored.get("name"), "imported_at": stored.get("imported_at"),
                 "items": payload["items"], "count": len(payload["items"])}
-    return {"source": "empty", "name": None, "imported_at": None, "items": [], "count": 0}
+    return {"source": "default", "name": "Curated Candidates", "imported_at": None, "items": DEFAULT_WATCHLIST_CANDIDATES, "count": len(DEFAULT_WATCHLIST_CANDIDATES)}
 
 
 @app.get("/api/v1/watchlist")
 def watchlist() -> dict:
     return envelope(_watchlist_payload())
+
+
+@app.post("/api/v1/watchlist/items")
+def watchlist_add_item(payload: dict) -> dict:
+    """Add or update a candidate symbol in the watchlist."""
+    symbol = str(payload.get("symbol", "")).strip().upper()
+    if not symbol:
+        raise HTTPException(status_code=400, detail="Symbol is required")
+    name = payload.get("name") or resolve_company_name(symbol) or symbol
+    sector = payload.get("sector") or resolve_sector(symbol) or "Equities"
+    note = payload.get("note", "")
+    item = store.add_watchlist_item({"symbol": symbol, "name": name, "sector": sector, "note": note})
+    return envelope({"item": item, "watchlist": _watchlist_payload()})
+
+
+@app.delete("/api/v1/watchlist/items/{symbol}")
+def watchlist_remove_item(symbol: str) -> dict:
+    """Remove a symbol from the active watchlist."""
+    sym = symbol.strip().upper()
+    # If the user is currently looking at the default list, initialize a real watchlist list excluding this symbol
+    stored = store.latest_list("watchlist")
+    if not stored or not stored.get("payload") or not stored["payload"].get("items"):
+        filtered = [it for it in DEFAULT_WATCHLIST_CANDIDATES if it["symbol"].upper() != sym]
+        store.save_list("watchlist", {"items": filtered, "source": "custom"}, name="Candidate Radar")
+        return envelope({"symbol": sym, "removed": True, "watchlist": _watchlist_payload()})
+
+    removed = store.remove_watchlist_item(sym)
+    return envelope({"symbol": sym, "removed": removed, "watchlist": _watchlist_payload()})
 
 
 @app.post("/api/v1/watchlist/import")

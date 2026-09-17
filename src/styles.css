@@ -1484,6 +1484,35 @@ h1 { font-size: 24px; letter-spacing: -.03em; margin: 4px 0 4px; font-weight: 70
   color: var(--ink);
 }
 
+/* Watchlist Candidate Entry Point Radar Styles */
+.watchlist-radar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.candidate-card {
+  position: relative;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.candidate-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.entry-ready-card {
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25), 0 4px 14px rgba(34, 197, 94, 0.08);
+}
+
+.preset-chip:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
 @media print {
   body { background: #fff !important; color: #000 !important; }
   .sidebar, .topbar, .ratings-banner, .scenario-toast, .no-print, .drawer-close, .modal-backdrop { display: none !important; }
