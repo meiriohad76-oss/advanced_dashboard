@@ -101,7 +101,7 @@ export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: st
 
       {/* Shifts Feed Dropdown / Drawer */}
       {shiftsOpen && shifts.length > 0 && (
-        <div style={{ background: '#f8faf9', border: '1px solid var(--line)', borderTop: 'none', borderRadius: '0 0 12px 12px', padding: '12px 16px' }}>
+        <div style={{ background: 'var(--subtle)', border: '1px solid var(--line)', borderTop: 'none', borderRadius: '0 0 12px 12px', padding: '12px 16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               RECENT UPGRADES, DOWNGRADES &amp; TARGET REVISIONS
@@ -120,7 +120,8 @@ export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: st
                   type="button"
                   key={`${s.ticker}-${s.provider}-${s.field}-${idx}`}
                   style={{
-                    background: '#fff',
+                    background: 'var(--panel)',
+                    color: 'var(--ink)',
                     border: '1px solid var(--line)',
                     borderRadius: '8px',
                     padding: '8px 10px',

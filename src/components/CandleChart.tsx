@@ -142,7 +142,7 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo' }: Cand
   }, [bars, showSma200, candleSpacing, getY])
 
   return (
-    <section className="drawer-section candle-chart-card" style={{ marginTop: '14px', background: '#f8faf9', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
+    <section className="drawer-section candle-chart-card" style={{ marginTop: '14px', background: 'var(--subtle)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <BarChart2 size={16} color="var(--accent-dark)" />
@@ -161,7 +161,7 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo' }: Cand
                 fontSize: '10px',
                 borderRadius: '6px',
                 border: range === r ? '1px solid var(--accent-dark)' : '1px solid var(--line)',
-                background: range === r ? 'var(--accent-soft)' : '#fff',
+                background: range === r ? 'var(--accent-soft)' : 'var(--panel)',
                 color: range === r ? 'var(--accent-dark)' : 'var(--muted)',
                 fontWeight: range === r ? 700 : 500,
                 cursor: 'pointer',

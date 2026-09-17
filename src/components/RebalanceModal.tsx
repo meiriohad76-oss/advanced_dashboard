@@ -105,8 +105,8 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
 
       {/* Constraints Controls */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '14px' }}>
-        <div style={{ background: '#f8faf9', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
-          <span style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>MAX POSITION CAP</span>
+        <div style={{ background: 'var(--subtle)', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
+          <span style={{ fontSize: '10px', color: 'var(--muted)', display: 'block', fontWeight: 650, letterSpacing: '0.04em' }}>MAX POSITION CAP</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
             <input
               type="number"
@@ -114,14 +114,14 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
               max="25"
               value={maxPosition}
               onChange={(e) => setMaxPosition(Number(e.target.value))}
-              style={{ width: '60px', padding: '4px 6px', fontSize: '12px', borderRadius: '4px', border: '1px solid var(--line)' }}
+              style={{ width: '60px', padding: '4px 6px', fontSize: '12px', borderRadius: '4px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
             />
-            <span style={{ fontSize: '12px', fontWeight: 600 }}>%</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink)' }}>%</span>
           </div>
         </div>
 
-        <div style={{ background: '#f8faf9', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
-          <span style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>MAX SECTOR EXPOSURE</span>
+        <div style={{ background: 'var(--subtle)', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
+          <span style={{ fontSize: '10px', color: 'var(--muted)', display: 'block', fontWeight: 650, letterSpacing: '0.04em' }}>MAX SECTOR EXPOSURE</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
             <input
               type="number"
@@ -129,15 +129,15 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
               max="50"
               value={maxSector}
               onChange={(e) => setMaxSector(Number(e.target.value))}
-              style={{ width: '60px', padding: '4px 6px', fontSize: '12px', borderRadius: '4px', border: '1px solid var(--line)' }}
+              style={{ width: '60px', padding: '4px 6px', fontSize: '12px', borderRadius: '4px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
             />
-            <span style={{ fontSize: '12px', fontWeight: 600 }}>%</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink)' }}>%</span>
           </div>
         </div>
 
-        <div style={{ background: '#f8faf9', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
-          <span style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>SELECTED NOTIONAL</span>
-          <strong style={{ fontSize: '16px', display: 'block', marginTop: '2px', color: 'var(--ink)' }}>
+        <div style={{ background: 'var(--subtle)', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
+          <span style={{ fontSize: '10px', color: 'var(--muted)', display: 'block', fontWeight: 650, letterSpacing: '0.04em' }}>SELECTED NOTIONAL</span>
+          <strong style={{ fontSize: '16px', display: 'block', marginTop: '2px', color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
             ${Math.round(selectedNotional).toLocaleString()}
           </strong>
           <small style={{ fontSize: '10px', color: 'var(--muted)' }}>{buyCount} buys · {sellCount} sells</small>
@@ -145,7 +145,7 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
       </div>
 
       {resultMessage && (
-        <div style={{ marginBottom: '12px', padding: '10px', borderRadius: '8px', background: resultMessage.includes('Executed') ? '#f0fdf4' : '#eff6ff', border: '1px solid var(--line)', fontSize: '12px', color: 'var(--ink)' }}>
+        <div style={{ marginBottom: '12px', padding: '10px', borderRadius: '8px', background: resultMessage.includes('Executed') ? 'var(--accent-soft)' : 'var(--subtle)', border: '1px solid var(--line)', fontSize: '12px', color: 'var(--ink)' }}>
           {resultMessage}
         </div>
       )}
@@ -156,15 +156,15 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
         </div>
       ) : orders.length === 0 ? (
         <div style={{ padding: '36px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
-          <CheckCircle2 size={24} color="var(--green)" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+          <CheckCircle2 size={24} color="var(--accent-dark)" style={{ margin: '0 auto 8px auto', display: 'block' }} />
           Portfolio is balanced! Current weights match target allocations within tolerance.
         </div>
       ) : (
         <>
-          <div style={{ maxHeight: '340px', overflowY: 'auto', border: '1px solid var(--line)', borderRadius: '8px', marginBottom: '14px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+          <div style={{ maxHeight: '360px', overflowY: 'auto', border: '1px solid var(--line)', borderRadius: '8px', marginBottom: '14px', background: 'var(--panel)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', color: 'var(--ink)' }}>
               <thead>
-                <tr style={{ background: '#f8faf9', borderBottom: '1px solid var(--line)', textAlign: 'left', color: 'var(--muted)', fontSize: '10px', textTransform: 'uppercase' }}>
+                <tr style={{ background: 'var(--subtle)', borderBottom: '1px solid var(--line)', textAlign: 'left', color: 'var(--muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   <th style={{ padding: '8px 10px', width: '32px' }}>
                     <input
                       type="checkbox"
@@ -188,8 +188,9 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
                       key={o.symbol}
                       style={{
                         borderBottom: '1px solid var(--line)',
-                        background: isChecked ? '#fff' : '#fbfcfb',
+                        background: isChecked ? 'var(--panel)' : 'var(--subtle)',
                         opacity: isChecked ? 1 : 0.6,
+                        color: 'var(--ink)',
                       }}
                     >
                       <td style={{ padding: '8px 10px' }}>
@@ -200,17 +201,17 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
                         />
                       </td>
                       <td style={{ padding: '8px 10px' }}>
-                        <strong>{o.symbol}</strong>
+                        <strong style={{ color: 'var(--ink)', fontSize: '13px' }}>{o.symbol}</strong>
                         <small style={{ display: 'block', fontSize: '10px', color: 'var(--muted)' }}>{o.sector}</small>
                       </td>
-                      <td style={{ padding: '8px 10px' }}>
-                        {o.current_weight.toFixed(1)}% → <strong>{o.target_weight.toFixed(1)}%</strong>
+                      <td style={{ padding: '8px 10px', fontVariantNumeric: 'tabular-nums' }}>
+                        <span style={{ color: 'var(--muted)' }}>{o.current_weight.toFixed(1)}%</span> → <strong style={{ color: 'var(--ink)' }}>{o.target_weight.toFixed(1)}%</strong>
                         <span
                           style={{
                             marginLeft: '6px',
                             fontSize: '10px',
                             fontWeight: 700,
-                            color: isBuy ? 'var(--green)' : 'var(--red)',
+                            color: isBuy ? 'var(--accent-dark)' : 'var(--red)',
                           }}
                         >
                           {isBuy ? '+' : ''}{o.delta_weight.toFixed(1)}%
@@ -226,15 +227,15 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
                             borderRadius: '4px',
                             fontSize: '10px',
                             fontWeight: 700,
-                            background: isBuy ? 'rgba(52, 211, 153, 0.15)' : 'rgba(248, 113, 113, 0.15)',
-                            color: isBuy ? '#065f46' : '#991b1b',
+                            background: isBuy ? 'var(--accent-soft)' : 'var(--red-soft)',
+                            color: isBuy ? 'var(--accent-dark)' : 'var(--red)',
                           }}
                         >
                           {isBuy ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                           {o.side.toUpperCase()} {o.quantity} shs
                         </span>
                       </td>
-                      <td style={{ padding: '8px 10px', fontWeight: 600 }}>
+                      <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
                         ${Math.round(o.estimated_amount).toLocaleString()}
                       </td>
                       <td style={{ padding: '8px 10px', fontSize: '11px', color: 'var(--muted)' }}>

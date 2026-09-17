@@ -155,9 +155,9 @@ export function BacktestModal({ onClose }: BacktestModalProps) {
                     fontSize: '11px',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    background: lookback === lb ? 'var(--accent, #0b6847)' : '#fff',
-                    color: lookback === lb ? '#fff' : 'var(--ink, #1a202c)',
-                    border: '1px solid var(--line, #e2e8f0)',
+                    background: lookback === lb ? 'var(--accent)' : 'var(--panel)',
+                    color: lookback === lb ? '#fff' : 'var(--ink)',
+                    border: '1px solid var(--line)',
                   }}
                 >
                   {lb}
@@ -177,9 +177,9 @@ export function BacktestModal({ onClose }: BacktestModalProps) {
                     fontSize: '11px',
                     fontWeight: 600,
                     cursor: 'pointer',
-                    background: initialCapital === cap ? 'var(--accent, #0b6847)' : '#fff',
-                    color: initialCapital === cap ? '#fff' : 'var(--ink, #1a202c)',
-                    border: '1px solid var(--line, #e2e8f0)',
+                    background: initialCapital === cap ? 'var(--accent)' : 'var(--panel)',
+                    color: initialCapital === cap ? '#fff' : 'var(--ink)',
+                    border: '1px solid var(--line)',
                   }}
                 >
                   ${cap / 1000}k
@@ -204,43 +204,43 @@ export function BacktestModal({ onClose }: BacktestModalProps) {
           <div>
             {/* KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '16px' }}>
-              <div style={{ background: '#f0fdf4', padding: '10px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#166534', display: 'block' }}>STRATEGY RETURN</span>
-                <strong style={{ fontSize: '18px', color: '#15803d' }}>
+              <div style={{ background: 'var(--accent-soft)', padding: '10px', borderRadius: '8px', border: '1px solid var(--accent)' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--accent-dark)', display: 'block' }}>STRATEGY RETURN</span>
+                <strong style={{ fontSize: '18px', color: 'var(--accent-dark)', fontVariantNumeric: 'tabular-nums' }}>
                   {result.metrics.total_return_pct >= 0 ? '+' : ''}{result.metrics.total_return_pct.toFixed(1)}%
                 </strong>
-                <small style={{ fontSize: '10px', color: '#166534', display: 'block' }}>
+                <small style={{ fontSize: '10px', color: 'var(--accent-dark)', display: 'block' }}>
                   Alpha: <strong>{result.metrics.alpha_pct >= 0 ? '+' : ''}{result.metrics.alpha_pct.toFixed(1)}%</strong>
                 </small>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid var(--line, #e2e8f0)' }}>
+              <div style={{ background: 'var(--subtle)', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
                 <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>SPY BENCHMARK</span>
-                <strong style={{ fontSize: '18px' }}>
+                <strong style={{ fontSize: '18px', color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
                   {result.metrics.benchmark_return_pct >= 0 ? '+' : ''}{result.metrics.benchmark_return_pct.toFixed(1)}%
                 </strong>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Buy &amp; Hold</small>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid var(--line, #e2e8f0)' }}>
+              <div style={{ background: 'var(--subtle)', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
                 <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>SHARPE RATIO</span>
-                <strong style={{ fontSize: '18px', color: result.metrics.sharpe_ratio >= 1.5 ? '#15803d' : 'var(--ink)' }}>
+                <strong style={{ fontSize: '18px', color: result.metrics.sharpe_ratio >= 1.5 ? 'var(--accent-dark)' : 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
                   {result.metrics.sharpe_ratio.toFixed(2)}
                 </strong>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Risk-adj. return</small>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid var(--line, #e2e8f0)' }}>
+              <div style={{ background: 'var(--subtle)', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
                 <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>MAX DRAWDOWN</span>
-                <strong style={{ fontSize: '18px', color: '#ef4444' }}>
+                <strong style={{ fontSize: '18px', color: 'var(--red)', fontVariantNumeric: 'tabular-nums' }}>
                   -{result.metrics.max_drawdown_pct.toFixed(1)}%
                 </strong>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Peak-to-trough</small>
               </div>
 
-              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid var(--line, #e2e8f0)' }}>
+              <div style={{ background: 'var(--subtle)', padding: '10px', borderRadius: '8px', border: '1px solid var(--line)' }}>
                 <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>WIN RATE</span>
-                <strong style={{ fontSize: '18px' }}>
+                <strong style={{ fontSize: '18px', color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
                   {result.metrics.win_rate_pct.toFixed(0)}%
                 </strong>
                 <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>
@@ -250,18 +250,18 @@ export function BacktestModal({ onClose }: BacktestModalProps) {
             </div>
 
             {/* Chart */}
-            <div style={{ background: '#fff', border: '1px solid var(--line, #e2e8f0)', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>
                   EQUITY GROWTH COMPARISON (PORTFOLIO VS SPY)
                 </span>
                 <div style={{ display: 'flex', gap: '12px', fontSize: '10px' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent)' }} />
                     Atlas Strategy (${Math.round(result.metrics.final_equity).toLocaleString()})
                   </span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#94a3b8' }} />
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--muted)' }} />
                     SPY Benchmark (${Math.round(result.metrics.benchmark_final_equity).toLocaleString()})
                   </span>
                 </div>
@@ -272,14 +272,14 @@ export function BacktestModal({ onClose }: BacktestModalProps) {
 
             {/* Recent Trades Table */}
             {result.trades.length > 0 && (
-              <div style={{ background: '#fff', border: '1px solid var(--line, #e2e8f0)', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '8px', padding: '12px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '8px' }}>
                   RECENT SIMULATED TRADES
                 </span>
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', color: 'var(--ink)' }}>
                     <thead>
-                      <tr style={{ borderBottom: '1px solid var(--line, #e2e8f0)', color: 'var(--muted)', textAlign: 'left' }}>
+                      <tr style={{ borderBottom: '1px solid var(--line)', color: 'var(--muted)', textAlign: 'left' }}>
                         <th style={{ padding: '6px 8px' }}>Entry Date</th>
                         <th style={{ padding: '6px 8px' }}>Exit Date</th>
                         <th style={{ padding: '6px 8px' }}>Duration</th>

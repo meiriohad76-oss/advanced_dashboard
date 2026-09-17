@@ -118,24 +118,24 @@ export function MorningBriefingModal({ onClose }: MorningBriefingModalProps) {
             </section>
 
             {/* Top Signal Setups for Today */}
-            <section style={{ background: 'var(--card-bg, #f8fafc)', padding: '14px', borderRadius: '8px', border: '1px solid var(--line, #e2e8f0)' }}>
+            <section style={{ background: 'var(--subtle)', padding: '14px', borderRadius: '8px', border: '1px solid var(--line)' }}>
               <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>
                 TOP ACTIONABLE SETUPS TODAY
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {briefing.top_setups.map((s) => (
-                  <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--line, #e2e8f0)' }}>
+                  <div key={s.symbol} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--panel)', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--line)' }}>
                     <div>
-                      <strong style={{ fontSize: '13px' }}>{s.symbol}</strong>
-                      <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '6px' }}>
+                      <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>{s.symbol}</strong>
+                      <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '6px', fontVariantNumeric: 'tabular-nums' }}>
                         ${s.price.toFixed(2)} · RSI {s.rsi.toFixed(1)}
                       </span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent, #0b6847)' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent-dark)', fontVariantNumeric: 'tabular-nums' }}>
                         {s.score}/100
                       </span>
-                      <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 6px', borderRadius: '4px', background: s.score >= 80 ? '#dcfce7' : '#e0f2fe', color: s.score >= 80 ? '#15803d' : '#0369a1' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 6px', borderRadius: '4px', background: s.score >= 80 ? 'var(--accent-soft)' : 'var(--subtle)', color: s.score >= 80 ? 'var(--accent-dark)' : 'var(--muted)' }}>
                         {s.state}
                       </span>
                     </div>
@@ -146,13 +146,13 @@ export function MorningBriefingModal({ onClose }: MorningBriefingModalProps) {
 
             {/* Imminent Catalysts */}
             {briefing.catalysts.earnings_soon.length > 0 && (
-              <section style={{ background: '#fef3c7', padding: '12px 14px', borderRadius: '8px', border: '1px solid #f59e0b', color: '#92400e' }}>
+              <section style={{ background: 'var(--amber-soft)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--amber)', color: 'var(--ink)' }}>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
-                  <Flame size={16} color="#b45309" />
-                  <strong style={{ fontSize: '12px' }}>Earnings Risk This Week (≤7 Days)</strong>
+                  <Flame size={16} color="var(--amber)" />
+                  <strong style={{ fontSize: '12px', color: 'var(--ink)' }}>Earnings Risk This Week (≤7 Days)</strong>
                 </div>
                 {briefing.catalysts.earnings_soon.map((e) => (
-                  <div key={e.symbol} style={{ fontSize: '11px', marginTop: '2px' }}>
+                  <div key={e.symbol} style={{ fontSize: '11px', marginTop: '2px', color: 'var(--ink)' }}>
                     • <strong>{e.symbol}</strong>: {e.earnings_date} ({e.days_until}d away, {e.timing}) · Implied Move ±{e.implied_move_pct}%
                   </div>
                 ))}
@@ -160,24 +160,24 @@ export function MorningBriefingModal({ onClose }: MorningBriefingModalProps) {
             )}
 
             {/* Risk Posture & Executive Stance */}
-            <section style={{ background: 'var(--card-bg, #f8fafc)', padding: '14px', borderRadius: '8px', border: '1px solid var(--line, #e2e8f0)' }}>
+            <section style={{ background: 'var(--subtle)', padding: '14px', borderRadius: '8px', border: '1px solid var(--line)' }}>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
-                <ShieldAlert size={16} color="#475569" />
+                <ShieldAlert size={16} color="var(--muted)" />
                 <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.5px' }}>
                   RISK POSTURE &amp; EXECUTIVE DIRECTIVE
                 </span>
               </div>
-              <p style={{ margin: '4px 0 8px', fontSize: '12px', fontWeight: 600, color: 'var(--ink, #1a202c)' }}>
+              <p style={{ margin: '4px 0 8px', fontSize: '12px', fontWeight: 600, color: 'var(--ink)' }}>
                 {briefing.risk.executive_stance}
               </p>
-              <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
-                1-Day 95% VaR: <strong>${briefing.risk.var_95.toLocaleString()}</strong> · Beta: <strong>{briefing.risk.beta.toFixed(2)}</strong>
+              <div style={{ fontSize: '11px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                1-Day 95% VaR: <strong style={{ color: 'var(--ink)' }}>${briefing.risk.var_95.toLocaleString()}</strong> · Beta: <strong style={{ color: 'var(--ink)' }}>{briefing.risk.beta.toFixed(2)}</strong>
               </div>
             </section>
 
             {/* Status notice */}
             {dispatchStatus && (
-              <div style={{ fontSize: '12px', padding: '8px 12px', borderRadius: '6px', background: dispatchStatus.startsWith('✅') ? '#dcfce7' : '#fee2e2', color: dispatchStatus.startsWith('✅') ? '#15803d' : '#b91c1c' }}>
+              <div style={{ fontSize: '12px', padding: '8px 12px', borderRadius: '6px', background: dispatchStatus.startsWith('✅') ? 'var(--accent-soft)' : 'var(--red-soft)', color: dispatchStatus.startsWith('✅') ? 'var(--accent-dark)' : 'var(--red)' }}>
                 {dispatchStatus}
               </div>
             )}
@@ -201,14 +201,15 @@ export function MorningBriefingModal({ onClose }: MorningBriefingModalProps) {
                   gap: '6px',
                   padding: '10px 14px',
                   borderRadius: '8px',
-                  background: 'var(--card-bg, #fff)',
-                  border: '1px solid var(--line, #e2e8f0)',
+                  background: 'var(--panel)',
+                  border: '1px solid var(--line)',
                   cursor: 'pointer',
                   fontWeight: 600,
                   fontSize: '12px',
+                  color: 'var(--ink)',
                 }}
               >
-                {copied ? <Check size={15} color="#15803d" /> : <Copy size={15} />}
+                {copied ? <Check size={15} color="var(--accent-dark)" /> : <Copy size={15} />}
                 {copied ? 'Copied!' : 'Copy Text'}
               </button>
             </div>

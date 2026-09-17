@@ -62,7 +62,7 @@ export function SectorTreemap({ holdings, onSelect }: SectorTreemapProps) {
             style={{
               padding: '4px 10px',
               fontSize: '11px',
-              background: groupBySector ? 'var(--accent-soft)' : '#fff',
+              background: groupBySector ? 'var(--accent-soft)' : 'var(--panel)',
               color: groupBySector ? 'var(--accent-dark)' : 'var(--muted)',
             }}
           >
@@ -78,7 +78,7 @@ export function SectorTreemap({ holdings, onSelect }: SectorTreemapProps) {
             <div
               key={sec.sector}
               style={{
-                background: '#f8faf9',
+                background: 'var(--subtle)',
                 border: '1px solid var(--line)',
                 borderRadius: '10px',
                 padding: '12px',

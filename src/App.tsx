@@ -1136,7 +1136,7 @@ function SystemPage({ onOpenNotifications }: { onOpenNotifications?: () => void 
         </section>
 
         {/* Background Scheduler Card */}
-        <section className="panel" style={{ background: '#f8faf9', border: '1px solid var(--line)' }}>
+        <section className="panel" style={{ background: 'var(--subtle)', border: '1px solid var(--line)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <span className="eyebrow">AUTOMATED EXTRACTOR SCHEDULER</span>
             <span
@@ -1145,8 +1145,8 @@ function SystemPage({ onOpenNotifications }: { onOpenNotifications?: () => void 
                 fontWeight: 700,
                 padding: '2px 8px',
                 borderRadius: '6px',
-                background: sched?.enabled ? 'rgba(52, 211, 153, 0.2)' : 'rgba(148, 163, 184, 0.2)',
-                color: sched?.enabled ? '#065f46' : '#475569',
+                background: sched?.enabled ? 'var(--accent-soft)' : 'var(--subtle)',
+                color: sched?.enabled ? 'var(--accent-dark)' : 'var(--muted)',
               }}
             >
               {sched?.enabled ? '⚡ RUNNING' : '⏸ PAUSED'}

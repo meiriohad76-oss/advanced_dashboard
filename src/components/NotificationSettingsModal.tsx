@@ -104,13 +104,13 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
             )}
 
             {/* Telegram Settings */}
-            <section style={{ background: '#f8faf9', border: '1px solid var(--line)', borderRadius: '10px', padding: '14px' }}>
+            <section style={{ background: 'var(--subtle)', border: '1px solid var(--line)', borderRadius: '10px', padding: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Send size={15} color="#0284c7" />
-                  <strong style={{ fontSize: '13px' }}>Telegram Bot Notifications</strong>
+                  <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>Telegram Bot Notifications</strong>
                 </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: 'var(--ink)' }}>
                   <input
                     type="checkbox"
                     checked={settings.telegram_enabled}
@@ -131,7 +131,7 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
                     placeholder="123456789:ABCdefGHI..."
                     value={settings.telegram_token}
                     onChange={(e) => setSettings({ ...settings, telegram_token: e.target.value })}
-                    style={{ width: '100%', padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)' }}
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
                   />
                 </div>
                 <div>
@@ -144,7 +144,7 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
                     placeholder="@my_channel or -100123..."
                     value={settings.telegram_chat_id}
                     onChange={(e) => setSettings({ ...settings, telegram_chat_id: e.target.value })}
-                    style={{ width: '100%', padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)' }}
+                    style={{ width: '100%', padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
                   />
                 </div>
               </div>
@@ -154,13 +154,13 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
             </section>
 
             {/* Webhook Settings */}
-            <section style={{ background: '#f8faf9', border: '1px solid var(--line)', borderRadius: '10px', padding: '14px' }}>
+            <section style={{ background: 'var(--subtle)', border: '1px solid var(--line)', borderRadius: '10px', padding: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Radio size={15} color="#059669" />
-                  <strong style={{ fontSize: '13px' }}>Generic Webhook (Slack / Discord / Custom)</strong>
+                  <Radio size={15} color="var(--accent-dark)" />
+                  <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>Generic Webhook (Slack / Discord / Custom)</strong>
                 </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: 'var(--ink)' }}>
                   <input
                     type="checkbox"
                     checked={settings.webhook_enabled}
@@ -180,27 +180,27 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
                   placeholder="https://hooks.slack.com/services/... or https://discord.com/api/webhooks/..."
                   value={settings.webhook_url}
                   onChange={(e) => setSettings({ ...settings, webhook_url: e.target.value })}
-                  style={{ width: '100%', padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)' }}
+                  style={{ width: '100%', padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
                 />
               </div>
             </section>
 
             {/* Severity filter */}
-            <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f8faf9', border: '1px solid var(--line)', borderRadius: '10px' }}>
+            <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--subtle)', border: '1px solid var(--line)', borderRadius: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ShieldAlert size={16} color="var(--accent-dark)" />
-                <span style={{ fontSize: '12px', fontWeight: 600 }}>Minimum Severity to Dispatch</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--ink)' }}>Minimum Severity to Dispatch</span>
               </div>
-            <select
-              value={settings.min_severity}
-              onChange={(e) => setSettings({ ...settings, min_severity: e.target.value })}
-              style={{ padding: '5px 8px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)' }}
-            >
-              <option value="critical">Critical Only</option>
-              <option value="warning">Warning &amp; Critical</option>
-              <option value="info">All Alerts (Info, Warning, Critical)</option>
-            </select>
-          </section>
+              <select
+                value={settings.min_severity}
+                onChange={(e) => setSettings({ ...settings, min_severity: e.target.value })}
+                style={{ padding: '5px 8px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
+              >
+                <option value="critical">Critical Only</option>
+                <option value="warning">Warning &amp; Critical</option>
+                <option value="info">All Alerts (Info, Warning, Critical)</option>
+              </select>
+            </section>
 
           {testResult && (
             <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px', borderRadius: '8px', fontSize: '11px', color: '#166534' }}>
