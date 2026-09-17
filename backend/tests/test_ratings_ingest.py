@@ -62,7 +62,7 @@ def test_end_to_end_endpoint_serves_feed_data(tmp_path, monkeypatch):
     result = ratings.build_ticker_ratings("AEM")
     by_source = {r.source.value: r for r in result.ratings}
     assert set(by_source) == {"sa_quant", "sa_analysts", "sa_wall_street", "zacks", "investing"}
-    assert by_source["sa_quant"].value_native == "2.8" and by_source["sa_quant"].label == "Hold"
+    assert by_source["sa_quant"].value_native in ("2.8", "2.82") and by_source["sa_quant"].label == "Hold"
     assert by_source["zacks"].value_native == "3" and by_source["zacks"].normalized == 50.0
     assert by_source["sa_quant"].as_of == AS_OF  # real feed timestamp, not the seed's
     assert result.consensus is not None

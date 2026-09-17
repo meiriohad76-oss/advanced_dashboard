@@ -78,7 +78,21 @@ function buildRating(key: RatingSourceKey, display: string, raw: number | string
   const value = Number(raw)
   if (!Number.isFinite(value) || value < 1 || value > 5) return null
   const normalized = normalizeFive(value)
-  return { source: key, display, valueNative: value.toFixed(1), label: labelFromNormalized(normalized), normalized, nativeScale: '1-5 (5 best)', asOf: SEED_AS_OF }
+
+  const rawStr = String(raw).trim()
+  const decimals = rawStr.includes('.') ? rawStr.split('.')[1].length : 0
+  const valueNative = (decimals >= 2 || Math.round(value * 100) / 100 !== Math.round(value * 10) / 10)
+    ? value.toFixed(2)
+    : value.toFixed(1)
+
+  // Seeking Alpha standard rating tiers
+  let saLabel = 'Strong Sell'
+  if (value >= 4.5) saLabel = 'Strong Buy'
+  else if (value >= 3.5) saLabel = 'Buy'
+  else if (value >= 2.5) saLabel = 'Hold'
+  else if (value >= 1.5) saLabel = 'Sell'
+
+  return { source: key, display, valueNative, label: saLabel, normalized, nativeScale: '1-5 (5 best)', asOf: SEED_AS_OF }
 }
 
 import { EXTRACTED_PRICE_TARGETS } from '../data/priceTargets'

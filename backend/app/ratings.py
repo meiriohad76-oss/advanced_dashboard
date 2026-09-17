@@ -121,8 +121,29 @@ def _rating(source: str, display: str, raw: object, as_of: str) -> Rating | None
     if not 1.0 <= value <= 5.0:
         return None
     normalized = normalize_five(value)
-    return Rating(source=source, display=display, value_native=f"{value:.1f}",
-                  label=label_from_normalized(normalized), normalized=normalized,
+
+    # Format value: 2 decimals if present (e.g. 4.31, 3.18, 3.22), else 1 decimal (e.g. 4.6, 4.0)
+    raw_str = str(raw).strip()
+    decimals = len(raw_str.split(".")[-1]) if "." in raw_str else 0
+    if decimals >= 2 or round(value, 2) != round(value, 1):
+        value_native = f"{value:.2f}"
+    else:
+        value_native = f"{value:.1f}"
+
+    # Seeking Alpha standard rating tiers (4.5+ Strong Buy, 3.5-4.49 Buy, 2.5-3.49 Hold, 1.5-2.49 Sell, <1.5 Strong Sell)
+    if value >= 4.5:
+        sa_label = "Strong Buy"
+    elif value >= 3.5:
+        sa_label = "Buy"
+    elif value >= 2.5:
+        sa_label = "Hold"
+    elif value >= 1.5:
+        sa_label = "Sell"
+    else:
+        sa_label = "Strong Sell"
+
+    return Rating(source=source, display=display, value_native=value_native,
+                  label=sa_label, normalized=normalized,
                   native_scale="1-5 (5 best)", as_of=as_of)
 
 

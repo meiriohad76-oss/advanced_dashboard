@@ -699,6 +699,181 @@ h1 { font-size: 24px; letter-spacing: -.03em; margin: 4px 0 4px; font-weight: 70
   cursor: not-allowed;
 }
 
+/* --- External Ratings Gauge & Meters in Asset Drawer --- */
+.ratings-gauge {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.ratings-gauge .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.consensus-chip {
+  font-size: 11px;
+  font-weight: 750;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.consensus-chip.strong-buy,
+.consensus-chip.buy {
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.consensus-chip.hold {
+  background: var(--amber-soft);
+  color: var(--amber);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.consensus-chip.sell,
+.consensus-chip.strong-sell {
+  background: var(--red-soft);
+  color: var(--red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.consensus-chip.mini {
+  font-size: 10px;
+  padding: 2px 7px;
+}
+
+.rating-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rating-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--subtle);
+  border: 1px solid var(--line);
+}
+
+.rating-meter.no-data {
+  opacity: 0.6;
+}
+
+.rating-meter-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rating-meter-top span {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.rating-meter-top strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.rating-track {
+  height: 6px;
+  width: 100%;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  margin: 2px 0;
+}
+
+.rating-track span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.rating-track span.strong-buy,
+.rating-track span.buy {
+  background: var(--accent);
+}
+
+.rating-track span.hold {
+  background: var(--amber);
+}
+
+.rating-track span.sell,
+.rating-track span.strong-sell {
+  background: var(--red);
+}
+
+.rating-track span.empty {
+  background: transparent;
+}
+
+.rating-meter-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rating-meter-foot small {
+  font-size: 11px;
+}
+
+.rating-meter-foot .rating-label {
+  font-weight: 700;
+}
+
+.rating-meter-foot .rating-label.strong-buy,
+.rating-meter-foot .rating-label.buy {
+  color: var(--accent-dark);
+}
+
+.rating-meter-foot .rating-label.hold {
+  color: var(--amber);
+}
+
+.rating-meter-foot .rating-label.sell,
+.rating-meter-foot .rating-label.strong-sell {
+  color: var(--red);
+}
+
+.rating-meter-foot .scale {
+  color: var(--muted);
+}
+
+.ratings-provenance {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.ratings-empty {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+}
+
 /* --- Portfolio Switcher --- */
 .portfolio-switcher-container {
   position: relative;
