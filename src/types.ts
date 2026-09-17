@@ -183,6 +183,7 @@ export interface RatingsStatus {
   threshold_days: number
   imported_files?: number
   imported_rows?: number
+  extractor_running?: boolean
 }
 
 export interface PriceTargets {

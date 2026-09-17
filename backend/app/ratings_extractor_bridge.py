@@ -14,6 +14,10 @@ import json
 import logging
 import os
 import sqlite3
+import subprocess
+import sys
+import time
+import urllib.request
 from datetime import datetime, timezone
 from typing import Any
 
@@ -37,6 +41,91 @@ def find_analyzer_db() -> str | None:
         if candidate and os.path.exists(candidate) and os.path.isfile(candidate):
             return candidate
     return None
+
+
+def find_analyzer_root() -> str | None:
+    """Locate the root directory of the email article analyzer repository."""
+    db = find_analyzer_db()
+    if db:
+        root = os.path.dirname(os.path.dirname(os.path.abspath(db)))
+        if os.path.isdir(os.path.join(root, "src")):
+            return root
+    candidates = [
+        r"C:\Users\meiri\OneDrive\Documents\email article analyzer",
+        os.path.expanduser(r"~\OneDrive\Documents\email article analyzer"),
+        os.path.expanduser(r"~\Documents\email article analyzer"),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "email article analyzer")),
+    ]
+    for c in candidates:
+        if c and os.path.isdir(c) and os.path.isdir(os.path.join(c, "src")):
+            return c
+    return None
+
+
+def is_extractor_running(url: str = "http://127.0.0.1:8000") -> bool:
+    """Check if the extractor service is currently responding on its configured HTTP port."""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "AtlasDashboard"})
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            return resp.status in (200, 301, 302, 307, 308)
+    except Exception:
+        return False
+
+
+def ensure_extractor_running(url: str = "http://127.0.0.1:8000") -> dict[str, Any]:
+    """Ensure the email article analyzer extractor process is running. Spawns it if stopped."""
+    research_url = f"{url.rstrip('/')}/research"
+    if is_extractor_running(url):
+        return {"status": "running", "url": research_url, "already_running": True}
+
+    root = find_analyzer_root()
+    if not root:
+        return {
+            "status": "error",
+            "message": "Email article analyzer directory not found",
+            "url": research_url,
+        }
+
+    py_candidates = [
+        sys.executable,
+        os.path.join(root, ".venv", "Scripts", "python.exe"),
+        r"C:\Users\meiri\AppData\Local\Programs\Python\Python314\python.exe",
+        "python",
+    ]
+    python_exe = "python"
+    for cand in py_candidates:
+        if cand and (os.path.isfile(cand) or cand == "python"):
+            python_exe = cand
+            break
+
+    src_dir = os.path.join(root, "src")
+    env = os.environ.copy()
+    current_pypath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{current_pypath}" if current_pypath else src_dir
+
+    creation_flags = 0
+    if os.name == "nt":
+        creation_flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) | getattr(subprocess, "DETACHED_PROCESS", 0)
+
+    try:
+        subprocess.Popen(
+            [python_exe, "-m", "uvicorn", "email_article_analyzer.main:app", "--host", "127.0.0.1", "--port", "8000"],
+            cwd=root,
+            env=env,
+            creationflags=creation_flags,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception as exc:
+        return {"status": "error", "message": f"Failed to spawn uvicorn: {exc}", "url": research_url}
+
+    for _ in range(12):
+        time.sleep(0.5)
+        if is_extractor_running(url):
+            return {"status": "running", "url": research_url, "already_running": False}
+
+    return {"status": "starting", "url": research_url, "already_running": False}
+
 
 
 def extract_ratings_from_db(db_path: str, as_of: str | None = None) -> dict[str, Any]:

@@ -15,6 +15,7 @@ export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: st
   const [shifts, setShifts] = useState<RatingShiftItem[]>([])
   const [shiftsOpen, setShiftsOpen] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [launching, setLaunching] = useState(false)
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -26,8 +27,18 @@ export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: st
 
   if (!status) return null
 
-  const runExtraction = () => {
-    if (status.extractor_url) window.open(status.extractor_url, '_blank', 'noopener,noreferrer')
+  const runExtraction = async () => {
+    setLaunching(true)
+    try {
+      const res = await api.ensureExtractorRunning()
+      const target = res?.url || status.extractor_url || 'http://127.0.0.1:8000/research'
+      window.open(target, '_blank', 'noopener,noreferrer')
+    } catch {
+      const target = status.extractor_url || 'http://127.0.0.1:8000/research'
+      window.open(target, '_blank', 'noopener,noreferrer')
+    } finally {
+      setLaunching(false)
+    }
   }
 
   const autoSyncRanks = () => {
@@ -93,8 +104,8 @@ export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: st
           <button className="secondary-button" onClick={importLatest} disabled={busy} title="Import output JSON files">
             <RefreshCw size={14} /> Import Files
           </button>
-          <button className="secondary-button" onClick={runExtraction} title="Open browser extractor">
-            <ExternalLink size={14} /> Open Extractor
+          <button className="secondary-button" onClick={runExtraction} disabled={launching} title="Ensure extractor is running and open research dashboard">
+            <ExternalLink size={14} className={launching ? 'spin' : ''} /> {launching ? 'Launching…' : 'Open Extractor'}
           </button>
         </div>
       </div>

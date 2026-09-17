@@ -130,3 +130,14 @@ def test_ratings_changes_endpoint():
         assert "direction" in change
         assert "previous" in change
         assert "current" in change
+
+
+def test_ratings_extractor_ensure_endpoint(monkeypatch):
+    monkeypatch.setattr("app.ratings_extractor_bridge.is_extractor_running", lambda url: True)
+    resp = client.post("/api/v1/ratings/extractor/ensure")
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert data["status"] == "running"
+    assert data["already_running"] is True
+    assert "research" in data["url"]
+

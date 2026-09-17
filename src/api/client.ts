@@ -119,6 +119,8 @@ export const api = {
       `/api/v1/market/bars/${encodeURIComponent(symbol)}?range=${encodeURIComponent(range)}&interval=${encodeURIComponent(interval)}`
     ),
   syncAutoRatings: () => request<RatingsStatus>('/api/v1/ratings/sync-auto', { method: 'POST' }),
+  ensureExtractorRunning: () =>
+    request<{ status: string; url: string; already_running?: boolean }>('/api/v1/ratings/extractor/ensure', { method: 'POST' }),
   ratingsChanges: () => request<{ count: number; changes: import('../types').RatingShiftItem[] }>('/api/v1/ratings/changes'),
   notificationSettings: () => request<import('../types').NotificationSettings>('/api/v1/notifications/settings'),
   saveNotificationSettings: (settings: Partial<import('../types').NotificationSettings>) =>

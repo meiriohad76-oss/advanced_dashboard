@@ -31,7 +31,12 @@ from .market_data import market_router
 from .models import AskRequest, AskResponse, Holding
 from .portfolio_fit import compute_fit
 from .ratings import active_source, build_ticker_ratings
-from .ratings_extractor_bridge import extract_rating_shifts, sync_ratings_from_extractor
+from .ratings_extractor_bridge import (
+    ensure_extractor_running,
+    extract_rating_shifts,
+    is_extractor_running,
+    sync_ratings_from_extractor,
+)
 from .scheduler import sync_runner
 from . import bars_service
 
@@ -418,12 +423,23 @@ def watchlist_reset() -> dict:
 def _ratings_status_payload() -> dict:
     raw_map, as_of, source = active_source()
     freshness = store.evaluate_freshness(as_of, datetime.now(timezone.utc))
+    base_extractor_url = os.environ.get("ATLAS_EXTRACTOR_URL", "http://127.0.0.1:8000")
+    research_url = f"{base_extractor_url.rstrip('/')}/research"
     return {
         "source": source,  # "db" (imported run) | "feed" (file) | "seed" (sample)
         "tickers": len(raw_map),
-        "extractor_url": os.environ.get("ATLAS_EXTRACTOR_URL", "http://127.0.0.1:8000"),
+        "extractor_url": research_url,
+        "extractor_running": is_extractor_running(base_extractor_url),
         **freshness,
     }
+
+
+@app.post("/api/v1/ratings/extractor/ensure")
+def ratings_extractor_ensure() -> dict:
+    """Ensure the email article analyzer extractor process is running. Spawns it if stopped."""
+    base_url = os.environ.get("ATLAS_EXTRACTOR_URL", "http://127.0.0.1:8000")
+    res = ensure_extractor_running(base_url)
+    return envelope(res)
 
 
 @app.get("/api/v1/ratings/status")
