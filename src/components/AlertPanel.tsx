@@ -14,10 +14,10 @@ export interface AlertPanelProps {
 
 export function AlertPanel({ alerts, userAlerts, holdings, onClose, onAddAlert, onDeleteAlert }: AlertPanelProps) {
   const [activeTab, setActiveTab] = useState<'active' | 'create' | 'history'>('active')
-  const [symbol, setSymbol] = useState(holdings[0]?.symbol || 'CRDO')
+  const [symbol, setSymbol] = useState(holdings[0]?.symbol || '')
   const [metric, setMetric] = useState<UserAlert['metric']>('PRICE')
   const [condition, setCondition] = useState<UserAlert['condition']>('ABOVE')
-  const [targetValue, setTargetValue] = useState<number>(50)
+  const [targetValue, setTargetValue] = useState<number>(() => holdings[0]?.price || 50)
   const [severity, setSeverity] = useState<UserAlert['severity']>('warning')
   const [addedNotice, setAddedNotice] = useState(false)
 
@@ -27,7 +27,7 @@ export function AlertPanel({ alerts, userAlerts, holdings, onClose, onAddAlert, 
 
   const handleMetricChange = (newMetric: UserAlert['metric']) => {
     setMetric(newMetric)
-    if (newMetric === 'PRICE') setTargetValue(selectedHolding?.price || 150)
+    if (newMetric === 'PRICE') setTargetValue(selectedHolding?.price || 100)
     else if (newMetric === 'RSI') setTargetValue(condition.includes('ABOVE') ? 70 : 30)
     else if (newMetric === 'VOLUME') setTargetValue(2.0)
     else if (newMetric === 'STOP_LOSS') setTargetValue(5.0)

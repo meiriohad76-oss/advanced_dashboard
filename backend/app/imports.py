@@ -25,6 +25,7 @@ from typing import Any
 
 from .company_names import resolve_company_name
 from .models import Holding, WatchlistItem
+from .sectors import resolve_sector
 
 # gauge/engine technical inputs — presence of any of these marks a row as signal-ready.
 TECHNICAL_FIELDS = {
@@ -397,7 +398,7 @@ def parse_portfolio(rows: list[dict[str, Any]]) -> dict[str, Any]:
         staged.append({
             "symbol": symbol,
             "name": resolve_company_name(symbol, str(row.get(columns["name"])).strip() if "name" in columns and _present(row.get(columns["name"])) else None),
-            "sector": (str(row.get(columns["sector"])).strip() if "sector" in columns and _present(row.get(columns["sector"])) else "Uncategorized"),
+            "sector": resolve_sector(symbol, str(row.get(columns["sector"])).strip() if "sector" in columns and _present(row.get(columns["sector"])) else None),
             "quantity": qty or 0.0,
             "price": price or 0.0,
             "avg_cost": avg_cost if avg_cost is not None else (price or 0.0),

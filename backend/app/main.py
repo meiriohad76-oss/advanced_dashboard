@@ -181,12 +181,14 @@ def resolve_tickers(payload: dict) -> dict:
 @app.get("/api/v1/demo/state")
 def demo_state() -> dict:
     holdings = current_holdings()
+    uploaded = _portfolio_source()["source"] in {"uploaded", "alpaca"}
     if _live_enriched_holdings is not None:
         alerts = generate_live_alerts(_live_enriched_holdings)
+    elif uploaded:
+        alerts = generate_live_alerts(holdings)
     else:
-        uploaded = _portfolio_source()["source"] in {"uploaded", "alpaca"}
-        alerts = BASE_ALERTS if uploaded else ([_scenario_alert()] + BASE_ALERTS if _scenario_active else BASE_ALERTS)
-    return envelope({"scenario_active": _scenario_active and not _portfolio_source()["source"] in {"uploaded", "alpaca"},
+        alerts = ([_scenario_alert()] + BASE_ALERTS) if _scenario_active else BASE_ALERTS
+    return envelope({"scenario_active": _scenario_active and not uploaded,
                      "source": _portfolio_source(),
                      "holdings": [holding.model_dump(by_alias=True) for holding in holdings],
                      "alerts": [alert.model_dump() for alert in alerts]})
@@ -418,8 +420,12 @@ def ratings_poll(url: str | None = None) -> dict:
 
 @app.get("/api/v1/alerts")
 def alerts_get() -> dict:
-    uploaded = _portfolio_source()["source"] == "uploaded"
-    values = BASE_ALERTS if uploaded else (([_scenario_alert()] + BASE_ALERTS) if _scenario_active else BASE_ALERTS)
+    holdings = _live_enriched_holdings if _live_enriched_holdings is not None else current_holdings()
+    uploaded = _portfolio_source()["source"] in {"uploaded", "alpaca"}
+    if uploaded or _live_enriched_holdings is not None:
+        values = generate_live_alerts(holdings)
+    else:
+        values = ([_scenario_alert()] + BASE_ALERTS) if _scenario_active else BASE_ALERTS
     return envelope([alert.model_dump() for alert in values])
 
 
@@ -439,8 +445,12 @@ def browser_tasks_next() -> dict:
 @app.post("/api/v1/alerts/dispatch")
 def alerts_dispatch(webhook_url: str | None = None) -> dict:
     """Dispatch all currently active triggered alerts to configured webhooks."""
-    uploaded = _portfolio_source()["source"] == "uploaded"
-    active_alerts = BASE_ALERTS if uploaded else (([_scenario_alert()] + BASE_ALERTS) if _scenario_active else BASE_ALERTS)
+    holdings = _live_enriched_holdings if _live_enriched_holdings is not None else current_holdings()
+    uploaded = _portfolio_source()["source"] in {"uploaded", "alpaca"}
+    if uploaded or _live_enriched_holdings is not None:
+        active_alerts = generate_live_alerts(holdings)
+    else:
+        active_alerts = ([_scenario_alert()] + BASE_ALERTS) if _scenario_active else BASE_ALERTS
     triggered = [a for a in active_alerts if a.status == "TRIGGERED"]
     results = [alerts.dispatch_alert(a, webhook_url=webhook_url) for a in triggered]
     return envelope({"triggered_count": len(triggered), "dispatches": results})

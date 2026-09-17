@@ -64,3 +64,22 @@ def test_dispatch_alert_to_live_server():
     finally:
         server.shutdown()
 
+
+def test_live_alerts_skips_uncategorized_and_resolves_sector():
+    from app.live_enricher import generate_live_alerts
+    from app.models import Holding
+
+    # Test holdings with Uncategorized sector: should resolve to Aerospace & Defense for LMT / KTOS
+    h1 = Holding(symbol="LMT", name="Lockheed Martin", sector="Uncategorized", quantity=10, price=450.0, avgCost=400.0, dayChange=0.5, weight=20.0, rsi=50.0, macdBullish=True, aboveSma50=True, aboveSma200=True, relativeVolume=1.0, breakout20d=False, trendSlopePositive=True, returnsHistory=[0.01, -0.01])
+    h2 = Holding(symbol="KTOS", name="Kratos Defense", sector="Uncategorized", quantity=100, price=25.0, avgCost=20.0, dayChange=0.2, weight=15.0, rsi=50.0, macdBullish=True, aboveSma50=True, aboveSma200=True, relativeVolume=1.0, breakout20d=False, trendSlopePositive=True, returnsHistory=[0.01, -0.01])
+    h3 = Holding(symbol="XYZ_UNKNOWN", name="Mystery Corp", sector="Uncategorized", quantity=50, price=10.0, avgCost=10.0, dayChange=0.0, weight=65.0, rsi=50.0, macdBullish=True, aboveSma50=True, aboveSma200=True, relativeVolume=1.0, breakout20d=False, trendSlopePositive=True, returnsHistory=[0.0, 0.0])
+
+    alerts = generate_live_alerts([h1, h2, h3])
+    # The concentration alert should NOT say Uncategorized
+    for a in alerts:
+        if a.title == "Sector concentration":
+            assert "Uncategorized" not in a.message
+            assert "Aerospace & Defense" in a.message
+            assert "35.0%" in a.message
+
+

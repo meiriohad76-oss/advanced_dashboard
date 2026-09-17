@@ -994,6 +994,17 @@ function AlertsPage({
             </button>
           </div>
         ))}
+        {userAlerts.length === 0 && alerts.length === 0 && (
+          <div style={{ padding: '36px 20px', textAlign: 'center', color: 'var(--muted)' }}>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)', marginBottom: '6px' }}>No active triggers or custom alerts</p>
+            <p style={{ fontSize: '11px', maxWidth: '380px', margin: '0 auto 16px' }}>
+              Your portfolio is operating within standard risk parameters. Create custom price, RSI, or breakout alerts to monitor specific holdings.
+            </p>
+            <button className="ask-button" onClick={onOpenPanel} style={{ padding: '7px 16px', fontSize: '11px', margin: '0 auto' }}>
+              <Plus size={14} /> Create Your First Alert
+            </button>
+          </div>
+        )}
       </section>
 
       {inspectingAlert && (
@@ -1227,12 +1238,12 @@ export default function App() {
   const [userAlerts, setUserAlerts] = useState<UserAlert[]>(() => {
     try {
       const saved = localStorage.getItem('atlas_user_alerts')
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed: UserAlert[] = JSON.parse(saved)
+        return parsed.filter((a) => a && !a.id.startsWith('u-init-') && a.id !== 'u-init-1' && a.id !== 'u-init-2')
+      }
     } catch { /* ignore */ }
-    return [
-      { id: 'u-init-1', symbol: 'CRDO', metric: 'PRICE', condition: 'ABOVE', targetValue: 145.0, severity: 'CRITICAL', status: 'ARMED', createdAt: new Date().toISOString() },
-      { id: 'u-init-2', symbol: 'NVDA', metric: 'RSI', condition: 'ABOVE', targetValue: 70.0, severity: 'WARNING', status: 'ARMED', createdAt: new Date().toISOString() }
-    ]
+    return []
   })
   const [liveStreaming, setLiveStreaming] = useState(false)
   const [liveTicks, setLiveTicks] = useState<Record<string, { price: number; changePct: number }>>({})
@@ -1358,7 +1369,8 @@ export default function App() {
     })
   }, [baseHoldings, liveStreaming, liveTicks])
 
-  const alerts = apiAlerts ?? (scenario ? [scenarioAlert, ...baseAlerts] : baseAlerts)
+  const isCustomPortfolio = source?.source === 'uploaded' || source?.source === 'alpaca'
+  const alerts = apiAlerts ?? (isCustomPortfolio ? [] : (scenario ? [scenarioAlert, ...baseAlerts] : baseAlerts))
 
   // Live SSE stream with offline fallback generator
   useEffect(() => {

@@ -15,6 +15,7 @@ from typing import Any
 import httpx
 
 from .models import Alert, Holding
+from .sectors import resolve_sector
 
 logger = logging.getLogger(__name__)
 
@@ -168,10 +169,17 @@ async def enrich_holdings_with_live_market(
     for h in holdings:
         sym = h.symbol.strip().upper()
         t = tech_data.get(sym)
+        sector = h.sector
+        if not sector or sector.strip().lower() in {"uncategorized", "unknown", "none", "n/a", ""}:
+            resolved_s = resolve_sector(sym)
+            if resolved_s != "Uncategorized":
+                sector = resolved_s
+
         if t:
             updated_count += 1
             updated_h = h.model_copy(
                 update={
+                    "sector": sector,
                     "price": t["price"],
                     "day_change": t["day_change"],
                     "rsi": t["rsi"],
@@ -186,7 +194,7 @@ async def enrich_holdings_with_live_market(
             )
             updated_holdings.append(updated_h)
         else:
-            updated_holdings.append(h.model_copy(deep=True))
+            updated_holdings.append(h.model_copy(update={"sector": sector}))
 
     # Recalculate portfolio market value and weights if quantities are present
     has_quantities = any(h.quantity > 0 for h in updated_holdings if h.symbol != "CASH")
@@ -215,11 +223,15 @@ def generate_live_alerts(holdings: list[Holding]) -> list[Alert]:
     alerts: list[Alert] = []
     now_time = datetime.now(timezone.utc).strftime("%H:%M ET")
 
-    # 1. Sector concentration check (>25%)
+    # 1. Sector concentration check (>25%) - Ignore unclassified / uncategorized
     sector_sums: dict[str, float] = {}
     for h in holdings:
         if h.symbol != "CASH":
-            sector_sums[h.sector] = sector_sums.get(h.sector, 0.0) + h.weight
+            sec = h.sector
+            if not sec or sec.strip().lower() in {"uncategorized", "unknown", "none", "n/a", ""}:
+                sec = resolve_sector(h.symbol)
+            if sec and sec.strip().lower() not in {"uncategorized", "unknown", "other", "none", "n/a", ""}:
+                sector_sums[sec] = sector_sums.get(sec, 0.0) + h.weight
 
     for sec, w in sorted(sector_sums.items(), key=lambda x: x[1], reverse=True):
         if w >= 25.0:
