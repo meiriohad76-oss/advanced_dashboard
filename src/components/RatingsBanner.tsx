@@ -10,7 +10,7 @@ function formatWhen(iso: string | null): string {
   return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: string) => void }) {
+export function RatingsBanner({ onSelectTicker, onSync }: { onSelectTicker?: (ticker: string) => void; onSync?: () => void }) {
   const [status, setStatus] = useState<RatingsStatus | null>(null)
   const [shifts, setShifts] = useState<RatingShiftItem[]>([])
   const [shiftsOpen, setShiftsOpen] = useState(false)
@@ -47,8 +47,20 @@ export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: st
     api.syncAutoRatings()
       .then((s) => {
         setStatus(s)
-        setMessage(`Synced ranks for ${s.tickers} tickers from email analyzer`)
+        const details = (s as unknown as { sync_details?: { synced?: boolean; reason?: string; active_portfolio_missing?: string[] } }).sync_details
+        if (details?.synced) {
+          const missing = details.active_portfolio_missing || []
+          if (missing.length > 0) {
+            setMessage(`Synced ${s.tickers} ranks (${missing.length} portfolio tickers need extraction: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '…' : ''})`)
+          } else {
+            setMessage(`Synced fresh ranks for ${s.tickers} tickers`)
+          }
+        } else {
+          setMessage(details?.reason ? `Notice: ${details.reason}` : 'Auto-sync completed')
+        }
         api.ratingsChanges().then((res) => { if (res?.changes) setShifts(res.changes) }).catch(() => {})
+        window.dispatchEvent(new CustomEvent('atlas:ratings-synced'))
+        onSync?.()
       })
       .catch(() => setMessage('Auto-sync failed — check email article analyzer connection'))
       .finally(() => setBusy(false))
@@ -62,6 +74,8 @@ export function RatingsBanner({ onSelectTicker }: { onSelectTicker?: (ticker: st
         setStatus(s) 
         setMessage(`Imported ${s.imported_rows ?? 0} ratings across ${s.tickers} tickers`)
         api.ratingsChanges().then((res) => { if (res?.changes) setShifts(res.changes) }).catch(() => {})
+        window.dispatchEvent(new CustomEvent('atlas:ratings-synced'))
+        onSync?.()
       })
       .catch(() => setMessage('Import failed — run an extraction, or check the extractor output path'))
       .finally(() => setBusy(false))

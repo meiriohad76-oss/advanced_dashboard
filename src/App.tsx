@@ -1584,7 +1584,13 @@ export default function App() {
           </div>
         </header>
         <main>
-          <RatingsBanner onSelectTicker={(ticker) => setSelected(getOrBuildHolding(ticker, holdings))} />
+          <RatingsBanner
+            onSelectTicker={(ticker) => setSelected(getOrBuildHolding(ticker, holdings))}
+            onSync={() => {
+              reloadState()
+              handleRefreshAllData()
+            }}
+          />
           {renderPage()}
         </main>
       </div>

@@ -184,46 +184,86 @@ def extract_ratings_from_db(db_path: str, as_of: str | None = None) -> dict[str,
 
 def sync_ratings_from_extractor(force: bool = False, out_file: str | None = None) -> dict[str, Any]:
     """Extract ratings from the email article analyzer database, persist into Atlas SQLite DB,
-    and write data/ratings_feed.json.
+    and write data/ratings_feed.json. If the analyzer database is not accessible (e.g. deployed on
+    Raspberry Pi where the companion analyzer lives on a host PC), falls back to data/ratings_feed.json.
     """
     db_path = find_analyzer_db()
-    if not db_path:
-        return {
-            "synced": False,
-            "reason": "email article analyzer database not found",
-        }
-
+    feed: dict[str, Any] | None = None
+    source = "email_article_analyzer"
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    feed = extract_ratings_from_db(db_path, as_of=now)
-    if not feed["ratings"]:
+
+    if db_path:
+        feed = extract_ratings_from_db(db_path, as_of=now)
+
+    # Fallback to local ratings_feed.json when app.db is unavailable (e.g. Pi deployment)
+    if not feed or not feed.get("ratings"):
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        candidates = [
+            out_file,
+            os.environ.get("ATLAS_RATINGS_FEED"),
+            os.path.join(repo_root, "data", "ratings_feed.json"),
+            os.path.join(repo_root, "..", "data", "ratings_feed.json"),
+            "/app/data/ratings_feed.json",
+            "/home/ahad/atlas/data/ratings_feed.json",
+        ]
+        for c in candidates:
+            if c and os.path.exists(c) and os.path.isfile(c):
+                try:
+                    with open(c, "r", encoding="utf-8-sig") as handle:
+                        parsed = json.load(handle)
+                        if parsed and parsed.get("ratings"):
+                            feed = parsed
+                            source = f"ratings_feed_file ({os.path.basename(c)})"
+                            break
+                except Exception:
+                    continue
+
+    if not feed or not feed.get("ratings"):
         return {
             "synced": False,
-            "reason": "no valid ratings found in email analyzer database",
+            "reason": "Neither email analyzer database nor ratings_feed.json found",
             "db_path": db_path,
         }
 
     # Save to Atlas SQLite DB (ratings_runs table)
     store.save_feed(feed, imported_at=now)
 
-    # Also update data/ratings_feed.json file at root & in data/
-    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    feed_file = out_file or os.environ.get("ATLAS_FEED_OUT_FILE") or os.path.join(repo_root, "data", "ratings_feed.json")
-    try:
-        os.makedirs(os.path.dirname(feed_file), exist_ok=True)
-        with open(feed_file, "w", encoding="utf-8") as f:
-            json.dump(feed, f, indent=2)
-    except Exception as exc:
-        logger.warning("Could not write ratings_feed.json: %s", exc)
+    # Also update data/ratings_feed.json file if on host with analyzer
+    if db_path:
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        feed_file = out_file or os.environ.get("ATLAS_FEED_OUT_FILE") or os.path.join(repo_root, "data", "ratings_feed.json")
+        try:
+            os.makedirs(os.path.dirname(feed_file), exist_ok=True)
+            with open(feed_file, "w", encoding="utf-8") as f:
+                json.dump(feed, f, indent=2)
+        except Exception as exc:
+            logger.warning("Could not write ratings_feed.json: %s", exc)
 
     distinct_tickers = sorted(list({r["ticker"] for r in feed["ratings"]}))
+
+    # Check coverage against active portfolio holdings
+    active_symbols: set[str] = set()
+    try:
+        active_list = store.latest_list("portfolio")
+        if active_list and active_list.get("payload"):
+            holdings_list = active_list["payload"].get("holdings", [])
+            active_symbols = {str(h.get("symbol")).upper() for h in holdings_list if h.get("symbol")}
+    except Exception:
+        pass
+
+    covered_in_portfolio = sorted(list(active_symbols.intersection(set(distinct_tickers))))
+    missing_in_portfolio = sorted(list(active_symbols.difference(set(distinct_tickers))))
+
     return {
         "synced": True,
-        "source": "email_article_analyzer",
+        "source": source,
         "db_path": db_path,
-        "as_of": now,
+        "as_of": feed.get("as_of", now),
         "imported_rows": len(feed["ratings"]),
         "tickers_count": len(distinct_tickers),
         "tickers": distinct_tickers,
+        "active_portfolio_covered": covered_in_portfolio,
+        "active_portfolio_missing": missing_in_portfolio,
     }
 
 

@@ -48,9 +48,16 @@ export function RatingsGauge({ symbol }: { symbol: string }) {
   const [data, setData] = useState<TickerRatings>(() => buildTickerRatings(symbol))
   useEffect(() => {
     let alive = true
+    const fetchRatings = () => {
+      api.ratings(symbol).then((real) => { if (alive) setData(real) }).catch(() => { /* keep seed */ })
+    }
     setData(buildTickerRatings(symbol))
-    api.ratings(symbol).then((real) => { if (alive) setData(real) }).catch(() => { /* keep seed */ })
-    return () => { alive = false }
+    fetchRatings()
+    window.addEventListener('atlas:ratings-synced', fetchRatings)
+    return () => {
+      alive = false
+      window.removeEventListener('atlas:ratings-synced', fetchRatings)
+    }
   }, [symbol])
   const { ratings, consensus, consensusLabel } = data
 
