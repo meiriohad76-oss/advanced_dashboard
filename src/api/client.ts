@@ -103,7 +103,54 @@ export const api = {
   marketQuote: (symbol: string) => request<Quote>(`/api/v1/market/quote/${encodeURIComponent(symbol)}`),
   marketQuotes: (symbols: string[]) => request<Record<string, Quote>>('/api/v1/market/quotes', { method: 'POST', body: JSON.stringify({ symbols }) }),
   marketRefresh: () => request<MarketRefreshResponse>('/api/v1/market/refresh', { method: 'POST' }),
+  marketBars: (symbol: string, range = '6mo', interval = '1d') =>
+    request<import('../components/CandleChart').BarsResponse>(
+      `/api/v1/market/bars/${encodeURIComponent(symbol)}?range=${encodeURIComponent(range)}&interval=${encodeURIComponent(interval)}`
+    ),
   syncAutoRatings: () => request<RatingsStatus>('/api/v1/ratings/sync-auto', { method: 'POST' }),
+  ratingsChanges: () => request<{ count: number; changes: import('../types').RatingShiftItem[] }>('/api/v1/ratings/changes'),
+  notificationSettings: () => request<import('../types').NotificationSettings>('/api/v1/notifications/settings'),
+  saveNotificationSettings: (settings: Partial<import('../types').NotificationSettings>) =>
+    request<import('../types').NotificationSettings>('/api/v1/notifications/settings', {
+      method: 'POST',
+      body: JSON.stringify(settings),
+    }),
+  testNotifications: () => request<import('../types').NotificationTestResult>('/api/v1/notifications/test', { method: 'POST' }),
+  schedulerStatus: () => request<{
+    enabled: boolean
+    interval_seconds: number
+    interval_minutes: number
+    last_checked: string | null
+    last_sync: string | null
+    last_status: string
+    runs_completed: number
+    new_records_detected: number
+    analyzer_db_detected: boolean
+  }>('/api/v1/scheduler/status'),
+  toggleScheduler: (enabled?: boolean) =>
+    request<{ enabled: boolean }>('/api/v1/scheduler/toggle', {
+      method: 'POST',
+      body: JSON.stringify({ enabled }),
+    }),
   brokerAlpacaStatus: () => request<BrokerAlpacaStatus>('/api/v1/broker/alpaca/status'),
   brokerAlpacaSync: () => request<BrokerAlpacaSyncResult>('/api/v1/broker/alpaca/sync', { method: 'POST' }),
+  placeBrokerOrder: (order: { symbol: string; quantity: number; side: 'buy' | 'sell'; type?: string; limit_price?: number }) =>
+    request<Record<string, unknown>>('/api/v1/broker/alpaca/order', {
+      method: 'POST',
+      body: JSON.stringify(order),
+    }),
+  portfolioRebalance: (maxPosition = 12.0, maxSector = 30.0) =>
+    request<import('../types').RebalanceResponse>(
+      `/api/v1/portfolio/rebalance?max_position=${encodeURIComponent(maxPosition)}&max_sector=${encodeURIComponent(maxSector)}`
+    ),
+  executeRebalance: (orders: Array<{ symbol: string; quantity: number; side: string }>) =>
+    request<{ executed_count: number; failed_count: number; results: unknown[] }>('/api/v1/portfolio/rebalance/execute', {
+      method: 'POST',
+      body: JSON.stringify({ orders }),
+    }),
+  correlationMatrix: (maxSymbols = 10) =>
+    request<import('../types').CorrelationMatrixResponse>(`/api/v1/analytics/correlation?max_symbols=${encodeURIComponent(maxSymbols)}`),
+  benchmarkComparison: (range = '1y') =>
+    request<import('../types').BenchmarkComparisonResponse>(`/api/v1/analytics/benchmark-comparison?range=${encodeURIComponent(range)}`),
 }
+

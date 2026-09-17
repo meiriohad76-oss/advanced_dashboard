@@ -115,3 +115,18 @@ def test_ratings_sync_auto_endpoint(tmp_path, monkeypatch):
     assert resp.status_code == 200
     data = resp.json()["data"]
     assert data["sync_details"]["synced"] is True
+
+
+def test_ratings_changes_endpoint():
+    resp = client.get("/api/v1/ratings/changes")
+    assert resp.status_code == 200
+    data = resp.json()["data"]
+    assert "changes" in data
+    assert "count" in data
+    assert isinstance(data["changes"], list)
+    if data["count"] > 0:
+        change = data["changes"][0]
+        assert "ticker" in change
+        assert "direction" in change
+        assert "previous" in change
+        assert "current" in change

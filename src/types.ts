@@ -152,6 +152,17 @@ export interface TickerRatings {
   consensusLabel: string | null
 }
 
+export interface RatingShiftItem {
+  ticker: string
+  provider: string
+  field: string
+  previous: string
+  current: string
+  direction: 'UPGRADE' | 'DOWNGRADE' | 'REVISION'
+  date: string
+  headline: string
+}
+
 export interface RatingsStatus {
   source: 'db' | 'feed' | 'seed'
   tickers: number
@@ -204,4 +215,81 @@ export interface RiskSummary {
   var95Pct?: number
   var95Amount?: number
 }
+
+export interface NotificationSettings {
+  telegram_token: string
+  telegram_chat_id: string
+  telegram_enabled: boolean
+  webhook_url: string
+  webhook_enabled: boolean
+  min_severity: string
+}
+
+export interface NotificationTestResult {
+  status: string
+  settings: Record<string, string | boolean>
+  results: {
+    telegram?: { success?: boolean; error?: string; detail?: string }
+    webhook?: { success?: boolean; error?: string; detail?: string }
+  }
+}
+
+export interface RebalanceOrder {
+  symbol: string
+  name?: string
+  sector?: string
+  price: number
+  current_quantity: number
+  current_weight: number
+  target_weight: number
+  delta_weight: number
+  side: 'buy' | 'sell'
+  quantity: number
+  estimated_amount: number
+  score: number
+  state: string
+  reason: string
+}
+
+export interface RebalanceResponse {
+  orders_count: number
+  total_rebalance_amount: number
+  portfolio_value: number
+  orders: RebalanceOrder[]
+}
+
+export interface CorrelationMatrixResponse {
+  symbols: string[]
+  matrix: number[][]
+  high_pairs: Array<{
+    pair: [string, string]
+    correlation: number
+    risk: string
+  }>
+  sample_period?: string
+}
+
+export interface BenchmarkPoint {
+  date: string
+  portfolio: number
+  spy: number
+  qqq: number
+}
+
+export interface BenchmarkMetrics {
+  portfolio_return: number
+  spy_return: number
+  qqq_return: number
+  alpha: number
+  beta: number
+  sharpe: number
+  max_drawdown: number
+}
+
+export interface BenchmarkComparisonResponse {
+  timeframe: string
+  series: BenchmarkPoint[]
+  metrics: BenchmarkMetrics
+}
+
 

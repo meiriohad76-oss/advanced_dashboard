@@ -193,5 +193,198 @@ class AlpacaBrokerSync:
             "message": f"Successfully synchronized {len(holdings)} position(s) from Alpaca.",
         }
 
+    async def place_order(
+        self,
+        symbol: str,
+        qty: float,
+        side: str,
+        order_type: str = "market",
+        time_in_force: str = "day",
+        limit_price: float | None = None,
+    ) -> dict[str, Any]:
+        """Place an order with Alpaca paper trading account, with simulation fallback if unconfigured."""
+        sym = symbol.strip().upper()
+        order_side = side.strip().lower()
+        if order_side not in ("buy", "sell"):
+            raise ValueError("Side must be 'buy' or 'sell'")
+
+        if not self.is_configured:
+            # Simulated paper order response for development & offline testing
+            from uuid import uuid4
+            return {
+                "id": str(uuid4()),
+                "client_order_id": f"atlas_sim_{sym}_{int(qty)}",
+                "symbol": sym,
+                "qty": qty,
+                "side": order_side,
+                "type": order_type,
+                "time_in_force": time_in_force,
+                "status": "filled",
+                "simulated": True,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "message": f"Simulated paper trade: {order_side.upper()} {qty} {sym} executed.",
+            }
+
+        payload: dict[str, Any] = {
+            "symbol": sym,
+            "qty": qty,
+            "side": order_side,
+            "type": order_type,
+            "time_in_force": time_in_force,
+        }
+        if limit_price is not None:
+            payload["limit_price"] = limit_price
+
+        async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
+            res = await client.post(f"{self.base_url}/v2/orders", json=payload, headers=self._headers())
+            if res.status_code in (200, 201):
+                data = res.json()
+                return {
+                    "id": data.get("id"),
+                    "symbol": data.get("symbol"),
+                    "qty": float(data.get("qty", qty)),
+                    "side": data.get("side"),
+                    "type": data.get("type"),
+                    "status": data.get("status", "accepted"),
+                    "simulated": False,
+                    "created_at": data.get("created_at"),
+                    "message": f"Alpaca paper order accepted: {order_side.upper()} {qty} {sym}.",
+                }
+            raise ValueError(f"Alpaca order rejected ({res.status_code}): {res.text}")
+
+    async def get_orders(self, status: str = "open", limit: int = 50) -> list[dict[str, Any]]:
+        """Retrieve recent orders from Alpaca."""
+        if not self.is_configured:
+            return []
+
+        try:
+            async with httpx.AsyncClient(timeout=8.0, verify=False) as client:
+                res = await client.get(f"{self.base_url}/v2/orders?status={status}&limit={limit}", headers=self._headers())
+                if res.status_code == 200:
+                    return res.json()
+                return []
+        except Exception:
+            return []
+
+    async def cancel_order(self, order_id: str) -> dict[str, Any]:
+        """Cancel an open order."""
+        if not self.is_configured:
+            return {"cancelled": True, "simulated": True, "order_id": order_id}
+
+        async with httpx.AsyncClient(timeout=8.0, verify=False) as client:
+            res = await client.delete(f"{self.base_url}/v2/orders/{order_id}", headers=self._headers())
+            return {"cancelled": res.status_code in (200, 204), "status_code": res.status_code}
+
+
+def calculate_portfolio_rebalance(holdings: list[Holding], max_position_pct: float = 12.0, max_sector_pct: float = 30.0) -> dict[str, Any]:
+    """Calculate recommended rebalance trades comparing current holdings weights
+    against model signal priorities (Entry vs Exit setups) with concentration caps.
+    """
+    from ..engine import assess_holding
+
+    non_cash = [h for h in holdings if h.symbol != "CASH"]
+    if not non_cash:
+        return {"orders": [], "total_rebalance_amount": 0.0, "current_value": 0.0}
+
+    total_value = sum(h.quantity * h.price for h in non_cash)
+    if total_value <= 0:
+        total_value = 100000.0
+
+    raw_targets: dict[str, float] = {}
+    for h in non_cash:
+        assessment = assess_holding(h)
+        score = assessment.score
+        # High conviction (Entry/Strong Entry) targeted higher
+        if score >= 80:
+            target = 8.5
+        elif score >= 65:
+            target = 5.5
+        elif score >= 50:
+            target = 3.5
+        else:
+            target = 1.5  # underperforming or exit setups
+        raw_targets[h.symbol] = target
+
+    # Sector constraint check: sum of targets per sector
+    sector_targets: dict[str, float] = {}
+    for h in non_cash:
+        sec = h.sector or "Equities"
+        sector_targets[sec] = sector_targets.get(sec, 0.0) + raw_targets[h.symbol]
+
+    for sec, tot in sector_targets.items():
+        if tot > max_sector_pct:
+            scale = max_sector_pct / tot
+            for h in non_cash:
+                if (h.sector or "Equities") == sec:
+                    raw_targets[h.symbol] *= scale
+
+    # Normalize targets so they sum to 100%
+    sum_targets = sum(raw_targets.values()) or 1.0
+    norm_targets = {sym: round((v / sum_targets) * 100.0, 2) for sym, v in raw_targets.items()}
+
+    # Cap single positions at max_position_pct
+    for sym in norm_targets:
+        if norm_targets[sym] > max_position_pct:
+            norm_targets[sym] = max_position_pct
+
+    # Re-normalize
+    sum_targets = sum(norm_targets.values()) or 1.0
+    norm_targets = {sym: round((v / sum_targets) * 100.0, 2) for sym, v in norm_targets.items()}
+
+    orders: list[dict[str, Any]] = []
+    total_rebalance_amt = 0.0
+
+    for h in non_cash:
+        target_wt = norm_targets.get(h.symbol, 0.0)
+        curr_wt = h.weight
+        delta_wt = round(target_wt - curr_wt, 2)
+
+        # Only propose trade if delta weight is at least 0.4%
+        if abs(delta_wt) >= 0.4:
+            target_mv = total_value * (target_wt / 100.0)
+            current_mv = h.quantity * h.price
+            dollar_diff = target_mv - current_mv
+            share_diff = int(round(dollar_diff / h.price))
+
+            if share_diff != 0:
+                side = "buy" if share_diff > 0 else "sell"
+                trade_qty = abs(share_diff)
+                trade_amt = round(trade_qty * h.price, 2)
+                total_rebalance_amt += trade_amt
+
+                assessment = assess_holding(h)
+                if side == "buy":
+                    reason = f"Scale into {assessment.state.value} setup (score {assessment.score}/100)"
+                else:
+                    reason = f"Trim overweight position to {target_wt:.1f}% target cap"
+
+                orders.append({
+                    "symbol": h.symbol,
+                    "name": h.name,
+                    "sector": h.sector,
+                    "price": h.price,
+                    "current_quantity": h.quantity,
+                    "current_weight": round(curr_wt, 2),
+                    "target_weight": target_wt,
+                    "delta_weight": delta_wt,
+                    "side": side,
+                    "quantity": trade_qty,
+                    "estimated_amount": trade_amt,
+                    "score": assessment.score,
+                    "state": assessment.state.value,
+                    "reason": reason,
+                })
+
+    # Sort sells first to free up buying power, then highest delta buys
+    orders.sort(key=lambda o: (o["side"] != "sell", -abs(o["delta_weight"])))
+
+    return {
+        "orders_count": len(orders),
+        "total_rebalance_amount": round(total_rebalance_amt, 2),
+        "portfolio_value": round(total_value, 2),
+        "orders": orders,
+    }
+
 
 alpaca_broker = AlpacaBrokerSync()
+

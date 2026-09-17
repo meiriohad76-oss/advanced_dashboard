@@ -21,8 +21,8 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from . import alerts, imports, ratings_ingest, store
-from .broker import alpaca_broker
+from . import alerts, analytics_service, bars_service, imports, notifications, ratings_ingest, store
+from .broker.alpaca_broker import alpaca_broker, calculate_portfolio_rebalance
 from .company_names import resolve_company_name
 from .data import BASE_ALERTS, SCENARIO_ALERT, holdings_for_scenario
 from .engine import assess_holding, calculate_risk
@@ -31,7 +31,9 @@ from .market_data import market_router
 from .models import AskRequest, AskResponse, Holding
 from .portfolio_fit import compute_fit
 from .ratings import active_source, build_ticker_ratings
-from .ratings_extractor_bridge import sync_ratings_from_extractor
+from .ratings_extractor_bridge import extract_rating_shifts, sync_ratings_from_extractor
+from .scheduler import sync_runner
+from . import bars_service
 
 app = FastAPI(title="Atlas Portfolio Intelligence", version="0.1.0", docs_url="/api/docs")
 app.add_middleware(
@@ -101,6 +103,7 @@ async def initialize_operational_state():
 @app.on_event("startup")
 async def on_startup():
     await initialize_operational_state()
+    sync_runner.start()
 
 
 def envelope(data: object) -> dict:
@@ -443,9 +446,58 @@ def alerts_dispatch(webhook_url: str | None = None) -> dict:
     return envelope({"triggered_count": len(triggered), "dispatches": results})
 
 
+@app.get("/api/v1/notifications/settings")
+def notifications_get_settings() -> dict:
+    """Get active Telegram and webhook notification configurations."""
+    return envelope(notifications.get_settings())
+
+
+@app.post("/api/v1/notifications/settings")
+def notifications_save_settings(payload: dict) -> dict:
+    """Save updated Telegram and webhook notification settings."""
+    updated = notifications.save_settings(payload)
+    return envelope(updated)
+
+
+@app.post("/api/v1/notifications/test")
+async def notifications_test() -> dict:
+    """Test connectivity for enabled notification channels (Telegram / Webhook)."""
+    res = await notifications.test_notifications()
+    return envelope(res)
+
+
+@app.get("/api/v1/scheduler/status")
+def scheduler_status() -> dict:
+    """Get status of automated extractor background runner."""
+    return envelope(sync_runner.get_status())
+
+
+@app.post("/api/v1/scheduler/toggle")
+def scheduler_toggle(payload: dict | None = None) -> dict:
+    """Enable or disable automated background synchronization."""
+    enabled = payload.get("enabled") if payload else None
+    return envelope(sync_runner.toggle(enabled))
+
+
 @app.get("/api/v1/analytics/risk")
 def risk() -> dict:
     return envelope(calculate_risk(current_holdings()).model_dump())
+
+
+@app.get("/api/v1/analytics/correlation")
+async def analytics_correlation(max_symbols: int = 10) -> dict:
+    """Calculate pairwise Pearson correlation matrix for top holdings (§14, §25)."""
+    holdings_dict = [h.model_dump() for h in current_holdings()]
+    data = await analytics_service.get_correlation_matrix(holdings_dict, max_symbols=max_symbols)
+    return envelope(data)
+
+
+@app.get("/api/v1/analytics/benchmark-comparison")
+async def analytics_benchmark_comparison(range: str = "1y") -> dict:
+    """Calculate cumulative return series vs SPY and QQQ benchmarks (§14, §28)."""
+    holdings_dict = [h.model_dump() for h in current_holdings()]
+    data = await analytics_service.get_benchmark_comparison(holdings_dict, range_str=range)
+    return envelope(data)
 
 
 @app.post("/api/v1/assistant/ask", response_model=dict)
@@ -489,6 +541,16 @@ async def market_quote(symbol: str) -> dict:
     if not quote:
         raise HTTPException(status_code=404, detail=f"Quote not available for {symbol}")
     return envelope(quote.model_dump(by_alias=True))
+
+
+@app.get("/api/v1/market/bars/{symbol}")
+async def market_bars(symbol: str, range: str = "6mo", interval: str = "1d") -> dict:
+    """Fetch OHLCV historical price bars with SMA technical overlays for charting (§13, §14)."""
+    sym = symbol.strip().upper()
+    h = next((item for item in current_holdings() if item.symbol == sym), None)
+    base_price = h.price if h else None
+    bars_data = await bars_service.get_symbol_bars(sym, range_str=range, interval=interval, base_price=base_price)
+    return envelope(bars_data)
 
 
 @app.post("/api/v1/market/quotes")
@@ -561,6 +623,16 @@ def ratings_sync_auto() -> dict:
     })
 
 
+@app.get("/api/v1/ratings/changes")
+def ratings_changes() -> dict:
+    """Return historical ratings upgrades, downgrades, and price target shifts from extractor runs."""
+    shifts = extract_rating_shifts()
+    return envelope({
+        "count": len(shifts),
+        "changes": shifts,
+    })
+
+
 @app.get("/api/v1/broker/alpaca/status")
 async def broker_alpaca_status() -> dict:
     """Return Alpaca broker account status and connection health (§97)."""
@@ -576,6 +648,83 @@ async def broker_alpaca_sync() -> dict:
         return envelope(res)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/api/v1/broker/alpaca/order")
+async def broker_alpaca_order(payload: dict) -> dict:
+    """Execute or simulate an order via Alpaca Paper Broker."""
+    symbol = payload.get("symbol")
+    qty = payload.get("qty") or payload.get("quantity")
+    side = payload.get("side", "buy")
+    order_type = payload.get("type", "market")
+    time_in_force = payload.get("time_in_force", "day")
+    limit_price = payload.get("limit_price")
+
+    if not symbol or not qty:
+        raise HTTPException(status_code=400, detail="symbol and qty are required")
+
+    try:
+        res = await alpaca_broker.place_order(
+            symbol=symbol,
+            qty=float(qty),
+            side=side,
+            order_type=order_type,
+            time_in_force=time_in_force,
+            limit_price=float(limit_price) if limit_price else None,
+        )
+        return envelope(res)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/v1/broker/alpaca/orders")
+async def broker_alpaca_orders(status: str = "all", limit: int = 50) -> dict:
+    """List recent orders from Alpaca."""
+    orders = await alpaca_broker.get_orders(status=status, limit=limit)
+    return envelope({"count": len(orders), "orders": orders})
+
+
+@app.delete("/api/v1/broker/alpaca/orders/{order_id}")
+async def broker_alpaca_cancel_order(order_id: str) -> dict:
+    """Cancel an open order on Alpaca."""
+    res = await alpaca_broker.cancel_order(order_id)
+    return envelope(res)
+
+
+@app.get("/api/v1/portfolio/rebalance")
+def portfolio_rebalance(max_position: float = 12.0, max_sector: float = 30.0) -> dict:
+    """Calculate recommended rebalancing trades based on model signal conviction and concentration constraints."""
+    holdings = current_holdings()
+    proposals = calculate_portfolio_rebalance(holdings, max_position_pct=max_position, max_sector_pct=max_sector)
+    return envelope(proposals)
+
+
+@app.post("/api/v1/portfolio/rebalance/execute")
+async def portfolio_rebalance_execute(payload: dict) -> dict:
+    """Execute selected rebalancing orders through Alpaca paper broker."""
+    orders = payload.get("orders", [])
+    if not orders:
+        raise HTTPException(status_code=400, detail="No orders provided for execution")
+
+    results = []
+    for o in orders:
+        try:
+            trade_res = await alpaca_broker.place_order(
+                symbol=o["symbol"],
+                qty=float(o["quantity"]),
+                side=o["side"],
+                order_type="market",
+                time_in_force="day",
+            )
+            results.append({"symbol": o["symbol"], "success": True, "details": trade_res})
+        except Exception as exc:
+            results.append({"symbol": o["symbol"], "success": False, "error": str(exc)})
+
+    return envelope({
+        "executed_count": sum(1 for r in results if r["success"]),
+        "failed_count": sum(1 for r in results if not r["success"]),
+        "results": results,
+    })
 
 
 @app.get("/api/v1/market/stream")

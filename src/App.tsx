@@ -3,7 +3,7 @@ import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Bell, BrainCircuit, BriefcaseBusiness,
   ChevronRight, CircleDollarSign, Database, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
   Play, Plus, Radar, Radio, Search, ServerCog, Settings, ShieldCheck, Sparkles,
-  Target, TrendingDown, TrendingUp, Upload, X, Zap,
+  Target, TrendingDown, TrendingUp, Upload, X, Zap, Scale, LayoutGrid, Table,
 } from 'lucide-react'
 import { answerQuestion, assessHolding, portfolioRisk } from './domain/engine'
 import { baseAlerts, performance, scenarioAlert, scenarioHoldings } from './data/demo'
@@ -20,8 +20,14 @@ import type { TimeframeKey } from './domain/timeframe'
 import { Tooltip } from './components/Tooltip'
 import { METRIC_TOOLTIPS } from './data/tooltips'
 import { AlertPanel } from './components/AlertPanel'
+import { NotificationSettingsModal } from './components/NotificationSettingsModal'
 import { DecisionModal } from './components/DecisionModal'
+import { RebalanceModal } from './components/RebalanceModal'
 import { StockPerformance } from './components/StockPerformance'
+import { CandleChart } from './components/CandleChart'
+import { SectorTreemap } from './components/SectorTreemap'
+import { CorrelationHeatmap } from './components/CorrelationHeatmap'
+import { BenchmarkChart } from './components/BenchmarkChart'
 import { resolveCompanyName } from './data/companyNames'
 import { buildTickerRatings, getPriceTargets } from './domain/ratings'
 import { evaluateAlert } from './domain/alertEngine'
@@ -232,6 +238,9 @@ function AssetDrawer({ holding, holdings, onClose, onOpenDecision }: { holding: 
           </section>
         )}
 
+        {/* Interactive Candlestick & Technical Indicator Chart */}
+        {holding.symbol !== 'CASH' && <CandleChart symbol={holding.symbol} />}
+
         {/* Stock Time-Related Performance Analysis */}
         {holding.symbol !== 'CASH' && <StockPerformance holding={holding} />}
 
@@ -365,15 +374,18 @@ function PortfolioPage({
   onSelect,
   onRefresh,
   refreshing,
+  onOpenRebalance,
 }: { 
   holdings: Holding[]
   onSelect: (holding: Holding) => void
   onRefresh?: () => void
   refreshing?: boolean
+  onOpenRebalance?: () => void
 }) {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<PortfolioSortKey>('weight')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [viewMode, setViewMode] = useState<'table' | 'treemap'>('table')
 
   const handleSort = (key: PortfolioSortKey) => {
     if (sortKey === key) {
@@ -470,6 +482,54 @@ function PortfolioPage({
             />
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ display: 'inline-flex', borderRadius: '6px', border: '1px solid var(--border)', overflow: 'hidden', backgroundColor: 'var(--surface-subtle)' }}>
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                style={{
+                  padding: '5px 9px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  border: 'none',
+                  background: viewMode === 'table' ? 'var(--accent-dark)' : 'transparent',
+                  color: viewMode === 'table' ? '#fff' : 'var(--muted)',
+                  cursor: 'pointer'
+                }}
+              >
+                <Table size={13} /> Table
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('treemap')}
+                style={{
+                  padding: '5px 9px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  border: 'none',
+                  background: viewMode === 'treemap' ? 'var(--accent-dark)' : 'transparent',
+                  color: viewMode === 'treemap' ? '#fff' : 'var(--muted)',
+                  cursor: 'pointer'
+                }}
+              >
+                <LayoutGrid size={13} /> Heatmap
+              </button>
+            </div>
+            {onOpenRebalance && (
+              <button
+                type="button"
+                className="banner-primary"
+                onClick={onOpenRebalance}
+                title="Model-based portfolio rebalance and trade execution"
+              >
+                <Scale size={14} /> Rebalance &amp; Trade
+              </button>
+            )}
             {onRefresh && (
               <button
                 type="button"
@@ -494,64 +554,72 @@ function PortfolioPage({
             }}>Export CSV</button>
           </div>
         </div>
-        <div className="table-head extended">
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'symbol' ? 'active' : ''}`} onClick={() => handleSort('symbol')}>
-              Asset {renderSortArrow('symbol')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'price' ? 'active' : ''}`} onClick={() => handleSort('price')}>
-              Price {renderSortArrow('price')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'quantity' ? 'active' : ''}`} onClick={() => handleSort('quantity')}>
-              <Tooltip content={METRIC_TOOLTIPS.shares}>Shares</Tooltip> {renderSortArrow('quantity')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'avgCost' ? 'active' : ''}`} onClick={() => handleSort('avgCost')}>
-              <Tooltip content={METRIC_TOOLTIPS.costBasis}>Avg Cost</Tooltip> {renderSortArrow('avgCost')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'marketValue' ? 'active' : ''}`} onClick={() => handleSort('marketValue')}>
-              <Tooltip content={METRIC_TOOLTIPS.totalCost}>Market Value</Tooltip> {renderSortArrow('marketValue')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'weight' ? 'active' : ''}`} onClick={() => handleSort('weight')}>
-              Weight {renderSortArrow('weight')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'dayChange' ? 'active' : ''}`} onClick={() => handleSort('dayChange')}>
-              Today {renderSortArrow('dayChange')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'unrealizedPct' ? 'active' : ''}`} onClick={() => handleSort('unrealizedPct')}>
-              <Tooltip content={METRIC_TOOLTIPS.unrealizedPct}>Unrealized %</Tooltip> {renderSortArrow('unrealizedPct')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'unrealizedVal' ? 'active' : ''}`} onClick={() => handleSort('unrealizedVal')}>
-              <Tooltip content={METRIC_TOOLTIPS.unrealizedVal}>Unrealized Value</Tooltip> {renderSortArrow('unrealizedVal')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'state' ? 'active' : ''}`} onClick={() => handleSort('state')}>
-              State {renderSortArrow('state')}
-            </button>
-          </span>
-          <span>
-            <button type="button" className={`th-sort-btn ${sortKey === 'score' ? 'active' : ''}`} onClick={() => handleSort('score')}>
-              Score {renderSortArrow('score')}
-            </button>
-          </span>
-        </div>
-        {sortedHoldings.map((holding) => <HoldingRow key={holding.symbol} holding={holding} onSelect={onSelect}/>)}
+        {viewMode === 'treemap' ? (
+          <div style={{ padding: '0 16px 16px 16px' }}>
+            <SectorTreemap holdings={filtered} onSelect={onSelect} />
+          </div>
+        ) : (
+          <>
+            <div className="table-head extended">
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'symbol' ? 'active' : ''}`} onClick={() => handleSort('symbol')}>
+                  Asset {renderSortArrow('symbol')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'price' ? 'active' : ''}`} onClick={() => handleSort('price')}>
+                  Price {renderSortArrow('price')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'quantity' ? 'active' : ''}`} onClick={() => handleSort('quantity')}>
+                  <Tooltip content={METRIC_TOOLTIPS.shares}>Shares</Tooltip> {renderSortArrow('quantity')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'avgCost' ? 'active' : ''}`} onClick={() => handleSort('avgCost')}>
+                  <Tooltip content={METRIC_TOOLTIPS.costBasis}>Avg Cost</Tooltip> {renderSortArrow('avgCost')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'marketValue' ? 'active' : ''}`} onClick={() => handleSort('marketValue')}>
+                  <Tooltip content={METRIC_TOOLTIPS.totalCost}>Market Value</Tooltip> {renderSortArrow('marketValue')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'weight' ? 'active' : ''}`} onClick={() => handleSort('weight')}>
+                  Weight {renderSortArrow('weight')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'dayChange' ? 'active' : ''}`} onClick={() => handleSort('dayChange')}>
+                  Today {renderSortArrow('dayChange')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'unrealizedPct' ? 'active' : ''}`} onClick={() => handleSort('unrealizedPct')}>
+                  <Tooltip content={METRIC_TOOLTIPS.unrealizedPct}>Unrealized %</Tooltip> {renderSortArrow('unrealizedPct')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'unrealizedVal' ? 'active' : ''}`} onClick={() => handleSort('unrealizedVal')}>
+                  <Tooltip content={METRIC_TOOLTIPS.unrealizedVal}>Unrealized Value</Tooltip> {renderSortArrow('unrealizedVal')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'state' ? 'active' : ''}`} onClick={() => handleSort('state')}>
+                  State {renderSortArrow('state')}
+                </button>
+              </span>
+              <span>
+                <button type="button" className={`th-sort-btn ${sortKey === 'score' ? 'active' : ''}`} onClick={() => handleSort('score')}>
+                  Score {renderSortArrow('score')}
+                </button>
+              </span>
+            </div>
+            {sortedHoldings.map((holding) => <HoldingRow key={holding.symbol} holding={holding} onSelect={onSelect}/>)}
+          </>
+        )}
       </section>
     </>
   )
@@ -1001,13 +1069,130 @@ function AnalyticsPage({ holdings }: { holdings: Holding[] }) {
           </div>
         </section>
       </div>
+
+      <BenchmarkChart />
+      <CorrelationHeatmap />
     </>
   )
 }
 
-function SystemPage() {
-  const services = [['Market data (Yahoo/Alpaca)','Live','Connected'],['Calculation engine','Active','Real-time'],['Ratings Extractor Bridge','Active','Synced'],['Portfolio database','Healthy','Connected'],['Alert evaluator','Active','Real-time']]
-  return <><PageHeading eyebrow="TRUST & OPERATIONS" title="System health" copy="Source freshness and operational state are visible—not assumed."/><div className="system-grid"><section className="panel system-hero"><div className="health-orb"><HeartPulse size={31}/></div><div><span className="eyebrow">OVERALL STATUS</span><h2>All systems operational</h2><p>Live operational market data &amp; indicators engine</p></div></section><section className="panel service-list">{services.map(([name,status,time]) => <div key={name}><span><i/>{name}</span><strong>{status}</strong><time>{time}</time></div>)}</section><section className="panel provenance-panel"><span className="eyebrow">DATA PROVENANCE</span><h2>Know what supports every answer</h2><p>Live market data ingested via Yahoo Finance and Alpaca with real-time technical calculation engine (RSI-14, SMA-50, SMA-200, MACD, Trend Slope, Rel-Vol) and automated ratings extraction.</p><div><Database size={17}/><span><strong>Live Market Engine</strong><small>Concurrent price feeds &amp; historical bars</small></span></div><div><BrainCircuit size={17}/><span><strong>Deterministic calculations</strong><small>Verified mathematical formula implementation</small></span></div><div><ShieldCheck size={17}/><span><strong>Grounded explanations</strong><small>Calculations derived from live computed metrics</small></span></div></section></div></>
+function SystemPage({ onOpenNotifications }: { onOpenNotifications?: () => void }) {
+  const [sched, setSched] = useState<{ enabled: boolean; interval_minutes: number; last_sync: string | null; last_status: string; new_records_detected: number; runs_completed: number } | null>(null)
+  const [schedLoading, setSchedLoading] = useState(false)
+
+  useEffect(() => {
+    let alive = true
+    api.schedulerStatus().then((s) => { if (alive) setSched(s) }).catch(() => {})
+    return () => { alive = false }
+  }, [])
+
+  const handleToggleScheduler = () => {
+    if (!sched) return
+    setSchedLoading(true)
+    api.toggleScheduler(!sched.enabled)
+      .then((res) => {
+        setSched((prev) => prev ? { ...prev, enabled: res.enabled } : null)
+      })
+      .finally(() => setSchedLoading(false))
+  }
+
+  const services = [
+    ['Market data (Yahoo/Alpaca)', 'Live', 'Connected'],
+    ['Calculation engine', 'Active', 'Real-time'],
+    ['Ratings Extractor Bridge', 'Active', 'Synced'],
+    ['Automated Scheduler', sched?.enabled ? 'Active' : 'Paused', sched?.last_sync ? `Sync: ${sched.last_sync.slice(11, 16)} UTC` : 'Every 10m'],
+    ['Portfolio database', 'Healthy', 'Connected'],
+    ['Alert evaluator & Push', 'Active', 'Real-time'],
+  ]
+
+  return (
+    <>
+      <PageHeading eyebrow="TRUST & OPERATIONS" title="System health & Background Services" copy="Source freshness, background tasks, and automated runner state are visible—not assumed." />
+      <div className="system-grid">
+        <section className="panel system-hero">
+          <div className="health-orb"><HeartPulse size={31} /></div>
+          <div>
+            <span className="eyebrow">OVERALL STATUS</span>
+            <h2>All systems operational</h2>
+            <p>Live operational market data, indicators engine &amp; background scheduler active</p>
+          </div>
+        </section>
+
+        {/* Background Scheduler Card */}
+        <section className="panel" style={{ background: '#f8faf9', border: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <span className="eyebrow">AUTOMATED EXTRACTOR SCHEDULER</span>
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '6px',
+                background: sched?.enabled ? 'rgba(52, 211, 153, 0.2)' : 'rgba(148, 163, 184, 0.2)',
+                color: sched?.enabled ? '#065f46' : '#475569',
+              }}
+            >
+              {sched?.enabled ? '⚡ RUNNING' : '⏸ PAUSED'}
+            </span>
+          </div>
+          <h3 style={{ margin: '0 0 6px 0', fontSize: '15px' }}>Pre-Market &amp; Periodic Sync Runner</h3>
+          <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 12px 0' }}>
+            Polls the companion article analyzer database every {sched?.interval_minutes ?? 10} minutes. Automatically pulls rank shifts and recalculates model setups.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', marginBottom: '12px' }}>
+            <div style={{ background: '#fff', padding: '8px', borderRadius: '6px', border: '1px solid var(--line)' }}>
+              <span style={{ color: 'var(--muted)', display: 'block' }}>Status</span>
+              <strong>{sched?.last_status ?? 'Ready'}</strong>
+            </div>
+            <div style={{ background: '#fff', padding: '8px', borderRadius: '6px', border: '1px solid var(--line)' }}>
+              <span style={{ color: 'var(--muted)', display: 'block' }}>Runs Completed</span>
+              <strong>{sched?.runs_completed ?? 0} cycles</strong>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleToggleScheduler}
+              disabled={schedLoading}
+              style={{ fontSize: '11px', padding: '6px 12px' }}
+            >
+              {sched?.enabled ? 'Pause Runner' : 'Resume Runner'}
+            </button>
+            {onOpenNotifications && (
+              <button
+                type="button"
+                className="banner-primary"
+                onClick={onOpenNotifications}
+                style={{ fontSize: '11px', padding: '6px 12px' }}
+              >
+                <Bell size={13} /> Telegram &amp; Push Alerts
+              </button>
+            )}
+          </div>
+        </section>
+
+        <section className="panel service-list">
+          {services.map(([name, status, time]) => (
+            <div key={name}>
+              <span><i />{name}</span>
+              <strong>{status}</strong>
+              <time>{time}</time>
+            </div>
+          ))}
+        </section>
+
+        <section className="panel provenance-panel">
+          <span className="eyebrow">DATA PROVENANCE</span>
+          <h2>Know what supports every answer</h2>
+          <p>Live market data ingested via Yahoo Finance and Alpaca with real-time technical calculation engine (RSI-14, SMA-50, SMA-200, MACD, Trend Slope, Rel-Vol) and automated ratings extraction.</p>
+          <div><Database size={17} /><span><strong>Live Market Engine</strong><small>Concurrent price feeds &amp; historical bars</small></span></div>
+          <div><BrainCircuit size={17} /><span><strong>Deterministic calculations</strong><small>Verified mathematical formula implementation</small></span></div>
+          <div><ShieldCheck size={17} /><span><strong>Grounded explanations</strong><small>Calculations derived from live computed metrics</small></span></div>
+        </section>
+      </div>
+    </>
+  )
 }
 
 function PageHeading({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
@@ -1020,6 +1205,8 @@ export default function App() {
   const [selected, setSelected] = useState<Holding | null>(null)
   const [decisionHolding, setDecisionHolding] = useState<Holding | null>(null)
   const [alertPanelOpen, setAlertPanelOpen] = useState(false)
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false)
+  const [rebalanceModalOpen, setRebalanceModalOpen] = useState(false)
   const [userAlerts, setUserAlerts] = useState<UserAlert[]>(() => {
     try {
       const saved = localStorage.getItem('atlas_user_alerts')
@@ -1218,7 +1405,7 @@ export default function App() {
   }
 
   const renderPage = () => {
-    if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected} onRefresh={handleRefreshAllData} refreshing={refreshingLive}/>
+    if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected} onRefresh={handleRefreshAllData} refreshing={refreshingLive} onOpenRebalance={() => setRebalanceModalOpen(true)}/>
     if (page === 'Signals') return <SignalsPage holdings={holdings} onSelect={setSelected}/>
     if (page === 'Watchlist') return <WatchlistPage/>
     if (page === 'Alerts') return (
@@ -1234,7 +1421,7 @@ export default function App() {
     )
     if (page === 'Analytics') return <AnalyticsPage holdings={holdings}/>
     if (page === 'Import') return <ImportPage onChanged={reloadState}/>
-    if (page === 'System') return <SystemPage/>
+    if (page === 'System') return <SystemPage onOpenNotifications={() => setNotificationModalOpen(true)}/>
     return <Overview holdings={holdings} scenario={scenario} onSelect={setSelected} onAsk={() => setAskOpen(true)} onOpenDecision={(h) => setDecisionHolding(h)} onNavigate={(p) => setPage(p)}/>
   }
 
@@ -1251,7 +1438,7 @@ export default function App() {
               <small>{lastRefreshedAt ? `Live market · ${lastRefreshedAt}` : 'Live quotes & indicators active'}</small>
             </span>
           </div>
-          <button><Settings size={18}/> Settings</button>
+          <button onClick={() => setNotificationModalOpen(true)}><Settings size={18}/> Notifications &amp; Settings</button>
           <div className="user"><span>OM</span><div><strong>Ohad Meiri</strong><small>Portfolio owner</small></div></div>
         </div>
       </aside>
@@ -1299,12 +1486,17 @@ export default function App() {
             </button>
           </div>
         </header>
-        <main><RatingsBanner/>{renderPage()}</main>
+        <main>
+          <RatingsBanner onSelectTicker={(ticker) => setSelected(getOrBuildHolding(ticker, holdings))} />
+          {renderPage()}
+        </main>
       </div>
       {mobileNav && <div className="nav-backdrop" role="button" tabIndex={0} aria-label="Close navigation" onClick={() => setMobileNav(false)} onKeyDown={(event) => { if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') setMobileNav(false) }}/>}
       {selected && <AssetDrawer holding={selected} holdings={holdings} onClose={() => setSelected(null)} onOpenDecision={() => setDecisionHolding(selected)}/>}
       {decisionHolding && <DecisionModal holding={decisionHolding} holdings={holdings} onClose={() => setDecisionHolding(null)} />}
       {alertPanelOpen && <AlertPanel alerts={alerts} userAlerts={userAlerts} holdings={holdings} onClose={() => setAlertPanelOpen(false)} onAddAlert={handleAddAlert} onDeleteAlert={handleDeleteAlert} />}
+      {notificationModalOpen && <NotificationSettingsModal onClose={() => setNotificationModalOpen(false)} />}
+      {rebalanceModalOpen && <RebalanceModal onClose={() => setRebalanceModalOpen(false)} onSuccess={reloadState} />}
       {askOpen && <AskPanel holdings={holdings} onClose={() => setAskOpen(false)}/>} 
       {scenario && <div className="scenario-toast"><span><Target size={18}/></span><div><strong>Decision event detected</strong><small>CRDO crossed into Strong Entry at 90/100</small></div><button onClick={() => setDecisionHolding(holdings[0])}>Review <ArrowRight size={14}/></button><button className="toast-close" onClick={toggleScenario}><X size={15}/></button></div>}
       {liveToast && (
