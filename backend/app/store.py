@@ -104,6 +104,24 @@ def latest_list(kind: str, path: str | None = None) -> dict | None:
     return {"name": row[0], "imported_at": row[1], "payload": json.loads(row[2])}
 
 
+def update_latest_list(kind: str, payload: dict, path: str | None = None) -> bool:
+    """Update payload of the most recent imported list in-place."""
+    path = path or _db_path()
+    if path != ":memory:" and not os.path.exists(path):
+        return False
+    conn = _connect(path)
+    try:
+        cur = conn.execute("SELECT id FROM imported_lists WHERE kind = ? ORDER BY id DESC LIMIT 1", (kind,))
+        row = cur.fetchone()
+        if not row:
+            return False
+        conn.execute("UPDATE imported_lists SET payload = ? WHERE id = ?", (json.dumps(payload), row[0]))
+        conn.commit()
+        return True
+    finally:
+        conn.close()
+
+
 def clear_list(kind: str, path: str | None = None) -> None:
     """Remove all uploaded rows of ``kind`` (revert to the seed)."""
     path = path or _db_path()

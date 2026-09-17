@@ -23,9 +23,12 @@ export interface Holding {
 }
 
 export interface PortfolioSource {
-  source: 'uploaded' | 'seed' | 'alpaca'
+  source: 'uploaded' | 'seed' | 'alpaca' | 'live'
+  mode?: 'live' | 'uploaded' | 'demo'
   name: string | null
   imported_at: string | null
+  last_refreshed?: string | null
+  provider?: string | null
   count: number
   has_signal_inputs: boolean
   scenario_active: boolean

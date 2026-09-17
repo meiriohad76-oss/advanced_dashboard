@@ -1,6 +1,7 @@
 """Yahoo Finance Market Data Provider (§13 zero-key fallback)."""
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 import httpx
 
@@ -32,25 +33,26 @@ class YahooMarketDataProvider(MarketDataProvider):
         if not symbols:
             return {}
 
-        clean_symbols = [s.strip().upper() for s in symbols if s.strip() and s.strip().upper() != "CASH"]
+        clean_symbols = list(dict.fromkeys(s.strip().upper() for s in symbols if s.strip() and s.strip().upper() != "CASH"))
         if not clean_symbols:
             return {}
 
         results: dict[str, Quote] = {}
         now_iso = datetime.now(timezone.utc).isoformat()
+        sem = asyncio.Semaphore(15)
 
-        async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers, verify=False) as client:
-            for sym in clean_symbols:
+        async def _fetch_one(client: httpx.AsyncClient, sym: str) -> None:
+            async with sem:
                 try:
                     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d"
                     res = await client.get(url)
                     if res.status_code != 200:
-                        continue
+                        return
                     data = res.json()
                     meta = data.get("chart", {}).get("result", [{}])[0].get("meta", {})
                     price = meta.get("regularMarketPrice")
                     if price is None:
-                        continue
+                        return
 
                     prev_close = meta.get("previousClose") or meta.get("chartPreviousClose")
                     day_change_pct = None
@@ -69,6 +71,10 @@ class YahooMarketDataProvider(MarketDataProvider):
                         provider="Yahoo Finance"
                     )
                 except Exception:
-                    continue
+                    pass
+
+        async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers, verify=False) as client:
+            tasks = [_fetch_one(client, sym) for sym in clean_symbols]
+            await asyncio.gather(*tasks)
 
         return results

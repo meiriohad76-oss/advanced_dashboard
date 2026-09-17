@@ -3,7 +3,7 @@ import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Bell, BrainCircuit, BriefcaseBusiness,
   ChevronRight, CircleDollarSign, Database, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
   Play, Plus, Radar, Radio, Search, ServerCog, Settings, ShieldCheck, Sparkles,
-  Target, TrendingDown, TrendingUp, Upload, X,
+  Target, TrendingDown, TrendingUp, Upload, X, Zap,
 } from 'lucide-react'
 import { answerQuestion, assessHolding, portfolioRisk } from './domain/engine'
 import { baseAlerts, performance, scenarioAlert, scenarioHoldings } from './data/demo'
@@ -360,7 +360,17 @@ function Overview({ holdings, scenario, onSelect, onAsk, onOpenDecision, onNavig
 
 type PortfolioSortKey = 'symbol' | 'price' | 'quantity' | 'avgCost' | 'marketValue' | 'weight' | 'dayChange' | 'unrealizedPct' | 'unrealizedVal' | 'state' | 'score'
 
-function PortfolioPage({ holdings, onSelect }: { holdings: Holding[]; onSelect: (holding: Holding) => void }) {
+function PortfolioPage({ 
+  holdings, 
+  onSelect,
+  onRefresh,
+  refreshing,
+}: { 
+  holdings: Holding[]
+  onSelect: (holding: Holding) => void
+  onRefresh?: () => void
+  refreshing?: boolean
+}) {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<PortfolioSortKey>('weight')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
@@ -459,16 +469,30 @@ function PortfolioPage({ holdings, onSelect }: { holdings: Holding[]; onSelect: 
               placeholder="Search holdings by symbol, name, or sector…"
             />
           </div>
-          <button className="secondary-button" onClick={() => {
-            const rows = ['Symbol,Name,Sector,Price,Shares,AvgCost,Weight,DayChange,Value']
-            holdings.forEach((h) => rows.push(`${h.symbol},"${h.name || ''}",${h.sector},${h.price},${h.quantity},${h.avgCost},${h.weight}%,${h.dayChange}%,${(h.quantity * h.price).toFixed(2)}`))
-            const blob = new Blob([rows.join('\n')], { type: 'text/csv' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'atlas_portfolio.csv'
-            a.click()
-          }}>Export CSV</button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {onRefresh && (
+              <button
+                type="button"
+                className="refresh-data-btn"
+                onClick={onRefresh}
+                disabled={refreshing}
+                title="Refresh live market quotes and recalculate technical signals"
+              >
+                <Zap size={14} className={refreshing ? 'spin' : ''} />
+                {refreshing ? 'Refreshing…' : '⚡ Refresh All Data'}
+              </button>
+            )}
+            <button className="secondary-button" onClick={() => {
+              const rows = ['Symbol,Name,Sector,Price,Shares,AvgCost,Weight,DayChange,Value']
+              holdings.forEach((h) => rows.push(`${h.symbol},"${h.name || ''}",${h.sector},${h.price},${h.quantity},${h.avgCost},${h.weight}%,${h.dayChange}%,${(h.quantity * h.price).toFixed(2)}`))
+              const blob = new Blob([rows.join('\n')], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'atlas_portfolio.csv'
+              a.click()
+            }}>Export CSV</button>
+          </div>
         </div>
         <div className="table-head extended">
           <span>
@@ -1014,6 +1038,8 @@ export default function App() {
   const [apiHoldings, setApiHoldings] = useState<Holding[] | null>(null)
   const [apiAlerts, setApiAlerts] = useState<AlertItem[] | null>(null)
   const [source, setSource] = useState<PortfolioSource | null>(null)
+  const [refreshingLive, setRefreshingLive] = useState(false)
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
 
   useEffect(() => {
     try {
@@ -1027,10 +1053,53 @@ export default function App() {
       setApiHoldings(state.holdings)
       setApiAlerts(state.alerts)
       setSource(state.source ?? null)
+      if (state.source?.last_refreshed) {
+        setLastRefreshedAt(state.source.last_refreshed)
+      }
     }).catch(() => { /* Offline-first seeded mode is intentional for the POC. */ })
   }, [])
+
+  const handleRefreshAllData = useCallback(async () => {
+    setRefreshingLive(true)
+    try {
+      const res = await api.marketRefresh()
+      if (res && res.holdings) {
+        setApiHoldings(res.holdings)
+        if (res.alerts) setApiAlerts(res.alerts)
+        if (res.source) setSource(res.source)
+        if (res.meta?.timestamp) setLastRefreshedAt(res.meta.timestamp)
+        // Check armed user alerts against fresh holdings
+        userAlerts.forEach((alert) => {
+          if (alert.status !== 'ARMED') return
+          const h = res.holdings.find((x) => x.symbol.toUpperCase() === alert.symbol.toUpperCase())
+          if (!h) return
+          const evalRes = evaluateAlert(alert, h)
+          if (evalRes.triggered) {
+            setUserAlerts((prev) => prev.map((a) => a.id === alert.id ? { ...a, status: 'TRIGGERED' } : a))
+            setLiveToast({ title: `${alert.symbol} Alert Triggered`, detail: evalRes.message, symbol: alert.symbol })
+          }
+        })
+        setLiveToast({
+          title: '⚡ Live Operational Refresh',
+          detail: `Updated ${res.meta?.updated_count ?? res.holdings.length} assets with live market data & technical indicators.`,
+          symbol: 'LIVE'
+        })
+      }
+    } catch {
+      setLiveToast({
+        title: 'Refresh Notice',
+        detail: 'Could not contact live market provider. Keeping local data.',
+        symbol: 'WARN'
+      })
+    } finally {
+      setRefreshingLive(false)
+    }
+  }, [userAlerts])
   
-  useEffect(() => { reloadState() }, [reloadState])
+  useEffect(() => { 
+    reloadState()
+    handleRefreshAllData()
+  }, [reloadState, handleRefreshAllData])
   
   const baseHoldings = useMemo(() => apiHoldings ?? scenarioHoldings(scenario), [apiHoldings, scenario])
   
@@ -1146,7 +1215,7 @@ export default function App() {
   }
 
   const renderPage = () => {
-    if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected}/>
+    if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected} onRefresh={handleRefreshAllData} refreshing={refreshingLive}/>
     if (page === 'Signals') return <SignalsPage holdings={holdings} onSelect={setSelected}/>
     if (page === 'Watchlist') return <WatchlistPage/>
     if (page === 'Alerts') return (
@@ -1171,7 +1240,17 @@ export default function App() {
       <aside className={`sidebar ${mobileNav ? 'open' : ''}`}>
         <div className="brand"><span><Activity size={21}/></span><div><strong>ATLAS</strong><small>Portfolio intelligence</small></div><button className="mobile-close" onClick={() => setMobileNav(false)}><X/></button></div>
         <nav>{navItems.map(({label,icon:Icon}) => <button key={label} className={page === label ? 'active' : ''} onClick={() => {setPage(label);setMobileNav(false)}}><Icon size={18}/><span>{label}</span>{label === 'Alerts' && (scenario || userAlerts.length > 0) && <b>{1 + userAlerts.length}</b>}</button>)}</nav>
-        <div className="sidebar-bottom"><div className="demo-badge"><Sparkles size={16}/><span><strong>Customer POC</strong><small>Seeded demonstration data</small></span></div><button><Settings size={18}/> Settings</button><div className="user"><span>OM</span><div><strong>Ohad Meiri</strong><small>Portfolio owner</small></div></div></div>
+        <div className="sidebar-bottom">
+          <div className="demo-badge" style={lastRefreshedAt ? { background: '#eaf7f0', color: '#0b6847', border: '1px solid #b5e4cb' } : undefined}>
+            {lastRefreshedAt ? <Zap size={16} color="#0b6847" /> : <Sparkles size={16} />}
+            <span>
+              <strong>{lastRefreshedAt ? 'Live Operational' : 'Customer POC'}</strong>
+              <small>{lastRefreshedAt ? `Live market · ${lastRefreshedAt}` : 'Seeded demonstration data'}</small>
+            </span>
+          </div>
+          <button><Settings size={18}/> Settings</button>
+          <div className="user"><span>OM</span><div><strong>Ohad Meiri</strong><small>Portfolio owner</small></div></div>
+        </div>
       </aside>
       <div className="main-column">
         <header className="topbar">
@@ -1179,13 +1258,28 @@ export default function App() {
           <div className="portfolio-picker">
             <span>PORTFOLIO</span>
             <strong>
-              {source?.source === 'uploaded' ? (source.name ?? 'Uploaded') : source?.source === 'alpaca' ? 'Alpaca Paper Account' : 'Strategic Growth'}
+              {source?.source === 'uploaded' ? (source.name ?? 'Uploaded') : source?.source === 'alpaca' ? 'Alpaca Paper Account' : lastRefreshedAt ? 'Live Portfolio' : 'Strategic Growth'}
             </strong>
           </div>
-          <span className={`source-badge ${source?.source === 'uploaded' || source?.source === 'alpaca' ? 'live' : 'demo'}`}>
-            {source?.source === 'uploaded' ? `Uploaded · ${source.count} holdings` : source?.source === 'alpaca' ? `Alpaca · ${source.count} pos` : 'Demo data'}
+          <span className={`source-badge ${source?.source === 'uploaded' || source?.source === 'alpaca' || lastRefreshedAt ? 'live' : 'demo'}`}>
+            {source?.source === 'uploaded' 
+              ? `Uploaded · ${source.count} holdings${lastRefreshedAt ? ' · ⚡ Live' : ''}` 
+              : source?.source === 'alpaca' 
+                ? `Alpaca · ${source.count} pos` 
+                : lastRefreshedAt 
+                  ? `Live Operational · ${holdings.length} assets` 
+                  : 'Demo data'}
           </span>
           <div className="topbar-actions">
+            <button
+              className="refresh-data-btn"
+              onClick={handleRefreshAllData}
+              disabled={refreshingLive}
+              title="Fetch fresh live quotes, calculate technical indicators & signals, and evaluate alerts"
+            >
+              <Zap size={14} className={refreshingLive ? 'spin' : ''} />
+              {refreshingLive ? 'Refreshing…' : '⚡ Refresh All Data'}
+            </button>
             <button
               className={`scenario-button ${liveStreaming ? 'complete' : ''}`}
               onClick={() => setLiveStreaming(!liveStreaming)}
@@ -1194,7 +1288,9 @@ export default function App() {
             >
               <Radio size={14} /> {liveStreaming ? '🔴 Live Stream' : '⏸ Stream Paused'}
             </button>
-            <span className="market-status"><i/> Market open</span>
+            <span className="market-status" title={lastRefreshedAt ? `Last refreshed at ${lastRefreshedAt}` : 'Market open'}>
+              <i/> {lastRefreshedAt ? `Live · ${lastRefreshedAt}` : 'Market open'}
+            </span>
             <button className={`scenario-button ${scenario ? 'complete' : ''}`} onClick={toggleScenario}>{scenario ? <ShieldCheck size={16}/> : <Play size={15}/>} {scenario ? 'Scenario active' : 'Run demo scenario'}</button>
             <button className="icon-button" onClick={() => setAlertPanelOpen(true)} title="Alert Center">
               <Bell size={18}/>

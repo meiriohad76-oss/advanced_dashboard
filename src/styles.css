@@ -52,6 +52,11 @@ button { color: inherit; }
 .scenario-button,.ask-button,.secondary-button { border: 0; border-radius: 8px; font-weight: 650; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 7px; }
 .scenario-button { background: var(--ink); color: white; padding: 10px 14px; }.scenario-button.complete { background: var(--accent-dark); }
 .icon-button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: white; cursor: pointer; position: relative; }.notification-dot { position:absolute; right:7px;top:6px;width:6px;height:6px;border-radius:50%;background:var(--red);border:1px solid white; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
+.refresh-data-btn { background: #0b6847; color: white; padding: 8px 12px; border: 0; border-radius: 8px; font-size: 11px; font-weight: 650; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: opacity .2s; }
+.refresh-data-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.refresh-data-btn:hover:not(:disabled) { background: #14875e; }
 main { padding: 28px; max-width: 1480px; margin: 0 auto; }
 .page-title-row { display: flex; justify-content: space-between; align-items: end; margin: 4px 0 24px; }.page-title-row.simple { margin-bottom: 22px; }
 .eyebrow { font-size: 9px; color: var(--accent-dark); letter-spacing: .13em; font-weight: 750; }

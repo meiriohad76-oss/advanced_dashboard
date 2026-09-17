@@ -201,3 +201,16 @@ def test_api_market_quotes_endpoint():
         assert "SPY" in data
         assert data["SPY"]["price"] == 756.0
         assert data["SPY"]["provider"] == "Alpaca Markets"
+
+
+def test_api_market_refresh_endpoint():
+    res = client.post("/api/v1/market/refresh")
+    assert res.status_code == 200
+    data = res.json()["data"]
+    assert "holdings" in data
+    assert "alerts" in data
+    assert "signals" in data
+    assert "summary" in data
+    assert "meta" in data
+    assert len(data["holdings"]) > 0
+    assert data["meta"]["updated_count"] >= 0

@@ -181,6 +181,7 @@
     <header class="top">
       <div class="picker"><small>PORTFOLIO</small><strong>Strategic Growth</strong></div>
       <div class="actions">
+        <button class="run" id="btnRefreshAll" style="background:#0b6847;color:#fff;border:1px solid #14875e;font-weight:700;margin-right:6px">⚡ Refresh All Data</button>
         <button class="run" id="btnLiveStream" style="background:#17211d;margin-right:6px">⏸ Stream Paused</button>
         <span class="market">Market open</span>
         <button class="run" id="run">▶ Run demo scenario</button>
@@ -12248,6 +12249,59 @@ function toggleLiveStream() {
 }
 
 if (btnLiveStream) btnLiveStream.onclick = toggleLiveStream;
+
+const btnRefreshAll = document.getElementById('btnRefreshAll');
+if (btnRefreshAll) {
+  btnRefreshAll.onclick = async () => {
+    btnRefreshAll.textContent = 'Refreshing…';
+    btnRefreshAll.disabled = true;
+    try {
+      const res = await fetch('/api/v1/market/refresh', { method: 'POST' }).catch(() => fetch('http://127.0.0.1:8000/api/v1/market/refresh', { method: 'POST' }));
+      if (res && res.ok) {
+        const j = await res.json();
+        const data = j.data;
+        if (data && data.holdings) {
+          data.holdings.forEach(dh => {
+            const h = HOLDINGS.find(x => x.s.toUpperCase() === dh.symbol.toUpperCase());
+            if (h) {
+              h.price = dh.price;
+              h.dc = dh.dayChange;
+              h.rsi = dh.rsi;
+              h.macd = dh.macdBullish;
+              h.s50 = dh.aboveSma50;
+              h.s200 = dh.aboveSma200;
+              h.slope = dh.trendSlopePositive;
+              h.brk = dh.breakout20d;
+              h.rv = dh.relativeVolume;
+              h.hasSignalInputs = true;
+            } else if (dh.symbol !== 'CASH') {
+              HOLDINGS.push({
+                s: dh.symbol, n: dh.name, sec: dh.sector,
+                price: dh.price, dc: dh.dayChange, w: dh.weight,
+                rsi: dh.rsi, macd: dh.macdBullish, s50: dh.aboveSma50, s200: dh.aboveSma200,
+                slope: dh.trendSlopePositive, brk: dh.breakout20d, rv: dh.relativeVolume,
+                hasSignalInputs: true
+              });
+            }
+          });
+          render();
+          const t = document.getElementById('toast');
+          if (t) {
+            t.querySelector('strong').textContent = '⚡ Live Operational Refresh';
+            t.querySelector('small').textContent = `Updated ${data.holdings.length} assets with live market quotes & technical indicators (${data.meta?.provider || 'Live Data'}).`;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 5000);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Refresh error:', e);
+    } finally {
+      btnRefreshAll.textContent = '⚡ Refresh All Data';
+      btnRefreshAll.disabled = false;
+    }
+  };
+}
 
 // Alpaca Broker and Market Data Integration in preview.html (§13, §14, §97)
 const btnSyncAlpacaPreview = document.getElementById('btnSyncAlpacaPreview');

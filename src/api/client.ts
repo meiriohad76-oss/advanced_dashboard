@@ -19,6 +19,22 @@ export interface DemoState {
   alerts: AlertItem[]
 }
 
+export interface MarketRefreshResponse {
+  holdings: Holding[]
+  alerts: AlertItem[]
+  signals: unknown[]
+  risk: Record<string, unknown>
+  summary: Record<string, unknown>
+  source?: PortfolioSource
+  meta: {
+    updated_count: number
+    total_symbols: number
+    provider: string
+    timestamp: string
+    iso_timestamp: string
+  }
+}
+
 async function upload<T>(path: string, file: File): Promise<T> {
   const body = new FormData()
   body.append('file', file)
@@ -86,6 +102,7 @@ export const api = {
   marketStatus: () => request<MarketStatus>('/api/v1/market/status'),
   marketQuote: (symbol: string) => request<Quote>(`/api/v1/market/quote/${encodeURIComponent(symbol)}`),
   marketQuotes: (symbols: string[]) => request<Record<string, Quote>>('/api/v1/market/quotes', { method: 'POST', body: JSON.stringify({ symbols }) }),
+  marketRefresh: () => request<MarketRefreshResponse>('/api/v1/market/refresh', { method: 'POST' }),
   brokerAlpacaStatus: () => request<BrokerAlpacaStatus>('/api/v1/broker/alpaca/status'),
   brokerAlpacaSync: () => request<BrokerAlpacaSyncResult>('/api/v1/broker/alpaca/sync', { method: 'POST' }),
 }

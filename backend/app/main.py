@@ -26,6 +26,7 @@ from .broker import alpaca_broker
 from .company_names import resolve_company_name
 from .data import BASE_ALERTS, SCENARIO_ALERT, holdings_for_scenario
 from .engine import assess_holding, calculate_risk
+from .live_enricher import enrich_holdings_with_live_market, generate_live_alerts
 from .market_data import market_router
 from .models import AskRequest, AskResponse, Holding
 from .portfolio_fit import compute_fit
@@ -41,17 +42,22 @@ app.add_middleware(
 )
 
 _scenario_active = False
+_live_enriched_holdings: list[Holding] | None = None
+_live_enriched_meta: dict[str, Any] | None = None
 
 
 def envelope(data: object) -> dict:
     return {"data": data, "meta": {"timestamp": datetime.now(timezone.utc).isoformat(), "request_id": str(uuid4())}}
 
 
-# ---- Active data source: an uploaded portfolio (DB) overrides the seeded demo book. ----
+# ---- Active data source: live quotes take precedence; an uploaded portfolio (DB) overrides the seeded demo book. ----
 
 def current_holdings() -> list[Holding]:
-    """The holdings the dashboard serves. An uploaded portfolio (persisted in the DB)
-    is the source of truth; otherwise the seeded demo book (with the scenario toggle)."""
+    """The holdings the dashboard serves. If live enriched holdings are available,
+    they take precedence. Otherwise an uploaded portfolio (persisted in the DB),
+    otherwise the seeded demo book (with the scenario toggle)."""
+    if _live_enriched_holdings is not None:
+        return _live_enriched_holdings
     stored = store.latest_list("portfolio")
     if stored and stored["payload"].get("holdings"):
         return [Holding(**item) for item in stored["payload"]["holdings"]]
@@ -60,13 +66,18 @@ def current_holdings() -> list[Holding]:
 
 def _portfolio_source() -> dict:
     stored = store.latest_list("portfolio")
+    refreshed = _live_enriched_meta.get("timestamp") if _live_enriched_meta else None
     if stored and stored["payload"].get("holdings"):
         payload = stored["payload"]
         source_type = payload.get("broker") or "uploaded"
+        last_ref = refreshed or payload.get("refreshed_at")
         return {
             "source": source_type,
+            "mode": "live" if last_ref else "uploaded",
             "name": stored["name"],
             "imported_at": stored["imported_at"],
+            "last_refreshed": last_ref,
+            "provider": _live_enriched_meta.get("provider") if _live_enriched_meta else None,
             "count": len(payload["holdings"]),
             "has_signal_inputs": bool(payload.get("has_signal_inputs")),
             "portfolio_value": payload.get("portfolio_value"),
@@ -74,9 +85,12 @@ def _portfolio_source() -> dict:
             "scenario_active": False,
         }
     return {
-        "source": "seed",
-        "name": None,
+        "source": "live" if refreshed else "seed",
+        "mode": "live" if refreshed else "demo",
+        "name": "Live Strategic Growth" if refreshed else None,
         "imported_at": None,
+        "last_refreshed": refreshed,
+        "provider": _live_enriched_meta.get("provider") if _live_enriched_meta else None,
         "count": len(holdings_for_scenario(_scenario_active)),
         "has_signal_inputs": True,
         "scenario_active": _scenario_active,
@@ -84,8 +98,18 @@ def _portfolio_source() -> dict:
 
 
 @app.get("/api/v1/system/health")
-def health() -> dict:
-    return envelope({"status": "healthy", "mode": "seeded-demo", "database": "not-required", "calculation_engine": "healthy", "data_freshness": "current"})
+async def health() -> dict:
+    active_info = await market_router.get_active_provider_info()
+    is_live = bool(_live_enriched_meta or store.latest_list("portfolio"))
+    return envelope({
+        "status": "healthy",
+        "mode": "live-operational" if is_live else "seeded-demo",
+        "market_data": active_info,
+        "database": "connected" if store.latest_list("portfolio") else "not-required",
+        "calculation_engine": "healthy",
+        "data_freshness": "live" if _live_enriched_meta else "current",
+        "last_refreshed": _live_enriched_meta.get("timestamp") if _live_enriched_meta else None,
+    })
 
 
 @app.post("/api/v1/tickers/resolve")
@@ -98,9 +122,12 @@ def resolve_tickers(payload: dict) -> dict:
 @app.get("/api/v1/demo/state")
 def demo_state() -> dict:
     holdings = current_holdings()
-    uploaded = _portfolio_source()["source"] in {"uploaded", "alpaca"}
-    alerts = BASE_ALERTS if uploaded else ([_scenario_alert()] + BASE_ALERTS if _scenario_active else BASE_ALERTS)
-    return envelope({"scenario_active": _scenario_active and not uploaded,
+    if _live_enriched_holdings is not None:
+        alerts = generate_live_alerts(_live_enriched_holdings)
+    else:
+        uploaded = _portfolio_source()["source"] in {"uploaded", "alpaca"}
+        alerts = BASE_ALERTS if uploaded else ([_scenario_alert()] + BASE_ALERTS if _scenario_active else BASE_ALERTS)
+    return envelope({"scenario_active": _scenario_active and not _portfolio_source()["source"] in {"uploaded", "alpaca"},
                      "source": _portfolio_source(),
                      "holdings": [holding.model_dump(by_alias=True) for holding in holdings],
                      "alerts": [alert.model_dump() for alert in alerts]})
@@ -112,10 +139,12 @@ def _scenario_alert():
 
 @app.post("/api/v1/demo/scenario/{action}")
 def scenario(action: str) -> dict:
-    global _scenario_active
+    global _scenario_active, _live_enriched_holdings, _live_enriched_meta
     if action not in {"activate", "reset"}:
         raise HTTPException(status_code=400, detail="action must be activate or reset")
     _scenario_active = action == "activate"
+    _live_enriched_holdings = None
+    _live_enriched_meta = None
     return demo_state()
 
 
@@ -187,12 +216,26 @@ def portfolio_fit(holding: Holding = Depends(get_tradable_holding)) -> dict:
 async def portfolio_import(file: UploadFile = File(...)) -> dict:
     """Upload a real portfolio as CSV or Excel. Parsed holdings are persisted and become
     the source of truth across the dashboard (value, weights, signals, risk, fit, ratings)."""
+    global _live_enriched_holdings, _live_enriched_meta
     content = await file.read()
     try:
         rows = imports.read_tabular(file.filename or "", content)
         parsed = imports.parse_portfolio(rows)
     except imports.ImportError_ as exc:
         raise HTTPException(status_code=422, detail=str(exc))
+
+    # Auto-enrich with live market quotes & technical indicators
+    try:
+        raw_holdings = [Holding(**h) for h in parsed["holdings"]]
+        enriched, meta = await enrich_holdings_with_live_market(raw_holdings, force_refresh=True)
+        parsed["holdings"] = [h.model_dump(by_alias=True) for h in enriched]
+        parsed["has_signal_inputs"] = True
+        parsed["refreshed_at"] = meta.get("timestamp")
+        _live_enriched_holdings = enriched
+        _live_enriched_meta = meta
+    except Exception:
+        pass
+
     store.save_list("portfolio", parsed, name=file.filename)
     return envelope({**_portfolio_source(), "warnings": parsed["warnings"]})
 
@@ -200,6 +243,9 @@ async def portfolio_import(file: UploadFile = File(...)) -> dict:
 @app.post("/api/v1/portfolio/reset")
 def portfolio_reset() -> dict:
     """Discard the uploaded portfolio and revert to the seeded demo book."""
+    global _live_enriched_holdings, _live_enriched_meta
+    _live_enriched_holdings = None
+    _live_enriched_meta = None
     store.clear_list("portfolio")
     return envelope(_portfolio_source())
 
@@ -395,6 +441,47 @@ async def market_quotes(payload: dict) -> dict:
     symbols = payload.get("symbols", [])
     quotes = await market_router.get_quotes(symbols)
     return envelope({k: v.model_dump(by_alias=True) for k, v in quotes.items()})
+
+
+@app.post("/api/v1/market/refresh")
+async def market_refresh(payload: dict | None = None) -> dict:
+    """Full operational refresh (§13, §14):
+    1. Re-fetches live market quotes and 1y historical price bars
+    2. Recalculates technical indicators (RSI, SMA50, SMA200, MACD, Trend Slope, RelVol)
+    3. Recomputes portfolio market values, today's P&L, and weights
+    4. Recalculates all signals, portfolio fit, and risk metrics
+    5. Re-evaluates system and portfolio alerts
+    6. Persists updated state to DB if an uploaded portfolio is active
+    """
+    global _live_enriched_holdings, _live_enriched_meta
+    base = current_holdings()
+    enriched, meta = await enrich_holdings_with_live_market(base, force_refresh=True)
+    _live_enriched_holdings = enriched
+    _live_enriched_meta = meta
+
+    # If an uploaded portfolio is in DB, update stored holdings in place
+    stored = store.latest_list("portfolio")
+    if stored and stored["payload"].get("holdings"):
+        p_data = dict(stored["payload"])
+        p_data["holdings"] = [h.model_dump(by_alias=True) for h in enriched]
+        p_data["has_signal_inputs"] = True
+        p_data["refreshed_at"] = meta.get("timestamp")
+        store.update_latest_list("portfolio", p_data)
+
+    live_alerts = generate_live_alerts(enriched)
+    signals_data = [assess_holding(h).model_dump() for h in enriched if h.symbol != "CASH"]
+    risk_data = calculate_risk(enriched).model_dump()
+    summary_data = portfolio_summary()["data"]
+
+    return envelope({
+        "holdings": [h.model_dump(by_alias=True) for h in enriched],
+        "alerts": [a.model_dump() for a in live_alerts],
+        "signals": signals_data,
+        "risk": risk_data,
+        "summary": summary_data,
+        "source": _portfolio_source(),
+        "meta": meta,
+    })
 
 
 @app.get("/api/v1/broker/alpaca/status")
