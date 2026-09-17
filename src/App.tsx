@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Activity, AlertTriangle, ArrowRight, BarChart3, Bell, BrainCircuit, BriefcaseBusiness,
-  ChevronRight, CircleDollarSign, Database, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
-  Play, Plus, Radar, Radio, Search, ServerCog, Settings, ShieldCheck, Sparkles,
+  Activity, AlertTriangle, ArrowRight, BarChart2, BarChart3, Bell, BrainCircuit, BriefcaseBusiness,
+  Calendar, ChevronRight, CircleDollarSign, Database, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
+  Play, Plus, Radar, Radio, Search, ServerCog, Settings, ShieldCheck, Sparkles, Sun,
   Target, TrendingDown, TrendingUp, Upload, X, Zap, Scale, LayoutGrid, Table,
 } from 'lucide-react'
 import { answerQuestion, assessHolding, portfolioRisk } from './domain/engine'
@@ -28,13 +28,16 @@ import { CandleChart } from './components/CandleChart'
 import { SectorTreemap } from './components/SectorTreemap'
 import { CorrelationHeatmap } from './components/CorrelationHeatmap'
 import { BenchmarkChart } from './components/BenchmarkChart'
+import { CatalystRadar } from './components/CatalystRadar'
+import { MorningBriefingModal } from './components/MorningBriefingModal'
+import { BacktestModal } from './components/BacktestModal'
 import { resolveCompanyName } from './data/companyNames'
 import { buildTickerRatings, getPriceTargets } from './domain/ratings'
 import { evaluateAlert } from './domain/alertEngine'
 import type { AlertItem, Holding, PortfolioSource, ScoreComponent, TickerRatings, UserAlert } from './types'
 
 
-type Page = 'Overview' | 'Portfolio' | 'Signals' | 'Watchlist' | 'Alerts' | 'Analytics' | 'Import' | 'System'
+type Page = 'Overview' | 'Portfolio' | 'Signals' | 'Catalysts' | 'Watchlist' | 'Alerts' | 'Analytics' | 'Import' | 'System'
 
 const formatCurrency = (value: number, compact = false) => new Intl.NumberFormat('en-US', {
   style: 'currency', currency: 'USD', maximumFractionDigits: compact ? 0 : 2,
@@ -45,6 +48,7 @@ const navItems = [
   { label: 'Overview' as Page, icon: LayoutDashboard },
   { label: 'Portfolio' as Page, icon: BriefcaseBusiness },
   { label: 'Signals' as Page, icon: Radar },
+  { label: 'Catalysts' as Page, icon: Calendar },
   { label: 'Watchlist' as Page, icon: ListChecks },
   { label: 'Alerts' as Page, icon: Bell },
   { label: 'Analytics' as Page, icon: BarChart3 },
@@ -1004,7 +1008,7 @@ function AlertsPage({
   )
 }
 
-function AnalyticsPage({ holdings }: { holdings: Holding[] }) {
+function AnalyticsPage({ holdings, onOpenBacktest }: { holdings: Holding[]; onOpenBacktest?: () => void }) {
   const risk = portfolioRisk(holdings)
   const [shockPct, setShockPct] = useState(10)
 
@@ -1016,7 +1020,18 @@ function AnalyticsPage({ holdings }: { holdings: Holding[] }) {
 
   return (
     <>
-      <PageHeading eyebrow="PORTFOLIO CONTEXT" title="Risk analytics & Stress Testing" copy="Beta sensitivity, 95% Parametric VaR, and interactive market shock simulation." />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+        <PageHeading eyebrow="PORTFOLIO CONTEXT" title="Risk analytics & Stress Testing" copy="Beta sensitivity, 95% Parametric VaR, and interactive market shock simulation." />
+        {onOpenBacktest && (
+          <button
+            className="ask-button"
+            onClick={onOpenBacktest}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '12px', marginTop: '8px' }}
+          >
+            <BarChart2 size={15} /> Launch Strategy Backtester
+          </button>
+        )}
+      </div>
       <div className="analytics-grid">
         <section className="panel risk-hero">
           <span className="eyebrow">RISK POSTURE</span>
@@ -1227,6 +1242,8 @@ export default function App() {
   const [source, setSource] = useState<PortfolioSource | null>(null)
   const [refreshingLive, setRefreshingLive] = useState(false)
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
+  const [briefingOpen, setBriefingOpen] = useState(false)
+  const [backtestOpen, setBacktestOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -1407,6 +1424,7 @@ export default function App() {
   const renderPage = () => {
     if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected} onRefresh={handleRefreshAllData} refreshing={refreshingLive} onOpenRebalance={() => setRebalanceModalOpen(true)}/>
     if (page === 'Signals') return <SignalsPage holdings={holdings} onSelect={setSelected}/>
+    if (page === 'Catalysts') return <CatalystRadar holdings={holdings} onSelectHolding={setSelected}/>
     if (page === 'Watchlist') return <WatchlistPage/>
     if (page === 'Alerts') return (
       <AlertsPage 
@@ -1419,7 +1437,7 @@ export default function App() {
         onOpenPanel={() => setAlertPanelOpen(true)}
       />
     )
-    if (page === 'Analytics') return <AnalyticsPage holdings={holdings}/>
+    if (page === 'Analytics') return <AnalyticsPage holdings={holdings} onOpenBacktest={() => setBacktestOpen(true)}/>
     if (page === 'Import') return <ImportPage onChanged={reloadState}/>
     if (page === 'System') return <SystemPage onOpenNotifications={() => setNotificationModalOpen(true)}/>
     return <Overview holdings={holdings} scenario={scenario} onSelect={setSelected} onAsk={() => setAskOpen(true)} onOpenDecision={(h) => setDecisionHolding(h)} onNavigate={(p) => setPage(p)}/>
@@ -1480,6 +1498,22 @@ export default function App() {
               <i/> {lastRefreshedAt ? `Live · ${lastRefreshedAt}` : 'Market open'}
             </span>
             <button className={`scenario-button ${scenario ? 'complete' : ''}`} onClick={toggleScenario}>{scenario ? <ShieldCheck size={16}/> : <Play size={15}/>} {scenario ? 'Scenario active' : 'Run demo scenario'}</button>
+            <button
+              className="scenario-button"
+              onClick={() => setBriefingOpen(true)}
+              title="Daily Pre-Market Executive Briefing & Telegram Dispatch"
+              style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }}
+            >
+              <Sun size={14} color="#b45309" /> ☀️ Morning Briefing
+            </button>
+            <button
+              className="scenario-button"
+              onClick={() => setBacktestOpen(true)}
+              title="Strategy Rule Backtester"
+              style={{ background: '#eff6ff', color: '#1e40af', borderColor: '#bfdbfe' }}
+            >
+              <BarChart2 size={14} color="#1d4ed8" /> 🧪 Backtester
+            </button>
             <button className="icon-button" onClick={() => setAlertPanelOpen(true)} title="Alert Center">
               <Bell size={18}/>
               {(scenario || userAlerts.length > 0) && <i className="notification-dot"/>}
@@ -1497,6 +1531,8 @@ export default function App() {
       {alertPanelOpen && <AlertPanel alerts={alerts} userAlerts={userAlerts} holdings={holdings} onClose={() => setAlertPanelOpen(false)} onAddAlert={handleAddAlert} onDeleteAlert={handleDeleteAlert} />}
       {notificationModalOpen && <NotificationSettingsModal onClose={() => setNotificationModalOpen(false)} />}
       {rebalanceModalOpen && <RebalanceModal onClose={() => setRebalanceModalOpen(false)} onSuccess={reloadState} />}
+      {briefingOpen && <MorningBriefingModal onClose={() => setBriefingOpen(false)} />}
+      {backtestOpen && <BacktestModal onClose={() => setBacktestOpen(false)} />}
       {askOpen && <AskPanel holdings={holdings} onClose={() => setAskOpen(false)}/>} 
       {scenario && <div className="scenario-toast"><span><Target size={18}/></span><div><strong>Decision event detected</strong><small>CRDO crossed into Strong Entry at 90/100</small></div><button onClick={() => setDecisionHolding(holdings[0])}>Review <ArrowRight size={14}/></button><button className="toast-close" onClick={toggleScenario}><X size={15}/></button></div>}
       {liveToast && (

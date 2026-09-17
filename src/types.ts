@@ -292,4 +292,172 @@ export interface BenchmarkComparisonResponse {
   metrics: BenchmarkMetrics
 }
 
+// Catalysts (Earnings & Dividends)
+export interface EarningsEvent {
+  symbol: string
+  name: string
+  earnings_date: string
+  days_until: number
+  timing: 'BMO' | 'AMC' | 'Unspecified'
+  eps_estimate: number | null
+  last_reported_eps: number | null
+  implied_move_pct: number
+  is_high_risk: boolean
+  position_value: number
+  weight_pct: number
+}
+
+export interface EarningsSummary {
+  total_upcoming: number
+  this_week: number
+  next_30_days: number
+  high_risk_count: number
+}
+
+export interface EarningsCalendarResponse {
+  events: EarningsEvent[]
+  summary: EarningsSummary
+}
+
+export interface DividendSummary {
+  total_annual_income: number
+  average_monthly_income: number
+  portfolio_yield_pct: number
+  top_payer: string
+  paying_positions_count: number
+}
+
+export interface MonthlyCashflow {
+  month: string
+  month_num: number
+  amount: number
+  tickers: string[]
+}
+
+export interface HoldingDividend {
+  symbol: string
+  name: string
+  quantity: number
+  price: number
+  position_value: number
+  yield_pct: number
+  annual_dps: number
+  annual_income: number
+  monthly_income: number
+  payout_frequency: string
+  next_ex_date: string | null
+}
+
+export interface UpcomingExDate {
+  symbol: string
+  name: string
+  ex_date: string
+  days_to_ex: number
+  payout_per_share: number
+  estimated_cashflow: number
+}
+
+export interface DividendData {
+  summary: DividendSummary
+  monthly_cashflow: MonthlyCashflow[]
+  holdings: HoldingDividend[]
+  upcoming_ex_dates: UpcomingExDate[]
+}
+
+// Pre-Market Morning Briefing
+export interface DailyBriefingPulse {
+  total_value: number
+  day_change_amount: number
+  day_change_pct: number
+  top_gainer?: { symbol: string; change: number } | null
+  top_loser?: { symbol: string; change: number } | null
+}
+
+export interface DailyBriefingSetup {
+  symbol: string
+  name: string
+  price: number
+  score: number
+  state: string
+  rsi: number
+  breakout: boolean
+  weight: number
+}
+
+export interface DailyBriefing {
+  date: string
+  generated_at: string
+  pulse: DailyBriefingPulse
+  top_setups: DailyBriefingSetup[]
+  catalysts: {
+    earnings_soon: EarningsEvent[]
+    dividends_soon: UpcomingExDate[]
+  }
+  sentiment: {
+    ranks_count: number
+    highlights: string[]
+  }
+  risk: {
+    beta: number
+    var_95: number
+    executive_stance: string
+  }
+  telegram_markdown: string
+}
+
+// Backtest
+export interface BacktestParams {
+  entry_score?: number
+  exit_score?: number
+  lookback?: '6mo' | '1y' | '2y' | '3y'
+  initial_capital?: number
+}
+
+export interface BacktestMetrics {
+  final_equity: number
+  benchmark_final_equity: number
+  total_return_pct: number
+  benchmark_return_pct: number
+  alpha_pct: number
+  cagr_pct: number
+  sharpe_ratio: number
+  max_drawdown_pct: number
+  win_rate_pct: number
+  profit_factor: number
+  trades_count: number
+}
+
+export interface BacktestTrade {
+  entry_date: string
+  exit_date: string
+  duration_days: number
+  return_pct: number
+  entry_equity: number
+  exit_equity: number
+  win: boolean
+}
+
+export interface BacktestCurvePoint {
+  date: string
+  portfolio: number
+  benchmark: number
+  drawdown_pct: number
+  score: number
+  in_position: boolean
+}
+
+export interface BacktestResult {
+  parameters: {
+    entry_score: number
+    exit_score: number
+    lookback: string
+    trading_days: number
+    initial_capital: number
+  }
+  metrics: BacktestMetrics
+  trades: BacktestTrade[]
+  equity_curve: BacktestCurvePoint[]
+}
+
+
 

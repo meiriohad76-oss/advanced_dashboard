@@ -21,7 +21,7 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from . import alerts, analytics_service, bars_service, imports, notifications, ratings_ingest, store
+from . import alerts, analytics_service, backtest_service, bars_service, briefing_service, catalysts_service, imports, notifications, ratings_ingest, store
 from .broker.alpaca_broker import alpaca_broker, calculate_portfolio_rebalance
 from .company_names import resolve_company_name
 from .data import BASE_ALERTS, SCENARIO_ALERT, holdings_for_scenario
@@ -466,6 +466,46 @@ async def notifications_test() -> dict:
     return envelope(res)
 
 
+@app.post("/api/v1/notifications/telegram/webhook")
+async def notifications_telegram_webhook(payload: dict) -> dict:
+    """Receive Telegram webhook callbacks for interactive buttons (trade execution, dismiss)."""
+    res = await notifications.handle_telegram_update(payload)
+    return envelope(res)
+
+
+@app.post("/api/v1/notifications/telegram/send-trade-prompt")
+async def notifications_send_trade_prompt(payload: dict) -> dict:
+    """Dispatch an interactive trade authorization card to Telegram with inline execution buttons."""
+    symbol = payload.get("symbol", "").upper()
+    qty = float(payload.get("qty", 10.0))
+    side = payload.get("side", "buy")
+    tp = float(payload.get("take_profit_price")) if payload.get("take_profit_price") else None
+    sl = float(payload.get("stop_loss_price")) if payload.get("stop_loss_price") else None
+
+    settings = notifications.get_settings()
+    token = settings.get("telegram_token", "")
+    chat_id = settings.get("telegram_chat_id", "")
+    if not token or not chat_id:
+        raise HTTPException(status_code=400, detail="Telegram bot token or chat ID is not configured")
+
+    h = next((item for item in current_holdings() if item.symbol == symbol), None)
+    price = h.price if h else float(payload.get("price", 100.0))
+    score = assess_holding(h).score if h else 80.0
+
+    res = await notifications.send_telegram_trade_prompt(
+        token=token,
+        chat_id=chat_id,
+        symbol=symbol,
+        qty=qty,
+        side=side,
+        price=price,
+        score=score,
+        take_profit=tp,
+        stop_loss=sl,
+    )
+    return envelope(res)
+
+
 @app.get("/api/v1/scheduler/status")
 def scheduler_status() -> dict:
     """Get status of automated extractor background runner."""
@@ -498,6 +538,67 @@ async def analytics_benchmark_comparison(range: str = "1y") -> dict:
     holdings_dict = [h.model_dump() for h in current_holdings()]
     data = await analytics_service.get_benchmark_comparison(holdings_dict, range_str=range)
     return envelope(data)
+
+
+@app.post("/api/v1/analytics/backtest")
+def analytics_backtest(payload: dict | None = None) -> dict:
+    """Run quantitative strategy backtest simulation over historical lookback periods (§13, §14)."""
+    p = payload or {}
+    entry_score = int(p.get("entry_score", 75))
+    exit_score = int(p.get("exit_score", 50))
+    lookback = str(p.get("lookback", "1y"))
+    initial_capital = float(p.get("initial_capital", 100000.0))
+
+    holdings = current_holdings()
+    res = backtest_service.run_backtest(
+        holdings=holdings,
+        entry_score=entry_score,
+        exit_score=exit_score,
+        lookback=lookback,
+        initial_capital=initial_capital,
+    )
+    return envelope(res)
+
+
+@app.get("/api/v1/catalysts/earnings")
+async def catalysts_earnings() -> dict:
+    """Upcoming earnings announcements, fiscal timing (BMO/AMC), and risk flags for portfolio holdings (§13, §14)."""
+    holdings = current_holdings()
+    res = await catalysts_service.get_earnings_calendar(holdings)
+    return envelope(res)
+
+
+@app.get("/api/v1/catalysts/dividends")
+def catalysts_dividends() -> dict:
+    """Dividend cashflow projections, monthly income distribution, and upcoming ex-dates (§13, §14)."""
+    holdings = current_holdings()
+    res = catalysts_service.get_dividend_projections(holdings)
+    return envelope(res)
+
+
+@app.get("/api/v1/briefing/daily")
+async def briefing_daily() -> dict:
+    """Generate pre-market daily executive briefing memo synthesizing performance, catalysts, and risk (§13, §14)."""
+    holdings = current_holdings()
+    res = await briefing_service.generate_daily_briefing(holdings)
+    return envelope(res)
+
+
+@app.post("/api/v1/briefing/dispatch")
+async def briefing_dispatch(payload: dict | None = None) -> dict:
+    """Dispatch the morning briefing memo directly to Telegram (§13, §14)."""
+    p = payload or {}
+    settings = notifications.get_settings()
+    token = p.get("telegram_token") or settings.get("telegram_token", "")
+    chat_id = p.get("telegram_chat_id") or settings.get("telegram_chat_id", "")
+    if not token or not chat_id:
+        raise HTTPException(status_code=400, detail="Telegram bot token or chat ID is not configured")
+
+    holdings = current_holdings()
+    briefing = await briefing_service.generate_daily_briefing(holdings)
+    res = await briefing_service.dispatch_briefing_to_telegram(token=token, chat_id=chat_id, briefing=briefing)
+    return envelope(res)
+
 
 
 @app.post("/api/v1/assistant/ask", response_model=dict)
@@ -663,6 +764,11 @@ async def broker_alpaca_order(payload: dict) -> dict:
     if not symbol or not qty:
         raise HTTPException(status_code=400, detail="symbol and qty are required")
 
+    order_class = payload.get("order_class", "simple")
+    take_profit = float(payload.get("take_profit_price")) if payload.get("take_profit_price") else None
+    stop_loss = float(payload.get("stop_loss_price")) if payload.get("stop_loss_price") else None
+    simulate = bool(payload.get("simulate", False))
+
     try:
         res = await alpaca_broker.place_order(
             symbol=symbol,
@@ -671,6 +777,10 @@ async def broker_alpaca_order(payload: dict) -> dict:
             order_type=order_type,
             time_in_force=time_in_force,
             limit_price=float(limit_price) if limit_price else None,
+            order_class=order_class,
+            take_profit_price=take_profit,
+            stop_loss_price=stop_loss,
+            simulate=simulate,
         )
         return envelope(res)
     except Exception as exc:

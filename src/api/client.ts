@@ -152,5 +152,33 @@ export const api = {
     request<import('../types').CorrelationMatrixResponse>(`/api/v1/analytics/correlation?max_symbols=${encodeURIComponent(maxSymbols)}`),
   benchmarkComparison: (range = '1y') =>
     request<import('../types').BenchmarkComparisonResponse>(`/api/v1/analytics/benchmark-comparison?range=${encodeURIComponent(range)}`),
+  catalystsEarnings: () =>
+    request<import('../types').EarningsCalendarResponse>('/api/v1/catalysts/earnings'),
+  catalystsDividends: () =>
+    request<import('../types').DividendData>('/api/v1/catalysts/dividends'),
+  briefingDaily: () =>
+    request<import('../types').DailyBriefing>('/api/v1/briefing/daily'),
+  briefingDispatch: (token?: string, chatId?: string) =>
+    request<{ sent: boolean; message_id?: number; error?: string }>('/api/v1/briefing/dispatch', {
+      method: 'POST',
+      body: JSON.stringify({ telegram_token: token, telegram_chat_id: chatId }),
+    }),
+  analyticsBacktest: (params: import('../types').BacktestParams) =>
+    request<import('../types').BacktestResult>('/api/v1/analytics/backtest', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
+  telegramSendTradePrompt: (params: {
+    symbol: string
+    qty: number
+    side: 'buy' | 'sell'
+    price?: number
+    take_profit_price?: number
+    stop_loss_price?: number
+  }) =>
+    request<Record<string, unknown>>('/api/v1/notifications/telegram/send-trade-prompt', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
 }
 

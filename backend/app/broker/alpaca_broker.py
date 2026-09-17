@@ -201,6 +201,10 @@ class AlpacaBrokerSync:
         order_type: str = "market",
         time_in_force: str = "day",
         limit_price: float | None = None,
+        order_class: str = "simple",
+        take_profit_price: float | None = None,
+        stop_loss_price: float | None = None,
+        simulate: bool = False,
     ) -> dict[str, Any]:
         """Place an order with Alpaca paper trading account, with simulation fallback if unconfigured."""
         sym = symbol.strip().upper()
@@ -208,7 +212,7 @@ class AlpacaBrokerSync:
         if order_side not in ("buy", "sell"):
             raise ValueError("Side must be 'buy' or 'sell'")
 
-        if not self.is_configured:
+        if simulate or not self.is_configured:
             # Simulated paper order response for development & offline testing
             from uuid import uuid4
             return {
@@ -219,10 +223,13 @@ class AlpacaBrokerSync:
                 "side": order_side,
                 "type": order_type,
                 "time_in_force": time_in_force,
+                "order_class": order_class,
+                "take_profit_price": take_profit_price,
+                "stop_loss_price": stop_loss_price,
                 "status": "filled",
                 "simulated": True,
                 "created_at": datetime.now(timezone.utc).isoformat(),
-                "message": f"Simulated paper trade: {order_side.upper()} {qty} {sym} executed.",
+                "message": f"Simulated paper trade: {order_side.upper()} {qty} {sym} (Class: {order_class}) executed.",
             }
 
         payload: dict[str, Any] = {
@@ -235,6 +242,13 @@ class AlpacaBrokerSync:
         if limit_price is not None:
             payload["limit_price"] = limit_price
 
+        if order_class == "bracket":
+            payload["order_class"] = "bracket"
+            if take_profit_price is not None:
+                payload["take_profit"] = {"limit_price": round(take_profit_price, 2)}
+            if stop_loss_price is not None:
+                payload["stop_loss"] = {"stop_price": round(stop_loss_price, 2)}
+
         async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
             res = await client.post(f"{self.base_url}/v2/orders", json=payload, headers=self._headers())
             if res.status_code in (200, 201):
@@ -245,6 +259,7 @@ class AlpacaBrokerSync:
                     "qty": float(data.get("qty", qty)),
                     "side": data.get("side"),
                     "type": data.get("type"),
+                    "order_class": data.get("order_class", order_class),
                     "status": data.get("status", "accepted"),
                     "simulated": False,
                     "created_at": data.get("created_at"),

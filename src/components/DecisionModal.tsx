@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { CheckCircle2, Printer, ShieldCheck, Sparkles, Target, TrendingUp, X } from 'lucide-react'
+import { CheckCircle2, Printer, Send, ShieldCheck, Sparkles, Target, TrendingUp, X } from 'lucide-react'
 import { ModalOverlay } from './ModalOverlay'
 import type { Holding } from '../types'
 import { assessHolding } from '../domain/engine'
+import { api } from '../api/client'
 
 export interface DecisionModalProps {
   holding: Holding
@@ -13,6 +14,8 @@ export interface DecisionModalProps {
 
 export function DecisionModal({ holding, holdings, onClose, onSimulate }: DecisionModalProps) {
   const [executed, setExecuted] = useState(false)
+  const [telegramSent, setTelegramSent] = useState(false)
+  const [sendingTelegram, setSendingTelegram] = useState(false)
   const assessment = assessHolding(holding)
 
   const sectorWeight = holdings.filter((h) => h.sector === holding.sector).reduce((sum, h) => sum + h.weight, 0)
@@ -29,6 +32,26 @@ export function DecisionModal({ holding, holdings, onClose, onSimulate }: Decisi
     setExecuted(true)
     if (onSimulate) {
       onSimulate(holding.symbol, recommendedAction)
+    }
+  }
+
+  const handleSendTelegramPrompt = async () => {
+    setSendingTelegram(true)
+    try {
+      const defaultQty = Math.max(1, Math.round(2000 / holding.price))
+      await api.telegramSendTradePrompt({
+        symbol: holding.symbol,
+        qty: defaultQty,
+        side: 'buy',
+        price: holding.price,
+        take_profit_price: Number((holding.price * 1.15).toFixed(2)),
+        stop_loss_price: Number((holding.price * 0.95).toFixed(2)),
+      })
+      setTelegramSent(true)
+    } catch {
+      //
+    } finally {
+      setSendingTelegram(false)
     }
   }
 
@@ -94,6 +117,16 @@ export function DecisionModal({ holding, holdings, onClose, onSimulate }: Decisi
           style={{ flex: 1, justifyContent: 'center', background: executed ? 'var(--good-soft)' : 'var(--accent-dark)', color: executed ? 'var(--good)' : '#fff' }}
         >
           {executed ? <><CheckCircle2 size={16} /> Rebalance Applied in Simulation</> : <><Sparkles size={16} /> Simulate &amp; Apply Rebalance</>}
+        </button>
+        <button
+          className="ask-button"
+          onClick={handleSendTelegramPrompt}
+          disabled={sendingTelegram || telegramSent}
+          style={{ background: telegramSent ? '#15803d' : '#0284c7', color: '#fff', padding: '0 14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          title="Dispatch inline trade execution card to Telegram bot"
+        >
+          {telegramSent ? <CheckCircle2 size={16} /> : <Send size={16} />}
+          <span>{telegramSent ? 'Sent to Telegram' : sendingTelegram ? 'Sending...' : 'Trade via Telegram'}</span>
         </button>
         <button
           className="ask-button"
