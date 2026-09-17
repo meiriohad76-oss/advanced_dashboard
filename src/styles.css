@@ -1187,6 +1187,128 @@ h1 { font-size: 24px; letter-spacing: -.03em; margin: 4px 0 4px; font-weight: 70
   cursor: not-allowed;
 }
 
+/* --- Toast Notifications (Scenario & Live Alerts) --- */
+.scenario-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 440px;
+  min-width: 300px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1);
+  animation: slideToastUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+}
+
+.scenario-toast.stacked {
+  bottom: 84px;
+}
+
+.scenario-toast.live-toast {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: var(--panel);
+}
+
+@keyframes slideToastUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scenario-toast > span {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.scenario-toast.live-toast > span {
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--accent);
+}
+
+.scenario-toast > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.scenario-toast strong {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.scenario-toast small {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.scenario-toast button:not(.toast-close) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.scenario-toast button:not(.toast-close):hover {
+  opacity: 0.9;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s ease;
+}
+
+.toast-close:hover {
+  background: var(--subtle);
+  color: var(--ink);
+}
+
 @media print {
   body { background: #fff !important; color: #000 !important; }
   .sidebar, .topbar, .ratings-banner, .scenario-toast, .no-print, .drawer-close, .modal-backdrop { display: none !important; }

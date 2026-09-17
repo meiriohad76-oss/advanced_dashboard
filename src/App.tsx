@@ -1298,6 +1298,14 @@ export default function App() {
     } catch { /* ignore */ }
   }, [userAlerts])
 
+  useEffect(() => {
+    if (!liveToast) return
+    const timer = setTimeout(() => {
+      setLiveToast(null)
+    }, 5000)
+    return () => clearTimeout(timer)
+  }, [liveToast])
+
   const reloadState = useCallback(() => {
     api.state().then((state) => {
       setScenario(state.scenario_active)
@@ -1589,20 +1597,32 @@ export default function App() {
       {briefingOpen && <MorningBriefingModal onClose={() => setBriefingOpen(false)} />}
       {backtestOpen && <BacktestModal onClose={() => setBacktestOpen(false)} />}
       {askOpen && <AskPanel holdings={holdings} onClose={() => setAskOpen(false)}/>} 
-      {scenario && <div className="scenario-toast"><span><Target size={18}/></span><div><strong>Decision event detected</strong><small>CRDO crossed into Strong Entry at 90/100</small></div><button onClick={() => setDecisionHolding(holdings[0])}>Review <ArrowRight size={14}/></button><button className="toast-close" onClick={toggleScenario}><X size={15}/></button></div>}
+      {scenario && (
+        <div className="scenario-toast">
+          <span><Target size={18} /></span>
+          <div>
+            <strong>Decision event detected</strong>
+            <small>CRDO crossed into Strong Entry at 90/100</small>
+          </div>
+          <button onClick={() => setDecisionHolding(holdings[0])}>Review <ArrowRight size={14} /></button>
+          <button className="toast-close" onClick={toggleScenario} aria-label="Dismiss decision notification"><X size={15} /></button>
+        </div>
+      )}
       {liveToast && (
-        <div className="scenario-toast" style={{ bottom: '72px', background: '#17211d', color: '#fff', border: '1px solid #2bb07c' }}>
-          <span style={{ background: '#14875e' }}><Bell size={18} /></span>
+        <div className={`scenario-toast live-toast ${scenario ? 'stacked' : ''}`}>
+          <span><Bell size={18} /></span>
           <div>
             <strong>{liveToast.title}</strong>
             <small>{liveToast.detail}</small>
           </div>
-          <button onClick={() => {
-            const h = holdings.find((x) => x.symbol.toUpperCase() === liveToast.symbol.toUpperCase())
-            if (h) setSelected(h)
-            setLiveToast(null)
-          }}>Inspect <ArrowRight size={14} /></button>
-          <button className="toast-close" onClick={() => setLiveToast(null)}><X size={15} /></button>
+          {liveToast.symbol && liveToast.symbol !== 'LIVE' && liveToast.symbol !== 'WARN' && (
+            <button onClick={() => {
+              const h = holdings.find((x) => x.symbol.toUpperCase() === liveToast.symbol.toUpperCase())
+              if (h) setSelected(h)
+              setLiveToast(null)
+            }}>Inspect <ArrowRight size={14} /></button>
+          )}
+          <button className="toast-close" onClick={() => setLiveToast(null)} aria-label="Dismiss notification"><X size={15} /></button>
         </div>
       )}
       <CommandPalette
