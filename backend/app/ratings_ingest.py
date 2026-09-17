@@ -73,6 +73,16 @@ def _source_key(snapshot: dict) -> str | None:
     return PROVIDER_SOURCE.get((provider, rating_type))
 
 
+SA_LABEL_SCORES: dict[str, float] = {
+    "strong buy": 4.8,
+    "buy": 4.0,
+    "hold": 3.0,
+    "neutral": 3.0,
+    "sell": 2.0,
+    "strong sell": 1.0,
+}
+
+
 def snapshot_to_row(snapshot: dict, as_of: str) -> dict | None:
     """Convert one extractor snapshot to a feed row, or None if it isn't a
     recognized/parseable rating."""
@@ -104,20 +114,53 @@ def snapshot_to_row(snapshot: dict, as_of: str) -> dict | None:
                     value = None
             except (TypeError, ValueError):
                 value = None
-    else:
+    elif source == "zacks":
         raw_score = snapshot.get("score")
-        if source == "zacks" and (raw_score is None or raw_score == ""):
+        if raw_score is None or raw_score == "":
             match = re.search(r"Rank\s*#?([1-5])", str(label or ""), re.IGNORECASE)
             if match:
                 raw_score = match.group(1)
         try:
-            value = float(raw_score)
+            val_num = float(raw_score)
+            value = round(val_num)
         except (TypeError, ValueError):
             return None
-        if source == "zacks":
-            value = round(value)
-            if not (1 <= value <= 5):
-                return None
+        if not (1 <= value <= 5):
+            return None
+    else:
+        # Seeking Alpha numeric sources (sa_quant, sa_analysts, sa_wall_street)
+        raw_score = snapshot.get("score")
+        try:
+            value = float(raw_score)
+        except (TypeError, ValueError):
+            # Fallback to categorical label or source_text if numeric score is absent/null
+            clean_lbl = str(label or "").strip().lower()
+            if clean_lbl in SA_LABEL_SCORES:
+                value = SA_LABEL_SCORES[clean_lbl]
+            else:
+                match = re.search(r"\b(strong\s+buy|strong\s+sell|buy|hold|neutral|sell)\b", str(label or ""), re.IGNORECASE)
+                if not match:
+                    match = re.search(r"\b(strong\s+buy|strong\s+sell|buy|hold|neutral|sell)\b", str(snapshot.get("source_text") or ""), re.IGNORECASE)
+                if match:
+                    matched_key = match.group(1).lower().replace("  ", " ")
+                    value = SA_LABEL_SCORES.get(matched_key)
+                    if not label:
+                        label = matched_key.title()
+                else:
+                    return None
+        if value is None or not (1.0 <= value <= 5.0):
+            return None
+        if not label:
+            if value >= 4.5:
+                label = "Strong Buy"
+            elif value >= 3.5:
+                label = "Buy"
+            elif value >= 2.5:
+                label = "Hold"
+            elif value >= 1.5:
+                label = "Sell"
+            else:
+                label = "Strong Sell"
     if value is None or value == "":
         return None
     row = {"ticker": str(snapshot.get("ticker", "")).strip().upper(), "source": source,

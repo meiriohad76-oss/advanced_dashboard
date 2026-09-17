@@ -59,6 +59,14 @@ RAW_RATINGS: dict[str, dict[str, object]] = {
 
 ZACKS_LABEL = {1: "Strong Buy", 2: "Buy", 3: "Hold", 4: "Sell", 5: "Strong Sell"}
 INVESTING_NORMALIZED = {"Strong Sell": 0.0, "Sell": 25.0, "Neutral": 50.0, "Buy": 75.0, "Strong Buy": 100.0}
+SA_LABEL_SCORES: dict[str, float] = {
+    "strong buy": 4.8,
+    "buy": 4.0,
+    "hold": 3.0,
+    "neutral": 3.0,
+    "sell": 2.0,
+    "strong sell": 1.0,
+}
 
 
 def normalize_zacks(rank: int) -> float:
@@ -113,11 +121,15 @@ def _rating(source: str, display: str, raw: object, as_of: str) -> Rating | None
             return None
         return Rating(source=source, display=display, value_native=text, label=text,
                       normalized=normalized, native_scale="Strong Sell-Strong Buy", as_of=as_of)
-    # Seeking Alpha numeric sources.
+    # Seeking Alpha numeric sources (or categorical fallback).
     try:
         value = float(raw)  # type: ignore[arg-type]
     except (TypeError, ValueError):
-        return None
+        clean_raw = str(raw).strip().lower()
+        if clean_raw in SA_LABEL_SCORES:
+            value = SA_LABEL_SCORES[clean_raw]
+        else:
+            return None
     if not 1.0 <= value <= 5.0:
         return None
     normalized = normalize_five(value)

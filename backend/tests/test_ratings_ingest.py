@@ -34,6 +34,23 @@ def test_snapshot_mapping_matches_gauge_sources():
     assert snapshot_to_row(INVESTING, AS_OF)["value"] == "Buy"
 
 
+def test_sa_categorical_snapshots_without_numeric_score():
+    # When score is None/missing but rating is 'Hold', 'Buy', etc., canonical score is derived.
+    crm_quant = {"ticker": "CRM", "provider": "seeking_alpha", "rating_type": "quant", "rating": "Hold", "score": None, "source_text": "Quant Rating HOLD"}
+    row = snapshot_to_row(crm_quant, AS_OF)
+    assert row is not None
+    assert row["source"] == "sa_quant"
+    assert row["value"] == 3.0
+    assert row["label"] == "Hold"
+
+    # From source_text alone if rating is missing
+    crm_st = {"ticker": "CRM", "provider": "seeking_alpha", "rating_type": "quant", "score": None, "source_text": "Quant Rating BUY"}
+    row_st = snapshot_to_row(crm_st, AS_OF)
+    assert row_st is not None
+    assert row_st["value"] == 4.0
+    assert row_st["label"] == "Buy"
+
+
 def test_unknown_or_unparseable_snapshots_are_dropped():
     assert snapshot_to_row({"ticker": "X", "provider": "morningstar", "rating_type": "star"}, AS_OF) is None
     assert snapshot_to_row({"ticker": "X", "provider": "seeking_alpha", "rating_type": "quant", "score": "n/a"}, AS_OF) is None

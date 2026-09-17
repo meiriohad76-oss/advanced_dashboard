@@ -42,6 +42,14 @@ export const RAW_RATINGS: Record<string, RawRatings> = {
 
 const ZACKS_LABEL: Record<number, string> = { 1: 'Strong Buy', 2: 'Buy', 3: 'Hold', 4: 'Sell', 5: 'Strong Sell' }
 const INVESTING_NORMALIZED: Record<string, number> = { 'Strong Sell': 0, Sell: 25, Neutral: 50, Buy: 75, 'Strong Buy': 100 }
+const SA_LABEL_SCORES: Record<string, number> = {
+  'strong buy': 4.8,
+  buy: 4.0,
+  hold: 3.0,
+  neutral: 3.0,
+  sell: 2.0,
+  'strong sell': 1.0,
+}
 
 const round1 = (n: number) => Math.round(n * 10) / 10
 
@@ -75,8 +83,15 @@ function buildRating(key: RatingSourceKey, display: string, raw: number | string
     if (normalized === undefined) return null
     return { source: key, display, valueNative: text, label: text, normalized, nativeScale: 'Strong Sell-Strong Buy', asOf: SEED_AS_OF }
   }
-  const value = Number(raw)
-  if (!Number.isFinite(value) || value < 1 || value > 5) return null
+  let value = Number(raw)
+  if (!Number.isFinite(value) || value < 1 || value > 5) {
+    const cleanRaw = String(raw).trim().toLowerCase()
+    if (cleanRaw in SA_LABEL_SCORES) {
+      value = SA_LABEL_SCORES[cleanRaw]
+    } else {
+      return null
+    }
+  }
   const normalized = normalizeFive(value)
 
   const rawStr = String(raw).trim()

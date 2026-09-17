@@ -39,6 +39,19 @@ describe('ratings engine', () => {
     }
   })
 
+  it('handles categorical Seeking Alpha string ratings without numeric score', () => {
+    RAW_RATINGS.CAT = { sa_quant: 'Hold', sa_analysts: 'Buy', sa_wall_street: 'Strong Buy' }
+    try {
+      const result = buildTickerRatings('CAT')
+      const bySource = Object.fromEntries(result.ratings.map((r) => [r.source, r]))
+      expect(bySource.sa_quant).toMatchObject({ label: 'Hold', normalized: 50, valueNative: '3.0' })
+      expect(bySource.sa_analysts).toMatchObject({ label: 'Buy', normalized: 75, valueNative: '4.0' })
+      expect(bySource.sa_wall_street).toMatchObject({ label: 'Strong Buy', normalized: 95, valueNative: '4.8' })
+    } finally {
+      delete RAW_RATINGS.CAT
+    }
+  })
+
   it('returns an empty set for an uncovered symbol', () => {
     const result = buildTickerRatings('CASH')
     expect(result.ratings).toHaveLength(0)
