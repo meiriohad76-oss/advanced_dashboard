@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Calendar, CircleDollarSign, Clock, DollarSign, Flame, Layers, TrendingUp } from 'lucide-react'
 import { api } from '../api/client'
 import type { DividendData, EarningsCalendarResponse, EarningsEvent, Holding } from '../types'
@@ -8,11 +8,19 @@ interface CatalystRadarProps {
   onSelectHolding?: (holding: Holding) => void
 }
 
+type EarningsSortKey = 'symbol' | 'earnings_date' | 'days_until' | 'eps_estimate' | 'implied_move_pct' | 'position_value'
+type DividendSortKey = 'symbol' | 'ex_date' | 'days_to_ex' | 'payout_per_share' | 'estimated_cashflow'
+
 export function CatalystRadar({ holdings, onSelectHolding }: CatalystRadarProps) {
   const [tab, setTab] = useState<'earnings' | 'dividends'>('earnings')
   const [earningsData, setEarningsData] = useState<EarningsCalendarResponse | null>(null)
   const [dividendData, setDividendData] = useState<DividendData | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const [earningsSortKey, setEarningsSortKey] = useState<EarningsSortKey>('days_until')
+  const [earningsSortDir, setEarningsSortDir] = useState<'asc' | 'desc'>('asc')
+  const [dividendSortKey, setDividendSortKey] = useState<DividendSortKey>('days_to_ex')
+  const [dividendSortDir, setDividendSortDir] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
     let alive = true
@@ -46,6 +54,66 @@ export function CatalystRadar({ holdings, onSelectHolding }: CatalystRadarProps)
       onSelectHolding(found)
     }
   }
+
+  const handleEarningsSort = (key: EarningsSortKey) => {
+    if (earningsSortKey === key) {
+      setEarningsSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setEarningsSortKey(key)
+      setEarningsSortDir(key === 'symbol' ? 'asc' : 'desc')
+    }
+  }
+
+  const handleDividendSort = (key: DividendSortKey) => {
+    if (dividendSortKey === key) {
+      setDividendSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setDividendSortKey(key)
+      setDividendSortDir(key === 'symbol' ? 'asc' : 'desc')
+    }
+  }
+
+  const renderEarningsSortArrow = (key: EarningsSortKey) => (
+    <span className="sort-arrow">{earningsSortKey === key ? (earningsSortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+  )
+
+  const renderDividendSortArrow = (key: DividendSortKey) => (
+    <span className="sort-arrow">{dividendSortKey === key ? (dividendSortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+  )
+
+  const sortedEarnings = useMemo(() => {
+    if (!earningsData?.events) return []
+    return [...earningsData.events].sort((a, b) => {
+      const valA = a[earningsSortKey]
+      const valB = b[earningsSortKey]
+      if (valA === undefined || valA === null) return 1
+      if (valB === undefined || valB === null) return -1
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        const cmp = valA.localeCompare(valB)
+        return earningsSortDir === 'asc' ? cmp : -cmp
+      }
+      const numA = Number(valA)
+      const numB = Number(valB)
+      return earningsSortDir === 'asc' ? numA - numB : numB - numA
+    })
+  }, [earningsData, earningsSortKey, earningsSortDir])
+
+  const sortedDividends = useMemo(() => {
+    if (!dividendData?.upcoming_ex_dates) return []
+    return [...dividendData.upcoming_ex_dates].sort((a, b) => {
+      const valA = a[dividendSortKey]
+      const valB = b[dividendSortKey]
+      if (valA === undefined || valA === null) return 1
+      if (valB === undefined || valB === null) return -1
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        const cmp = valA.localeCompare(valB)
+        return dividendSortDir === 'asc' ? cmp : -cmp
+      }
+      const numA = Number(valA)
+      const numB = Number(valB)
+      return dividendSortDir === 'asc' ? numA - numB : numB - numA
+    })
+  }, [dividendData, dividendSortKey, dividendSortDir])
 
   return (
     <div className="catalyst-radar-page">
@@ -184,19 +252,43 @@ export function CatalystRadar({ holdings, onSelectHolding }: CatalystRadarProps)
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--line, #e2e8f0)', textAlign: 'left', color: 'var(--muted)' }}>
-                    <th style={{ padding: '10px 8px' }}>Asset</th>
-                    <th style={{ padding: '10px 8px' }}>Date</th>
-                    <th style={{ padding: '10px 8px' }}>Countdown</th>
+                    <th style={{ padding: '10px 8px' }}>
+                      <button type="button" className={`th-sort-btn ${earningsSortKey === 'symbol' ? 'active' : ''}`} onClick={() => handleEarningsSort('symbol')}>
+                        Asset {renderEarningsSortArrow('symbol')}
+                      </button>
+                    </th>
+                    <th style={{ padding: '10px 8px' }}>
+                      <button type="button" className={`th-sort-btn ${earningsSortKey === 'earnings_date' ? 'active' : ''}`} onClick={() => handleEarningsSort('earnings_date')}>
+                        Date {renderEarningsSortArrow('earnings_date')}
+                      </button>
+                    </th>
+                    <th style={{ padding: '10px 8px' }}>
+                      <button type="button" className={`th-sort-btn ${earningsSortKey === 'days_until' ? 'active' : ''}`} onClick={() => handleEarningsSort('days_until')}>
+                        Countdown {renderEarningsSortArrow('days_until')}
+                      </button>
+                    </th>
                     <th style={{ padding: '10px 8px' }}>Timing</th>
-                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>EPS Est.</th>
+                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>
+                      <button type="button" className={`th-sort-btn right-align ${earningsSortKey === 'eps_estimate' ? 'active' : ''}`} onClick={() => handleEarningsSort('eps_estimate')}>
+                        EPS Est. {renderEarningsSortArrow('eps_estimate')}
+                      </button>
+                    </th>
                     <th style={{ padding: '10px 8px', textAlign: 'right' }}>Prior EPS</th>
-                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>Implied Move</th>
-                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>Position Value</th>
+                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>
+                      <button type="button" className={`th-sort-btn right-align ${earningsSortKey === 'implied_move_pct' ? 'active' : ''}`} onClick={() => handleEarningsSort('implied_move_pct')}>
+                        Implied Move {renderEarningsSortArrow('implied_move_pct')}
+                      </button>
+                    </th>
+                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>
+                      <button type="button" className={`th-sort-btn right-align ${earningsSortKey === 'position_value' ? 'active' : ''}`} onClick={() => handleEarningsSort('position_value')}>
+                        Position Value {renderEarningsSortArrow('position_value')}
+                      </button>
+                    </th>
                     <th style={{ padding: '10px 8px', textAlign: 'center' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {earningsData?.events.map((e: EarningsEvent) => {
+                  {sortedEarnings.map((e: EarningsEvent) => {
                     const badgeColor =
                       e.days_until <= 3 ? '#dc2626' : e.days_until <= 7 ? '#d97706' : e.days_until <= 30 ? '#2563eb' : '#64748b'
                     const badgeBg =
@@ -364,16 +456,36 @@ export function CatalystRadar({ holdings, onSelectHolding }: CatalystRadarProps)
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--line, #e2e8f0)', textAlign: 'left', color: 'var(--muted)' }}>
-                    <th style={{ padding: '10px 8px' }}>Asset</th>
-                    <th style={{ padding: '10px 8px' }}>Ex-Dividend Date</th>
-                    <th style={{ padding: '10px 8px' }}>Days to Ex-Date</th>
-                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>DPS</th>
-                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>Est. Portfolio Cash</th>
+                    <th style={{ padding: '10px 8px' }}>
+                      <button type="button" className={`th-sort-btn ${dividendSortKey === 'symbol' ? 'active' : ''}`} onClick={() => handleDividendSort('symbol')}>
+                        Asset {renderDividendSortArrow('symbol')}
+                      </button>
+                    </th>
+                    <th style={{ padding: '10px 8px' }}>
+                      <button type="button" className={`th-sort-btn ${dividendSortKey === 'ex_date' ? 'active' : ''}`} onClick={() => handleDividendSort('ex_date')}>
+                        Ex-Dividend Date {renderDividendSortArrow('ex_date')}
+                      </button>
+                    </th>
+                    <th style={{ padding: '10px 8px' }}>
+                      <button type="button" className={`th-sort-btn ${dividendSortKey === 'days_to_ex' ? 'active' : ''}`} onClick={() => handleDividendSort('days_to_ex')}>
+                        Days to Ex-Date {renderDividendSortArrow('days_to_ex')}
+                      </button>
+                    </th>
+                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>
+                      <button type="button" className={`th-sort-btn right-align ${dividendSortKey === 'payout_per_share' ? 'active' : ''}`} onClick={() => handleDividendSort('payout_per_share')}>
+                        DPS {renderDividendSortArrow('payout_per_share')}
+                      </button>
+                    </th>
+                    <th style={{ padding: '10px 8px', textAlign: 'right' }}>
+                      <button type="button" className={`th-sort-btn right-align ${dividendSortKey === 'estimated_cashflow' ? 'active' : ''}`} onClick={() => handleDividendSort('estimated_cashflow')}>
+                        Est. Portfolio Cash {renderDividendSortArrow('estimated_cashflow')}
+                      </button>
+                    </th>
                     <th style={{ padding: '10px 8px', textAlign: 'center' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dividendData?.upcoming_ex_dates.map((d) => (
+                  {sortedDividends.map((d) => (
                     <tr key={d.symbol} style={{ borderBottom: '1px solid var(--line, #e2e8f0)' }}>
                       <td style={{ padding: '12px 8px' }}>
                         <strong style={{ fontSize: '13px', display: 'block' }}>{d.symbol}</strong>

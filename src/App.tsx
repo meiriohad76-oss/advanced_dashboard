@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Activity, AlertTriangle, ArrowRight, BarChart2, BarChart3, Bell, BrainCircuit, BriefcaseBusiness,
   Calendar, ChevronRight, CircleDollarSign, Database, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
-  Play, Plus, Radar, Radio, Search, ServerCog, Settings, ShieldCheck, Sparkles, Sun,
+  Moon, Plus, Radar, Search, ServerCog, Settings, ShieldCheck, Sparkles, Sun,
   Target, TrendingDown, TrendingUp, Upload, X, Zap, Scale, LayoutGrid, Table,
 } from 'lucide-react'
 import { answerQuestion, assessHolding, portfolioRisk } from './domain/engine'
@@ -31,6 +31,8 @@ import { BenchmarkChart } from './components/BenchmarkChart'
 import { CatalystRadar } from './components/CatalystRadar'
 import { MorningBriefingModal } from './components/MorningBriefingModal'
 import { BacktestModal } from './components/BacktestModal'
+import { QuickActionsMenu } from './components/QuickActionsMenu'
+import { CommandPalette } from './components/CommandPalette'
 import { resolveCompanyName } from './data/companyNames'
 import { buildTickerRatings, getPriceTargets } from './domain/ratings'
 import { evaluateAlert } from './domain/alertEngine'
@@ -1244,6 +1246,39 @@ export default function App() {
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
   const [briefingOpen, setBriefingOpen] = useState(false)
   const [backtestOpen, setBacktestOpen] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('atlas_theme')
+      if (saved === 'light' || saved === 'dark') return saved
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+      }
+    } catch { /* ignore */ }
+    return 'dark'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    try {
+      localStorage.setItem('atlas_theme', theme)
+    } catch { /* ignore */ }
+  }, [theme])
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setPaletteOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   useEffect(() => {
     try {
@@ -1478,42 +1513,51 @@ export default function App() {
           </span>
           <div className="topbar-actions">
             <button
+              className="cmd-palette-trigger"
+              onClick={() => setPaletteOpen(true)}
+              title="Quick Search & Navigation (Ctrl+K / ⌘K)"
+              aria-label="Quick Search"
+            >
+              <Search size={14} />
+              <span>Search assets, tools, pages...</span>
+              <kbd>⌘K</kbd>
+            </button>
+
+            <span className="market-status" title={lastRefreshedAt ? `Last refreshed at ${lastRefreshedAt}` : 'Market open'}>
+              <i/> {lastRefreshedAt ? `Live · ${lastRefreshedAt}` : 'Market open'}
+            </span>
+
+            <button
               className="refresh-data-btn"
               onClick={handleRefreshAllData}
               disabled={refreshingLive}
               title="Fetch fresh live quotes, calculate technical indicators & signals, and evaluate alerts"
             >
               <Zap size={14} className={refreshingLive ? 'spin' : ''} />
-              {refreshingLive ? 'Refreshing…' : '⚡ Refresh All Data'}
+              {refreshingLive ? 'Refreshing…' : '⚡ Refresh'}
             </button>
+
+            <QuickActionsMenu
+              onOpenBriefing={() => setBriefingOpen(true)}
+              onOpenBacktest={() => setBacktestOpen(true)}
+              onOpenRebalance={() => setRebalanceModalOpen(true)}
+              liveStreaming={liveStreaming}
+              onToggleStream={() => setLiveStreaming(!liveStreaming)}
+              scenario={scenario}
+              onToggleScenario={toggleScenario}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+            />
+
             <button
-              className={`scenario-button ${liveStreaming ? 'complete' : ''}`}
-              onClick={() => setLiveStreaming(!liveStreaming)}
-              title="Toggle live SSE market price ticks"
-              style={{ background: liveStreaming ? '#0b6847' : undefined, color: liveStreaming ? '#fff' : undefined }}
+              className="icon-button theme-toggle-btn"
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              aria-label="Toggle color theme"
             >
-              <Radio size={14} /> {liveStreaming ? '🔴 Live Stream' : '⏸ Stream Paused'}
+              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <span className="market-status" title={lastRefreshedAt ? `Last refreshed at ${lastRefreshedAt}` : 'Market open'}>
-              <i/> {lastRefreshedAt ? `Live · ${lastRefreshedAt}` : 'Market open'}
-            </span>
-            <button className={`scenario-button ${scenario ? 'complete' : ''}`} onClick={toggleScenario}>{scenario ? <ShieldCheck size={16}/> : <Play size={15}/>} {scenario ? 'Scenario active' : 'Run demo scenario'}</button>
-            <button
-              className="scenario-button"
-              onClick={() => setBriefingOpen(true)}
-              title="Daily Pre-Market Executive Briefing & Telegram Dispatch"
-              style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fde68a' }}
-            >
-              <Sun size={14} color="#b45309" /> ☀️ Morning Briefing
-            </button>
-            <button
-              className="scenario-button"
-              onClick={() => setBacktestOpen(true)}
-              title="Strategy Rule Backtester"
-              style={{ background: '#eff6ff', color: '#1e40af', borderColor: '#bfdbfe' }}
-            >
-              <BarChart2 size={14} color="#1d4ed8" /> 🧪 Backtester
-            </button>
+
             <button className="icon-button" onClick={() => setAlertPanelOpen(true)} title="Alert Center">
               <Bell size={18}/>
               {(scenario || userAlerts.length > 0) && <i className="notification-dot"/>}
@@ -1550,6 +1594,19 @@ export default function App() {
           <button className="toast-close" onClick={() => setLiveToast(null)}><X size={15} /></button>
         </div>
       )}
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        holdings={holdings}
+        onSelectHolding={(h) => setSelected(h)}
+        onNavigate={(p) => setPage(p as Page)}
+        onRefreshData={handleRefreshAllData}
+        onOpenBriefing={() => setBriefingOpen(true)}
+        onOpenBacktest={() => setBacktestOpen(true)}
+        onOpenRebalance={() => setRebalanceModalOpen(true)}
+        onToggleTheme={toggleTheme}
+        theme={theme}
+      />
     </div>
   )
 }
