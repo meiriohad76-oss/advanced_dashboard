@@ -1,5878 +1,5878 @@
 {
-  "as_of": "2026-09-17T18:54:26Z",
+  "as_of": "2026-09-17T19:10:09Z",
   "ratings": [
     {
       "ticker": "CRWV",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWV",
       "source": "sa_analysts",
       "value": 3.86,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWV",
       "source": "sa_wall_street",
       "value": 4.18,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWV",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ORCL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ORCL",
       "source": "sa_analysts",
       "value": 3.65,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ORCL",
       "source": "sa_wall_street",
       "value": 4.45,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ORCL",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMY",
       "source": "sa_analysts",
       "value": 4.2,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMY",
       "source": "sa_wall_street",
       "value": 3.53,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SPY",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SPY",
       "source": "sa_analysts",
       "value": 3.21,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SPY",
       "source": "sa_wall_street",
       "value": 3.21,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HIMS",
       "source": "sa_quant",
       "value": 1.36,
       "label": "Strong Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HIMS",
       "source": "sa_analysts",
       "value": 4.31,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HIMS",
       "source": "sa_wall_street",
       "value": 3.2,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HIMS",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "QQQ",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "QQQ",
       "source": "sa_analysts",
       "value": 3.11,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "QQQ",
       "source": "sa_wall_street",
       "value": 3.09,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "META",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "META",
       "source": "sa_analysts",
       "value": 3.93,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "META",
       "source": "sa_wall_street",
       "value": 4.64,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "META",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRT",
       "source": "sa_quant",
       "value": 3.11,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRT",
       "source": "sa_analysts",
       "value": 3.76,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRT",
       "source": "sa_wall_street",
       "value": 4.6,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRT",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MSFT",
       "source": "sa_quant",
       "value": 3.48,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MSFT",
       "source": "sa_analysts",
       "value": 4.16,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MSFT",
       "source": "sa_wall_street",
       "value": 4.64,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MSFT",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PM",
       "source": "sa_quant",
       "value": 3.18,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PM",
       "source": "sa_analysts",
       "value": 3.22,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PM",
       "source": "sa_wall_street",
       "value": 4.31,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PM",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DGRO",
       "source": "sa_quant",
       "value": 4.19,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DGRO",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DGRO",
       "source": "sa_wall_street",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SCHD",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SCHD",
       "source": "sa_analysts",
       "value": 3.71,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SCHD",
       "source": "sa_wall_street",
       "value": 3.71,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ONDS",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ONDS",
       "source": "sa_analysts",
       "value": 3.9,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ONDS",
       "source": "sa_wall_street",
       "value": 4.77,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ONDS",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IONQ",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IONQ",
       "source": "sa_analysts",
       "value": 3.53,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IONQ",
       "source": "sa_wall_street",
       "value": 4.61,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IONQ",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NOW",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NOW",
       "source": "sa_analysts",
       "value": 4.27,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NOW",
       "source": "sa_wall_street",
       "value": 4.53,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NOW",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ASML",
       "source": "sa_quant",
       "value": 3.48,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ASML",
       "source": "sa_analysts",
       "value": 3.83,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ASML",
       "source": "sa_wall_street",
       "value": 4.61,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ASML",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "USAR",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "USAR",
       "source": "sa_analysts",
       "value": 3.85,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "USAR",
       "source": "sa_wall_street",
       "value": 4.87,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "USAR",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEM",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEM",
       "source": "sa_analysts",
       "value": 3.71,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEM",
       "source": "sa_wall_street",
       "value": 4.27,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEM",
       "source": "zacks",
       "value": 5,
       "label": "Rank #5 Strong Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MTZ",
       "source": "sa_quant",
       "value": 4.37,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MTZ",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MTZ",
       "source": "sa_wall_street",
       "value": 4.75,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MTZ",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TSM",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TSM",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TSM",
       "source": "sa_wall_street",
       "value": 4.57,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TSM",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CGDV",
       "source": "sa_quant",
       "value": 3.99,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CGDV",
       "source": "sa_analysts",
       "value": 4.25,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CGDV",
       "source": "sa_wall_street",
       "value": 4.25,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWD",
       "source": "sa_quant",
       "value": 3.48,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWD",
       "source": "sa_analysts",
       "value": 2.83,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWD",
       "source": "sa_wall_street",
       "value": 4.33,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWD",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIPO",
       "source": "sa_quant",
       "value": 2.12,
       "label": "Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIPO",
       "source": "sa_analysts",
       "value": 5.0,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIPO",
       "source": "sa_wall_street",
       "value": 5.0,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRDO",
       "source": "sa_quant",
       "value": 4.75,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRDO",
       "source": "sa_analysts",
       "value": 3.87,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRDO",
       "source": "sa_wall_street",
       "value": 4.68,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRDO",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COHR",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COHR",
       "source": "sa_analysts",
       "value": 3.7,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COHR",
       "source": "sa_wall_street",
       "value": 4.33,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COHR",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ANET",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ANET",
       "source": "sa_analysts",
       "value": 3.9,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ANET",
       "source": "sa_wall_street",
       "value": 4.73,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ANET",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "QBTS",
       "source": "sa_quant",
       "value": 2.83,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "QBTS",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "QBTS",
       "source": "sa_wall_street",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "QBTS",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CLS",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ZBRA",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ZBRA",
       "source": "sa_analysts",
       "value": 5.0,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ZBRA",
       "source": "sa_wall_street",
       "value": 4.23,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ZBRA",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CLS",
       "source": "sa_analysts",
       "value": 3.81,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CLS",
       "source": "sa_wall_street",
       "value": 4.65,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CLS",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVLT",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVLT",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVLT",
       "source": "sa_wall_street",
       "value": 4.11,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVLT",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IREN",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IREN",
       "source": "sa_analysts",
       "value": 4.05,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IREN",
       "source": "sa_wall_street",
       "value": 4.37,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IREN",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PR",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PR",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PR",
       "source": "sa_wall_street",
       "value": 4.66,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PR",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KTOS",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KTOS",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KTOS",
       "source": "sa_wall_street",
       "value": 4.57,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KTOS",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ANET",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRWV",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "B",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "B",
       "source": "sa_analysts",
       "value": 3.57,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "B",
       "source": "sa_wall_street",
       "value": 4.25,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "B",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVLT",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ORCL",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AMGN",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AMGN",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AMGN",
       "source": "sa_analysts",
       "value": 3.8,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AMGN",
       "source": "sa_wall_street",
       "value": 3.52,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AMGN",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GILD",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GILD",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GILD",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GILD",
       "source": "sa_wall_street",
       "value": 4.31,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GILD",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRTX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRTX",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRTX",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRTX",
       "source": "sa_wall_street",
       "value": 4.37,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VRTX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "REGN",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "REGN",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "REGN",
       "source": "sa_analysts",
       "value": 4.25,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "REGN",
       "source": "sa_wall_street",
       "value": 4.18,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "REGN",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ARGX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ARGX",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ARGX",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ARGX",
       "source": "sa_wall_street",
       "value": 4.48,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ARGX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RVMD",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RVMD",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RVMD",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RVMD",
       "source": "sa_wall_street",
       "value": 4.72,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RVMD",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ILMN",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ILMN",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ILMN",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ILMN",
       "source": "sa_wall_street",
       "value": 3.47,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ILMN",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BIIB",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BIIB",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BIIB",
       "source": "sa_analysts",
       "value": 3.25,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BIIB",
       "source": "sa_wall_street",
       "value": 4.13,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BIIB",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ALNY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ALNY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ALNY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ALNY",
       "source": "sa_wall_street",
       "value": 4.29,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ALNY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INCY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INCY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INCY",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INCY",
       "source": "sa_wall_street",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INCY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UTHR",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UTHR",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UTHR",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UTHR",
       "source": "sa_wall_street",
       "value": 4.4,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UTHR",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRNA",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRNA",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRNA",
       "source": "sa_analysts",
       "value": 2.6,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRNA",
       "source": "sa_wall_street",
       "value": 3.08,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRNA",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEM",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEM",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEM",
       "source": "sa_analysts",
       "value": 3.91,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEM",
       "source": "sa_wall_street",
       "value": 4.47,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEM",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BNTX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BNTX",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BNTX",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BNTX",
       "source": "sa_wall_street",
       "value": 4.45,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BNTX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEM",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INSM",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INSM",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INSM",
       "source": "sa_analysts",
       "value": 5.0,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INSM",
       "source": "sa_wall_street",
       "value": 4.78,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "INSM",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NBIX",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NBIX",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NBIX",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NBIX",
       "source": "sa_wall_street",
       "value": 4.55,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NBIX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UBER",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UBER",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UBER",
       "source": "sa_analysts",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UBER",
       "source": "sa_wall_street",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UBER",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXEL",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXEL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXEL",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXEL",
       "source": "sa_wall_street",
       "value": 3.63,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXEL",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDGL",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDGL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDGL",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDGL",
       "source": "sa_wall_street",
       "value": 4.7,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDGL",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMRN",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMRN",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMRN",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMRN",
       "source": "sa_wall_street",
       "value": 4.28,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BMRN",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HALO",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HALO",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HALO",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HALO",
       "source": "sa_wall_street",
       "value": 4.11,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HALO",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRSP",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRSP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRSP",
       "source": "sa_analysts",
       "value": 4.25,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRSP",
       "source": "sa_wall_street",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRSP",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SU",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SU",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SU",
       "source": "sa_wall_street",
       "value": 3.95,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SU",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEE",
       "source": "sa_analysts",
       "value": 3.72,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEE",
       "source": "sa_wall_street",
       "value": 4.04,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NEE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MO",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MO",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MO",
       "source": "sa_analysts",
       "value": 3.14,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MO",
       "source": "sa_wall_street",
       "value": 3.35,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MO",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BUD",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BUD",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BUD",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BUD",
       "source": "sa_wall_street",
       "value": 4.36,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BUD",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EOG",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EOG",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EOG",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EOG",
       "source": "sa_wall_street",
       "value": 3.79,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EOG",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BKR",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BKR",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BKR",
       "source": "sa_analysts",
       "value": 2.5,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BKR",
       "source": "sa_wall_street",
       "value": 4.29,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BKR",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVS",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVS",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVS",
       "source": "sa_analysts",
       "value": 3.4,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVS",
       "source": "sa_wall_street",
       "value": 3.16,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVS",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GEV",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GEV",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GEV",
       "source": "sa_analysts",
       "value": 3.25,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GEV",
       "source": "sa_wall_street",
       "value": 4.42,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GEV",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEG",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEG",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEG",
       "source": "sa_analysts",
       "value": 2.0,
       "label": "Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEG",
       "source": "sa_wall_street",
       "value": 3.73,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEG",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SLB",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SLB",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SLB",
       "source": "sa_analysts",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SLB",
       "source": "sa_wall_street",
       "value": 4.4,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SLB",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KMI",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KMI",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KMI",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KMI",
       "source": "sa_wall_street",
       "value": 3.86,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KMI",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CNQ",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CNQ",
       "source": "sa_analysts",
       "value": 3.83,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CNQ",
       "source": "sa_wall_street",
       "value": 3.73,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CNQ",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WPM",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WPM",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WPM",
       "source": "sa_wall_street",
       "value": 4.68,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WPM",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TTE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TTE",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TTE",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TTE",
       "source": "sa_wall_street",
       "value": 3.9,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TTE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BTI",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BTI",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BTI",
       "source": "sa_analysts",
       "value": 3.57,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BTI",
       "source": "sa_wall_street",
       "value": 4.57,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BTI",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VST",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VST",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VST",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VST",
       "source": "sa_wall_street",
       "value": 4.65,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VST",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHEL",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHEL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHEL",
       "source": "sa_analysts",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHEL",
       "source": "sa_wall_street",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHEL",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ED",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ED",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ED",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ED",
       "source": "sa_wall_street",
       "value": 2.68,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ED",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BHP",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BHP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BHP",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BHP",
       "source": "sa_wall_street",
       "value": 2.87,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BHP",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNP",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNP",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNP",
       "source": "sa_wall_street",
       "value": 4.2,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNP",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CEG",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CEG",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CEG",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CEG",
       "source": "sa_wall_street",
       "value": 4.47,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CEG",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRP",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRP",
       "source": "sa_wall_street",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRP",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRH",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRH",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRH",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRH",
       "source": "sa_wall_street",
       "value": 4.66,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRH",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PM",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CTVA",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CTVA",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CTVA",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CTVA",
       "source": "sa_wall_street",
       "value": 4.23,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CTVA",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CL",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CL",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CL",
       "source": "sa_wall_street",
       "value": 3.95,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CL",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "OKE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "OKE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "OKE",
       "source": "sa_analysts",
       "value": 3.88,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "OKE",
       "source": "sa_wall_street",
       "value": 3.86,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "OKE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PH",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PH",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PH",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PH",
       "source": "sa_wall_street",
       "value": 4.32,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PH",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MNST",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MNST",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MNST",
       "source": "sa_analysts",
       "value": 3.4,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MNST",
       "source": "sa_wall_street",
       "value": 3.88,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MNST",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHW",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHW",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHW",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHW",
       "source": "sa_wall_street",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHW",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DUK",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DUK",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DUK",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DUK",
       "source": "sa_wall_street",
       "value": 3.86,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DUK",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BP",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BP",
       "source": "sa_analysts",
       "value": 3.8,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BP",
       "source": "sa_wall_street",
       "value": 3.63,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BP",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXC",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXC",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXC",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXC",
       "source": "sa_wall_street",
       "value": 3.18,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EXC",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PFE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PFE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PFE",
       "source": "sa_analysts",
       "value": 4.09,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PFE",
       "source": "sa_wall_street",
       "value": 3.53,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PFE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RIO",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RIO",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RIO",
       "source": "sa_analysts",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RIO",
       "source": "sa_wall_street",
       "value": 3.88,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RIO",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ISRG",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ISRG",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ISRG",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ISRG",
       "source": "sa_wall_street",
       "value": 4.12,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ISRG",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBV",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBV",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBV",
       "source": "sa_analysts",
       "value": 3.9,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBV",
       "source": "sa_wall_street",
       "value": 4.25,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBV",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VALE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VALE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VALE",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VALE",
       "source": "sa_wall_street",
       "value": 3.68,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VALE",
       "source": "zacks",
       "value": 5,
       "label": "Rank #5 Strong Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UL",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UL",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UL",
       "source": "sa_wall_street",
       "value": 4.2,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UL",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JNJ",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JNJ",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JNJ",
       "source": "sa_analysts",
       "value": 3.57,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JNJ",
       "source": "sa_wall_street",
       "value": 4.08,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JNJ",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LMT",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LMT",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LMT",
       "source": "sa_analysts",
       "value": 4.11,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LMT",
       "source": "sa_wall_street",
       "value": 3.47,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LMT",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RTX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RTX",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RTX",
       "source": "sa_analysts",
       "value": 3.62,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RTX",
       "source": "sa_wall_street",
       "value": 4.13,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RTX",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PG",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PG",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PG",
       "source": "sa_analysts",
       "value": 3.22,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PG",
       "source": "sa_wall_street",
       "value": 3.8,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PG",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEP",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEP",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEP",
       "source": "sa_analysts",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEP",
       "source": "sa_wall_street",
       "value": 3.95,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AEP",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGG",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGG",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGG",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGG",
       "source": "sa_wall_street",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGG",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COP",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COP",
       "source": "sa_analysts",
       "value": 3.4,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COP",
       "source": "sa_wall_street",
       "value": 4.26,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COP",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRK",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRK",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRK",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRK",
       "source": "sa_wall_street",
       "value": 4.17,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MRK",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LIN",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LIN",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LIN",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LIN",
       "source": "sa_wall_street",
       "value": 4.29,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LIN",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETN",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETN",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETN",
       "source": "sa_analysts",
       "value": 3.8,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETN",
       "source": "sa_wall_street",
       "value": 4.44,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETN",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HWM",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HWM",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HWM",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HWM",
       "source": "sa_wall_street",
       "value": 4.54,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HWM",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KO",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KO",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KO",
       "source": "sa_analysts",
       "value": 3.23,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KO",
       "source": "sa_wall_street",
       "value": 4.25,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "KO",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SO",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SO",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SO",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SO",
       "source": "sa_wall_street",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SO",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEP",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEP",
       "source": "sa_analysts",
       "value": 3.69,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEP",
       "source": "sa_wall_street",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PEP",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GE",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GE",
       "source": "sa_analysts",
       "value": 2.85,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GE",
       "source": "sa_wall_street",
       "value": 4.54,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DEO",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DEO",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DEO",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DEO",
       "source": "sa_wall_street",
       "value": 3.87,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DEO",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNH",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNH",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNH",
       "source": "sa_analysts",
       "value": 3.91,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNH",
       "source": "sa_wall_street",
       "value": 4.4,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "UNH",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SYK",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SYK",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SYK",
       "source": "sa_analysts",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SYK",
       "source": "sa_wall_street",
       "value": 4.39,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SYK",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVX",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVX",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVX",
       "source": "sa_wall_street",
       "value": 4.28,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDT",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDT",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDT",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDT",
       "source": "sa_wall_street",
       "value": 4.2,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDT",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AZN",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AZN",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AZN",
       "source": "sa_wall_street",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AZN",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BSX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BSX",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BSX",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BSX",
       "source": "sa_wall_street",
       "value": 4.41,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BSX",
       "source": "zacks",
       "value": 5,
       "label": "Rank #5 Strong Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DHR",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DHR",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DHR",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DHR",
       "source": "sa_wall_street",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DHR",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MPC",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MPC",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MPC",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MPC",
       "source": "sa_wall_street",
       "value": 3.78,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MPC",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ELV",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ELV",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ELV",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ELV",
       "source": "sa_wall_street",
       "value": 4.22,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ELV",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVO",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVO",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVO",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVO",
       "source": "sa_wall_street",
       "value": 3.57,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NVO",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VLO",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VLO",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VLO",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VLO",
       "source": "sa_wall_street",
       "value": 3.7,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "VLO",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABT",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABT",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABT",
       "source": "sa_analysts",
       "value": 3.85,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABT",
       "source": "sa_wall_street",
       "value": 4.33,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABT",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMB",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMB",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMB",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMB",
       "source": "sa_wall_street",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMB",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XOM",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XOM",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XOM",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XOM",
       "source": "sa_wall_street",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XOM",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENB",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENB",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENB",
       "source": "sa_wall_street",
       "value": 3.47,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENB",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LLY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LLY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LLY",
       "source": "sa_analysts",
       "value": 4.18,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LLY",
       "source": "sa_wall_street",
       "value": 4.28,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LLY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ECL",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ECL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ECL",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ECL",
       "source": "sa_wall_street",
       "value": 4.34,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ECL",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVS",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVS",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVS",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVS",
       "source": "sa_wall_street",
       "value": 4.55,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CVS",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "FCX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "FCX",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "FCX",
       "source": "sa_analysts",
       "value": 3.16,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "FCX",
       "source": "sa_wall_street",
       "value": 4.3,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "FCX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDLZ",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDLZ",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDLZ",
       "source": "sa_analysts",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDLZ",
       "source": "sa_wall_street",
       "value": 4.04,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "MDLZ",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PCG",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PCG",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PCG",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PCG",
       "source": "sa_wall_street",
       "value": 4.47,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PCG",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XEL",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XEL",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XEL",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XEL",
       "source": "sa_wall_street",
       "value": 4.57,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "XEL",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TMO",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TMO",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TMO",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TMO",
       "source": "sa_wall_street",
       "value": 4.46,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TMO",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COST",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COST",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COST",
       "source": "sa_analysts",
       "value": 2.91,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COST",
       "source": "sa_wall_street",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COST",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TGT",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TGT",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TGT",
       "source": "sa_analysts",
       "value": 3.16,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TGT",
       "source": "sa_wall_street",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TGT",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "D",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "D",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "D",
       "source": "sa_analysts",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "D",
       "source": "sa_wall_street",
       "value": 3.18,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "D",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETR",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETR",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETR",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETR",
       "source": "sa_wall_street",
       "value": 4.29,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ETR",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRGP",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRGP",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRGP",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRGP",
       "source": "sa_wall_street",
       "value": 4.47,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TRGP",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DE",
       "source": "sa_analysts",
       "value": 3.25,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DE",
       "source": "sa_wall_street",
       "value": 3.87,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SRE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SRE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SRE",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SRE",
       "source": "sa_wall_street",
       "value": 4.35,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SRE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CAT",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CAT",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CAT",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CAT",
       "source": "sa_wall_street",
       "value": 3.85,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CAT",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMT",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMT",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMT",
       "source": "sa_analysts",
       "value": 2.62,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMT",
       "source": "sa_wall_street",
       "value": 4.41,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "WMT",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NUE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NUE",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NUE",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NUE",
       "source": "sa_wall_street",
       "value": 4.47,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NUE",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "APD",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "APD",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "APD",
       "source": "sa_analysts",
       "value": 2.66,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "APD",
       "source": "sa_wall_street",
       "value": 4.19,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "APD",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PSX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PSX",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PSX",
       "source": "sa_analysts",
       "value": 3.8,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PSX",
       "source": "sa_wall_street",
       "value": 3.9,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PSX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BA",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BA",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BA",
       "source": "sa_analysts",
       "value": 3.6,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BA",
       "source": "sa_wall_street",
       "value": 4.39,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BA",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RYCEY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RYCEY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RYCEY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RYCEY",
       "source": "sa_wall_street",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RYCEY",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SAFRY",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SAFRY",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SAFRY",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SAFRY",
       "source": "sa_wall_street",
       "value": 5.0,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SAFRY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENLAY",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENLAY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENLAY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENLAY",
       "source": "sa_wall_street",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENLAY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HTHIY",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HTHIY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HTHIY",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HTHIY",
       "source": "sa_wall_street",
       "value": 5.0,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "HTHIY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DANOY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DANOY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DANOY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DANOY",
       "source": "sa_wall_street",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DANOY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LRLCY",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LRLCY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LRLCY",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LRLCY",
       "source": "sa_wall_street",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LRLCY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHECY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SHECY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SIEGY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SIEGY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SIEGY",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SIEGY",
       "source": "sa_wall_street",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SIEGY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBNY",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBNY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBNY",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBNY",
       "source": "sa_wall_street",
       "value": 2.6,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ABBNY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ANCTF",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIQUY",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIQUY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIQUY",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIQUY",
       "source": "sa_wall_street",
       "value": 4.66,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIQUY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SBGSY",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SBGSY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SBGSY",
       "source": "sa_analysts",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SBGSY",
       "source": "sa_wall_street",
       "value": 4.66,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SBGSY",
       "source": "zacks",
       "value": 2,
       "label": "Rank #2 Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EONGY",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EONGY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EONGY",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EONGY",
       "source": "sa_wall_street",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EONGY",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NSRGY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NSRGY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NSRGY",
       "source": "sa_analysts",
       "value": 3.33,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NSRGY",
       "source": "sa_wall_street",
       "value": 3.2,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NSRGY",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JAPAY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JAPAY",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JAPAY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JAPAY",
       "source": "sa_wall_street",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "JAPAY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGLOY",
       "source": "investing",
       "value": "Neutral",
       "label": "Neutral",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGLOY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGLOY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGLOY",
       "source": "sa_wall_street",
       "value": 2.5,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NGLOY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IBDRY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IBDRY",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IBDRY",
       "source": "sa_analysts",
       "value": 3.5,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IBDRY",
       "source": "sa_wall_street",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IBDRY",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BASFY",
       "source": "investing",
       "value": "Sell",
       "label": "Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BASFY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BASFY",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BASFY",
       "source": "sa_wall_street",
       "value": 2.75,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BASFY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENGIY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENGIY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENGIY",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENGIY",
       "source": "sa_wall_street",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ENGIY",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RWEOY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RWEOY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RWEOY",
       "source": "sa_wall_street",
       "value": 4.33,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RWEOY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EADSY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EADSY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EADSY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EADSY",
       "source": "sa_wall_street",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "EADSY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RHHBY",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RHHBY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RHHBY",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RHHBY",
       "source": "sa_wall_street",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "RHHBY",
       "source": "zacks",
       "value": 5,
       "label": "Rank #5 Strong Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GLNCY",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GLNCY",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GLNCY",
       "source": "sa_analysts",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GLNCY",
       "source": "sa_wall_street",
       "value": 4.6,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "GLNCY",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "SMEGF",
       "source": "sa_analysts",
       "value": 5.0,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRM",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRM",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRM",
       "source": "sa_analysts",
       "value": 4.15,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRM",
       "source": "sa_wall_street",
       "value": 4.32,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CRM",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AAOI",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AAOI",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AAOI",
       "source": "sa_analysts",
       "value": 3.87,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AAOI",
       "source": "sa_wall_street",
       "value": 3.66,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AAOI",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "TSM",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "COHR",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PAAS",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PAAS",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PAAS",
       "source": "sa_wall_street",
       "value": 4.22,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "PAAS",
       "source": "zacks",
       "value": 4,
       "label": "Rank #4 Sell",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LHX",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LHX",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LHX",
       "source": "sa_analysts",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LHX",
       "source": "sa_wall_street",
       "value": 4.35,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "LHX",
       "source": "zacks",
       "value": 3,
       "label": "Rank #3 Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "ONDS",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "NOW",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IONQ",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "USAR",
       "source": "investing",
       "value": "Strong Buy",
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CIEN",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "CIEN",
       "source": "sa_quant",
       "value": 4.8,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DRAM",
       "source": "sa_analysts",
       "value": 3.64,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "DRAM",
       "source": "sa_wall_street",
       "value": 3.64,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IGM",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IGM",
       "source": "sa_analysts",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "IGM",
       "source": "sa_wall_street",
       "value": 4.5,
       "label": "Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIS",
       "source": "sa_quant",
       "value": 4.0,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIS",
       "source": "sa_analysts",
       "value": 3.25,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "AIS",
       "source": "sa_wall_street",
       "value": 3.25,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BE",
       "source": "investing",
       "value": "Buy",
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BE",
       "source": "sa_quant",
       "value": 3.0,
       "label": "Hold",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BE",
       "source": "sa_analysts",
       "value": 3.56,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BE",
       "source": "sa_wall_street",
       "value": 3.75,
       "label": "Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     },
     {
       "ticker": "BE",
       "source": "zacks",
       "value": 1,
       "label": "Rank #1 Strong Buy",
-      "as_of": "2026-09-17T18:54:26Z"
+      "as_of": "2026-09-17T19:10:09Z"
     }
   ]
 }

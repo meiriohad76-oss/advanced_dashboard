@@ -8,12 +8,12 @@ export interface EvaluatedAlert {
 }
 
 export function evaluateAlert(alert: UserAlert, holding?: Holding): EvaluatedAlert {
-  if (!holding || holding.symbol !== alert.symbol) {
+  if (!holding || holding.symbol.toUpperCase() !== alert.symbol.toUpperCase()) {
     return {
       alert,
       triggered: alert.status === 'TRIGGERED',
       currentValue: 0,
-      message: `${alert.symbol} holding data not found in active book.`,
+      message: `${alert.symbol} monitoring trigger (awaiting live market data).`,
     }
   }
 

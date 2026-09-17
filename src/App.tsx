@@ -1502,7 +1502,9 @@ export default function App() {
         onSelectHolding={(h) => setSelected(getOrBuildHolding(h.symbol, holdings))}
         onOpenAlertPanel={() => setAlertPanelOpen(true)}
         existingHoldings={holdings}
+        userAlerts={userAlerts}
         onAddUserAlert={handleAddUserAlertFromCandidate}
+        onDeleteUserAlert={handleDeleteAlert}
       />
     )
     if (page === 'Alerts') return (

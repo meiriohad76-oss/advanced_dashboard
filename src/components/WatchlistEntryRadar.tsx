@@ -31,17 +31,21 @@ interface WatchlistEntryRadarProps {
   onSelectHolding: (holding: Holding) => void
   onOpenAlertPanel?: () => void
   existingHoldings?: Holding[]
+  userAlerts?: UserAlert[]
   onAddUserAlert?: (alert: Omit<UserAlert, 'id' | 'createdAt' | 'status'>) => void
+  onDeleteUserAlert?: (id: string) => void
 }
 
-type FilterTab = 'all' | 'ready' | 'approaching' | 'strong_ratings' | 'high_upside'
+type FilterTab = 'all' | 'ready' | 'approaching' | 'strong_ratings' | 'high_upside' | 'has_alerts'
 type SortField = 'entry_score' | 'ratings' | 'upside' | 'rsi' | 'symbol' | 'change'
 
 export function WatchlistEntryRadar({
   onSelectHolding,
   onOpenAlertPanel,
   existingHoldings = [],
+  userAlerts = [],
   onAddUserAlert,
+  onDeleteUserAlert,
 }: WatchlistEntryRadarProps) {
   const [watchlistData, setWatchlistData] = useState<WatchlistData | null>(null)
   const [quotes, setQuotes] = useState<Record<string, Quote>>({})
@@ -202,6 +206,10 @@ export function WatchlistEntryRadar({
         targetPrice,
       })
 
+      const candidateAlerts = userAlerts.filter((a) => a.symbol.toUpperCase() === sym)
+      const hasTriggeredAlert = candidateAlerts.some((a) => a.status === 'TRIGGERED')
+      const hasActiveAlert = candidateAlerts.length > 0
+
       return {
         item: it,
         symbol: sym,
@@ -220,9 +228,12 @@ export function WatchlistEntryRadar({
         targetPrice,
         upsidePct,
         assessment,
+        candidateAlerts,
+        hasTriggeredAlert,
+        hasActiveAlert,
       }
     })
-  }, [items, quotes, ratingsMap, existingHoldings])
+  }, [items, quotes, ratingsMap, existingHoldings, userAlerts])
 
   // Filter and sort candidates
   const filteredCandidates = useMemo(() => {
@@ -251,6 +262,9 @@ export function WatchlistEntryRadar({
         if (filterTab === 'high_upside') {
           return (c.upsidePct ?? 0) >= 15
         }
+        if (filterTab === 'has_alerts') {
+          return c.hasActiveAlert
+        }
         return true
       })
       .sort((a, b) => {
@@ -276,11 +290,20 @@ export function WatchlistEntryRadar({
   const totalCount = enrichedCandidates.length
   const entryReadyCount = enrichedCandidates.filter((c) => c.assessment.score >= 80).length
   const approachingCount = enrichedCandidates.filter((c) => c.assessment.score >= 60 && c.assessment.score < 80).length
+  const totalUserTriggers = userAlerts.length
+  const triggeredAlertsCount = userAlerts.filter((a) => a.status === 'TRIGGERED').length
+  const candidatesWithAlertsCount = enrichedCandidates.filter((c) => c.hasActiveAlert).length
   const avgUpside = useMemo(() => {
     const valid = enrichedCandidates.map((c) => c.upsidePct).filter((u): u is number => u !== null && u > -50 && u < 300)
     if (valid.length === 0) return 0
     return Math.round((valid.reduce((sum, v) => sum + v, 0) / valid.length) * 10) / 10
   }, [enrichedCandidates])
+
+  // Triggers for active modal ticker
+  const modalAlerts = useMemo(() => {
+    if (!alertModalTicker) return []
+    return userAlerts.filter((a) => a.symbol.toUpperCase() === alertModalTicker.toUpperCase())
+  }, [alertModalTicker, userAlerts])
 
   // Handle open drawer for candidate
   const handleSelectCandidate = (candidate: typeof enrichedCandidates[0]) => {
@@ -305,7 +328,7 @@ export function WatchlistEntryRadar({
   }
 
   // Handle create alert
-  const handleOpenAlertModal = (symbol: string, currentPrice: number, currentRsi: number) => {
+  const handleOpenAlertModal = (symbol: string, currentPrice: number, _currentRsi: number) => {
     setAlertModalTicker(symbol)
     setAlertMetric('PRICE')
     setAlertCondition('BELOW')
@@ -330,7 +353,6 @@ export function WatchlistEntryRadar({
     }
     setAlertSuccessMsg(`Entry alert armed for ${alertModalTicker} when ${alertMetric} is ${alertCondition} ${val}!`)
     setTimeout(() => {
-      setAlertModalTicker(null)
       setAlertSuccessMsg(null)
     }, 1500)
   }
@@ -359,34 +381,66 @@ export function WatchlistEntryRadar({
       </div>
 
       {/* KPI Summary Cards */}
-      <div className="summary-grid" style={{ marginBottom: '20px' }}>
-        <div className="summary-card">
-          <span>TRACKED CANDIDATES</span>
+      <div className="kpi-grid" style={{ marginBottom: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+        <div className="kpi-card">
+          <div className="kpi-top">
+            <span>TRACKED CANDIDATES</span>
+            <Database size={14} />
+          </div>
           <strong>{totalCount}</strong>
           <small>Prospective tickers</small>
         </div>
 
-        <div className="summary-card alert-summary-card" style={{ borderColor: entryReadyCount > 0 ? 'var(--green)' : undefined }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="kpi-card good" style={{ borderColor: entryReadyCount > 0 ? 'var(--green)' : undefined }}>
+          <div className="kpi-top">
             <span>ENTRY ALERTS ACTIVE</span>
-            {entryReadyCount > 0 && <span className="live-dot" style={{ background: 'var(--green)' }} />}
+            {entryReadyCount > 0 ? <span className="live-dot" style={{ background: 'var(--green)' }} /> : <Sparkles size={14} />}
           </div>
           <strong style={{ color: entryReadyCount > 0 ? 'var(--green)' : undefined }}>{entryReadyCount}</strong>
           <small>{entryReadyCount > 0 ? 'High-conviction buy setups (Score ≥ 80)' : 'Waiting for criteria'}</small>
         </div>
 
-        <div className="summary-card">
-          <span>APPROACHING ENTRY</span>
+        <div className="kpi-card">
+          <div className="kpi-top">
+            <span>APPROACHING ENTRY</span>
+            <Activity size={14} />
+          </div>
           <strong>{approachingCount}</strong>
           <small>Consolidating setups (Score 60–79)</small>
         </div>
 
-        <div className="summary-card">
-          <span>AVG TARGET UPSIDE</span>
+        <div className="kpi-card">
+          <div className="kpi-top">
+            <span>AVG TARGET UPSIDE</span>
+            <Target size={14} />
+          </div>
           <strong style={{ color: avgUpside > 0 ? 'var(--green)' : undefined }}>
             {avgUpside > 0 ? `+${avgUpside}%` : `${avgUpside}%`}
           </strong>
           <small>Wall St consensus targets</small>
+        </div>
+
+        <div
+          className={`kpi-card ${triggeredAlertsCount > 0 ? 'good' : ''}`}
+          style={{
+            borderColor: triggeredAlertsCount > 0 ? 'var(--green)' : candidatesWithAlertsCount > 0 ? 'var(--accent)' : undefined,
+            cursor: 'pointer',
+          }}
+          onClick={() => setFilterTab('has_alerts')}
+          title="Filter candidate stocks with active triggers"
+        >
+          <div className="kpi-top">
+            <span style={{ color: triggeredAlertsCount > 0 ? 'var(--green)' : undefined }}>USER TRIGGERS</span>
+            <Bell size={14} style={{ color: triggeredAlertsCount > 0 ? 'var(--green)' : undefined }} />
+          </div>
+          <strong style={{ color: triggeredAlertsCount > 0 ? 'var(--green)' : undefined }}>
+            {totalUserTriggers}
+          </strong>
+          <small>
+            {triggeredAlertsCount > 0
+              ? `⚡ ${triggeredAlertsCount} triggered (${candidatesWithAlertsCount} symbols)`
+              : `${totalUserTriggers} armed on ${candidatesWithAlertsCount} watchlist symbols`}
+          </small>
         </div>
       </div>
 
@@ -492,6 +546,32 @@ export function WatchlistEntryRadar({
           </button>
           <button
             type="button"
+            className={`secondary-button ${filterTab === 'has_alerts' ? 'active' : ''}`}
+            onClick={() => setFilterTab('has_alerts')}
+            style={{
+              color: filterTab === 'has_alerts' ? 'var(--accent)' : undefined,
+              borderColor: triggeredAlertsCount > 0 ? 'var(--green)' : undefined,
+            }}
+          >
+            🔔 Has Triggers ({candidatesWithAlertsCount})
+            {triggeredAlertsCount > 0 && (
+              <span
+                style={{
+                  marginLeft: '5px',
+                  background: 'var(--green)',
+                  color: '#fff',
+                  fontSize: '9px',
+                  padding: '1px 5px',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                }}
+              >
+                {triggeredAlertsCount} FIRED
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
             className={`secondary-button ${filterTab === 'strong_ratings' ? 'active' : ''}`}
             onClick={() => setFilterTab('strong_ratings')}
           >
@@ -553,6 +633,7 @@ export function WatchlistEntryRadar({
             const scoreColor =
               assessment.score >= 80 ? 'var(--green)' : assessment.score >= 60 ? 'var(--amber)' : 'var(--muted)'
             const isEntryReady = assessment.score >= 80
+            const cardBorderColor = candidate.hasTriggeredAlert ? 'var(--green)' : scoreColor
 
             return (
               <div
@@ -563,7 +644,8 @@ export function WatchlistEntryRadar({
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '14px',
-                  borderLeft: `4px solid ${scoreColor}`,
+                  borderLeft: `4px solid ${cardBorderColor}`,
+                  boxShadow: candidate.hasTriggeredAlert ? '0 0 16px rgba(16, 185, 129, 0.22)' : undefined,
                   transition: 'transform 0.15s ease, box-shadow 0.15s ease',
                 }}
               >
@@ -580,6 +662,42 @@ export function WatchlistEntryRadar({
                         <span className="sector-tag" style={{ fontSize: '11px', padding: '2px 6px' }}>
                           {candidate.sector}
                         </span>
+                        {candidate.hasTriggeredAlert ? (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              background: 'rgba(16, 185, 129, 0.18)',
+                              border: '1px solid var(--green)',
+                              color: 'var(--green)',
+                              borderRadius: '4px',
+                              padding: '2px 6px',
+                              fontSize: '10px',
+                              fontWeight: 800,
+                            }}
+                          >
+                            ⚡ TRIGGER FIRED
+                          </span>
+                        ) : candidate.hasActiveAlert ? (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              background: 'rgba(59, 130, 246, 0.12)',
+                              border: '1px solid rgba(59, 130, 246, 0.3)',
+                              color: '#60a5fa',
+                              borderRadius: '4px',
+                              padding: '2px 6px',
+                              fontSize: '10px',
+                              fontWeight: 700,
+                            }}
+                          >
+                            <Bell size={10} />
+                            {candidate.candidateAlerts.length} {candidate.candidateAlerts.length === 1 ? 'Trigger' : 'Triggers'}
+                          </span>
+                        ) : null}
                       </div>
                       <small style={{ color: 'var(--muted)', display: 'block' }}>{candidate.name}</small>
                     </div>
@@ -683,12 +801,25 @@ export function WatchlistEntryRadar({
                     </button>
                     <button
                       type="button"
-                      className="secondary-button"
-                      title="Arm Entry Alert"
-                      style={{ padding: '6px 10px', fontSize: '12px' }}
+                      className={`secondary-button ${candidate.hasActiveAlert ? 'active' : ''}`}
+                      title={candidate.hasActiveAlert ? 'Manage / Add Triggers' : 'Arm Entry Alert'}
+                      style={{
+                        padding: '6px 10px',
+                        fontSize: '12px',
+                        borderColor: candidate.hasTriggeredAlert ? 'var(--green)' : undefined,
+                        color: candidate.hasTriggeredAlert ? 'var(--green)' : candidate.hasActiveAlert ? 'var(--accent)' : undefined,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
                       onClick={() => handleOpenAlertModal(candidate.symbol, candidate.price, candidate.rsi)}
                     >
                       <Bell size={13} />
+                      {candidate.candidateAlerts.length > 0 && (
+                        <span style={{ fontSize: '11px', fontWeight: 700 }}>
+                          {candidate.candidateAlerts.length}
+                        </span>
+                      )}
                     </button>
                     <button
                       type="button"
@@ -701,6 +832,135 @@ export function WatchlistEntryRadar({
                     </button>
                   </div>
                 </div>
+
+                {/* User Triggers / Alerts on this Candidate */}
+                {candidate.candidateAlerts.length > 0 && (
+                  <div
+                    style={{
+                      background: candidate.hasTriggeredAlert ? 'rgba(16, 185, 129, 0.08)' : 'var(--surface-hover)',
+                      border: candidate.hasTriggeredAlert ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid var(--border)',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: candidate.hasTriggeredAlert ? 'var(--green)' : 'var(--accent)',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        <Bell size={12} />
+                        <span>Active Triggers ({candidate.candidateAlerts.length}):</span>
+                      </div>
+
+                      {candidate.candidateAlerts.map((alt) => {
+                        const isTriggered = alt.status === 'TRIGGERED'
+                        let condText = ''
+                        if (alt.metric === 'PRICE') {
+                          condText = alt.condition === 'BELOW' ? `Price ≤ $${alt.targetValue.toFixed(2)}` : `Price ≥ $${alt.targetValue.toFixed(2)}`
+                        } else if (alt.metric === 'RSI') {
+                          condText = `RSI ${alt.condition === 'BELOW' ? '≤' : '≥'} ${alt.targetValue}`
+                        } else {
+                          condText = `${alt.metric} ${alt.condition} ${alt.targetValue}`
+                        }
+
+                        let distanceText = ''
+                        if (alt.metric === 'PRICE' && candidate.price > 0) {
+                          const diff = candidate.price - alt.targetValue
+                          if (isTriggered) {
+                            distanceText = 'Trigger Met!'
+                          } else if (alt.condition === 'BELOW') {
+                            const pct = (diff / candidate.price) * 100
+                            distanceText = diff > 0 ? `$${diff.toFixed(2)} (${pct.toFixed(1)}%) above` : 'Target hit!'
+                          } else {
+                            const diffAbove = alt.targetValue - candidate.price
+                            const pct = (diffAbove / candidate.price) * 100
+                            distanceText = diffAbove > 0 ? `$${diffAbove.toFixed(2)} (${pct.toFixed(1)}%) to trigger` : 'Target hit!'
+                          }
+                        }
+
+                        return (
+                          <div
+                            key={alt.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: isTriggered ? 'rgba(16, 185, 129, 0.18)' : 'var(--surface)',
+                              border: `1px solid ${isTriggered ? 'var(--green)' : 'var(--border)'}`,
+                              borderRadius: '6px',
+                              padding: '3px 8px',
+                              fontSize: '11px',
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontWeight: 700,
+                                color: isTriggered ? 'var(--green)' : 'var(--foreground)',
+                              }}
+                            >
+                              {isTriggered && '⚡ '}
+                              {condText}
+                            </span>
+                            {distanceText && (
+                              <span style={{ color: isTriggered ? 'var(--green)' : 'var(--muted)', fontSize: '10px' }}>
+                                ({distanceText})
+                              </span>
+                            )}
+                            <span
+                              style={{
+                                fontSize: '9px',
+                                fontWeight: 800,
+                                padding: '1px 5px',
+                                borderRadius: '4px',
+                                textTransform: 'uppercase',
+                                background: isTriggered ? 'var(--green)' : 'rgba(59, 130, 246, 0.15)',
+                                color: isTriggered ? '#fff' : '#60a5fa',
+                              }}
+                            >
+                              {alt.status}
+                            </span>
+                            {onDeleteUserAlert && (
+                              <button
+                                type="button"
+                                className="icon-button"
+                                title="Delete this trigger"
+                                style={{ padding: '2px', color: 'var(--muted)', cursor: 'pointer', background: 'none', border: 'none' }}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  onDeleteUserAlert(alt.id)
+                                }}
+                              >
+                                <X size={12} />
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      style={{ padding: '2px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      onClick={() => handleOpenAlertModal(candidate.symbol, candidate.price, candidate.rsi)}
+                    >
+                      <Plus size={12} />
+                      Add Trigger
+                    </button>
+                  </div>
+                )}
 
                 {/* Second Row: 5-Point Entry Criteria Checklist */}
                 <div
@@ -835,6 +1095,61 @@ export function WatchlistEntryRadar({
             <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '16px' }}>
               Set an alert condition to be notified automatically when {alertModalTicker} triggers your entry trigger.
             </p>
+
+            {/* Existing Triggers for this ticker */}
+            {modalAlerts.length > 0 && (
+              <div style={{ marginBottom: '16px', background: 'var(--surface-hover)', borderRadius: '8px', padding: '10px 12px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                  Configured Triggers ({modalAlerts.length}):
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {modalAlerts.map((alt) => (
+                    <div
+                      key={alt.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        fontSize: '12px',
+                        background: 'var(--surface)',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 600 }}>
+                          {alt.metric} {alt.condition === 'BELOW' ? '≤' : alt.condition === 'ABOVE' ? '≥' : alt.condition} {alt.targetValue}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            padding: '1px 5px',
+                            borderRadius: '3px',
+                            background: alt.status === 'TRIGGERED' ? 'var(--green)' : 'rgba(59,130,246,0.15)',
+                            color: alt.status === 'TRIGGERED' ? '#fff' : '#60a5fa',
+                          }}
+                        >
+                          {alt.status}
+                        </span>
+                      </div>
+                      {onDeleteUserAlert && (
+                        <button
+                          type="button"
+                          className="icon-button"
+                          title="Delete trigger"
+                          style={{ color: 'var(--red)', cursor: 'pointer', padding: '2px', background: 'none', border: 'none' }}
+                          onClick={() => onDeleteUserAlert(alt.id)}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               <div>
