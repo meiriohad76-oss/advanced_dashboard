@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, Send, CheckCircle2, X, ShieldAlert, Radio } from 'lucide-react'
+import { Bell, Send, CheckCircle2, X, ShieldAlert, Radio, Sun } from 'lucide-react'
 import { api } from '../api/client'
 import { ModalOverlay } from './ModalOverlay'
 import type { NotificationSettings } from '../types'
@@ -16,11 +16,15 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
     webhook_url: '',
     webhook_enabled: false,
     min_severity: 'warning',
+    premarket_briefing_enabled: false,
+    premarket_briefing_time: '08:30 ET',
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
+  const [testingBriefing, setTestingBriefing] = useState(false)
   const [testResult, setTestResult] = useState<string | null>(null)
+  const [briefingPreview, setBriefingPreview] = useState<string | null>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -70,6 +74,26 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
       setTestResult('Test request failed.')
     } finally {
       setTesting(false)
+    }
+  }
+
+  const handleTestBriefing = async () => {
+    setTestingBriefing(true)
+    setBriefingPreview(null)
+    try {
+      const res = await api.sendTestBriefing()
+      if (res.success) {
+        setStatusMessage('Pre-market briefing dispatched to Telegram successfully!')
+      } else {
+        setStatusMessage(res.error ? `Briefing notice: ${res.error}` : 'Briefing preview generated.')
+      }
+      if (res.briefing) {
+        setBriefingPreview(res.briefing)
+      }
+    } catch {
+      setStatusMessage('Failed to trigger test briefing.')
+    } finally {
+      setTestingBriefing(false)
     }
   }
 
@@ -183,6 +207,58 @@ export function NotificationSettingsModal({ onClose }: NotificationSettingsModal
                   style={{ width: '100%', padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
                 />
               </div>
+            </section>
+
+            {/* Scheduled Daily Pre-Market Briefing */}
+            <section style={{ background: 'var(--subtle)', border: '1px solid var(--line)', borderRadius: '10px', padding: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sun size={16} color="#f59e0b" />
+                  <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>Scheduled Pre-Market Briefing</strong>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer', color: 'var(--ink)' }}>
+                  <input
+                    type="checkbox"
+                    checked={settings.premarket_briefing_enabled || false}
+                    onChange={(e) => setSettings({ ...settings, premarket_briefing_enabled: e.target.checked })}
+                  />
+                  <span>Enable Daily Briefing</span>
+                </label>
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '0 0 10px 0' }}>
+                Dispatches an institutional morning digest to Telegram at ~08:30 ET before US open, covering portfolio health, nearing triggers (&lt;3.5%), and rating upgrades.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11px', color: 'var(--accent-dark)', fontWeight: 600 }}>
+                  ⏰ Schedule: Weekdays at 08:30 ET
+                </span>
+                <button
+                  type="button"
+                  disabled={testingBriefing}
+                  onClick={handleTestBriefing}
+                  className="ask-button"
+                  style={{ fontSize: '11px', padding: '5px 10px' }}
+                >
+                  <Send size={12} /> {testingBriefing ? 'Dispatching…' : 'Send Test Briefing'}
+                </button>
+              </div>
+              {briefingPreview && (
+                <div style={{
+                  marginTop: '10px',
+                  padding: '10px',
+                  background: 'var(--panel)',
+                  borderRadius: '6px',
+                  border: '1px solid var(--line)',
+                  fontSize: '11px',
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: 'monospace',
+                  color: 'var(--ink)',
+                  maxHeight: '160px',
+                  overflowY: 'auto'
+                }}>
+                  {briefingPreview}
+                </div>
+              )}
             </section>
 
             {/* Severity filter */}

@@ -143,8 +143,9 @@ def run_backtest(
     max_holding_days: int = 20,
     rsi_min: float = 38.0,
     rsi_max: float = 58.0,
+    strategy_mode: str = "5point_entry",
 ) -> dict[str, Any]:
-    """Runs a quantitative backtest simulation of the 5-Point Entry Criteria."""
+    """Runs a quantitative backtest simulation of either the 5-Point Entry Criteria or Playbook Defense."""
     days_map = {
         "6mo": 126,
         "1y": 252,
@@ -178,14 +179,18 @@ def run_backtest(
         sub_vol = volumes[max(0, i - 19) : i + 1]
         vol_20.append(sum(sub_vol) / len(sub_vol))
 
-    # Benchmark tracking (SPY drift)
+    # Benchmark tracking (SPY drift for entry mode, Buy & Hold of asset for defense mode)
     bench_equity = initial_capital
+    bench_peak = initial_capital
+    bench_max_dd = 0.0
     strat_equity = initial_capital
 
-    in_position = False
-    entry_price = 0.0
-    entry_date = ""
+    in_position = strategy_mode == "playbook_defense"
+    entry_price = bars[0]["close"] if in_position else 0.0
+    entry_date = bars[0]["time"] if in_position else ""
     entry_idx = 0
+    peak_in_trade = entry_price
+    trimmed = False
     trades: list[dict[str, Any]] = []
 
     equity_curve: list[dict[str, Any]] = []
@@ -229,76 +234,147 @@ def run_backtest(
 
         current_score = int(min(100.0, rsi_score + trend_score + volume_score + ratings_score + upside_score))
 
-        # Benchmark daily drift (~0.04% per day)
-        spy_ret = (b["close"] - bars[i - 1]["close"]) / bars[i - 1]["close"] if i > 0 else 0.0004
-        bench_equity = round(bench_equity * (1.0 + spy_ret), 2)
+        # Benchmark return
+        if strategy_mode == "playbook_defense":
+            # Direct Buy & Hold of the target asset
+            bench_ret = (b["close"] - bars[i - 1]["close"]) / bars[i - 1]["close"] if i > 0 else 0.0
+        else:
+            # Broad market SPY benchmark drift (~0.04% per day)
+            bench_ret = (b["close"] - bars[i - 1]["close"]) / bars[i - 1]["close"] if i > 0 else 0.0004
+        bench_equity = round(bench_equity * (1.0 + bench_ret), 2)
+        if bench_equity > bench_peak:
+            bench_peak = bench_equity
+        bdd = (bench_peak - bench_equity) / bench_peak if bench_peak > 0 else 0.0
+        if bdd > bench_max_dd:
+            bench_max_dd = bdd
 
         # Position Evaluation & Exit Rules
         strat_ret = 0.00018  # Default cash risk-free yield
 
-        if in_position:
-            days_held = i - entry_idx
-            gain_pct = ((b["high"] - entry_price) / entry_price) * 100.0
-            loss_pct = ((entry_price - b["low"]) / entry_price) * 100.0
-            close_ret_pct = ((b["close"] - entry_price) / entry_price) * 100.0
+        if strategy_mode == "playbook_defense":
+            # Playbook Defense Mode: -6% Trailing Stop + 33% Profit Trim
+            if in_position:
+                days_held = i - entry_idx
+                if b["high"] > peak_in_trade:
+                    peak_in_trade = b["high"]
 
-            exit_triggered = False
-            exit_reason = ""
-            exit_price = b["close"]
+                trailing_stop_price = peak_in_trade * (1.0 - stop_loss_pct / 100.0)
+                effective_stop = max(trailing_stop_price, entry_price) if trimmed else trailing_stop_price
 
-            # 1. Take Profit
-            if gain_pct >= take_profit_pct:
-                exit_triggered = True
-                exit_reason = "TARGET"
-                exit_price = entry_price * (1.0 + take_profit_pct / 100.0)
-            # 2. Stop Loss
-            elif loss_pct >= stop_loss_pct:
-                exit_triggered = True
-                exit_reason = "STOP_LOSS"
-                exit_price = entry_price * (1.0 - stop_loss_pct / 100.0)
-            # 3. Time Stop
-            elif days_held >= max_holding_days:
-                exit_triggered = True
-                exit_reason = "TIME_STOP"
-                exit_price = b["close"]
-            # 4. Score De-risk Exit
-            elif current_score < exit_score:
-                exit_triggered = True
-                exit_reason = "SIGNAL_EXIT"
-                exit_price = b["close"]
+                # Check Stop-Loss / Trailing Stop Trigger
+                if b["low"] <= effective_stop and i > entry_idx:
+                    in_position = False
+                    exit_price = max(b["low"], effective_stop)
+                    trade_ret = (exit_price - entry_price) / entry_price
+                    strat_equity = round(strat_equity * (1.0 + trade_ret), 2)
+                    trades.append({
+                        "symbol": symbol.upper(),
+                        "entry_date": entry_date,
+                        "exit_date": d,
+                        "duration_days": days_held,
+                        "entry_price": round(entry_price, 2),
+                        "exit_price": round(exit_price, 2),
+                        "return_pct": round(trade_ret * 100.0, 2),
+                        "win": trade_ret > 0,
+                        "exit_reason": "TRAILING_STOP_DEFENSE",
+                        "entry_score": current_score,
+                    })
+                else:
+                    # Check Profit Trim (+15%)
+                    gain_pct = ((b["high"] - entry_price) / entry_price) * 100.0
+                    if gain_pct >= take_profit_pct and not trimmed:
+                        trimmed = True
+                        trades.append({
+                            "symbol": symbol.upper(),
+                            "entry_date": entry_date,
+                            "exit_date": d,
+                            "duration_days": days_held,
+                            "entry_price": round(entry_price, 2),
+                            "exit_price": round(entry_price * (1.0 + take_profit_pct / 100.0), 2),
+                            "return_pct": round(take_profit_pct, 2),
+                            "win": True,
+                            "exit_reason": "PROFIT_TRIM_33%",
+                            "entry_score": current_score,
+                        })
 
-            if exit_triggered:
-                in_position = False
-                trade_ret = (exit_price - entry_price) / entry_price
-                trades.append({
-                    "symbol": symbol.upper(),
-                    "entry_date": entry_date,
-                    "exit_date": d,
-                    "duration_days": days_held,
-                    "entry_price": round(entry_price, 2),
-                    "exit_price": round(exit_price, 2),
-                    "return_pct": round(trade_ret * 100.0, 2),
-                    "win": trade_ret > 0,
-                    "exit_reason": exit_reason,
-                    "entry_score": entry_score,
-                })
-                # Apply trade outcome
-                strat_equity = round(strat_equity * (1.0 + trade_ret), 2)
+                    bar_ret = (b["close"] - bars[i - 1]["close"]) / bars[i - 1]["close"] if i > 0 else 0.0
+                    strat_ret = bar_ret * (0.67 if trimmed else 1.0)
+                    strat_equity = round(strat_equity * (1.0 + strat_ret), 2)
             else:
-                # Daily return while in trade
-                bar_ret = (b["close"] - bars[i - 1]["close"]) / bars[i - 1]["close"] if i > 0 else 0.0
-                strat_ret = bar_ret
+                # Cash position: re-enter when price regains 50 SMA with positive momentum
                 strat_equity = round(strat_equity * (1.0 + strat_ret), 2)
+                if i >= 15 and price >= sma_50[i] and rsi >= 45.0 and b["close"] >= b["open"]:
+                    in_position = True
+                    entry_price = b["close"]
+                    entry_date = d
+                    entry_idx = i
+                    peak_in_trade = entry_price
+                    trimmed = False
         else:
-            # Check for Entry Trigger
-            # Need minimum 15 bars warmup for indicators
-            if i >= 15 and current_score >= entry_score:
-                in_position = True
-                entry_price = b["close"]
-                entry_date = d
-                entry_idx = i
+            # 5-Point Entry Criteria Mode
+            if in_position:
+                days_held = i - entry_idx
+                gain_pct = ((b["high"] - entry_price) / entry_price) * 100.0
+                loss_pct = ((entry_price - b["low"]) / entry_price) * 100.0
+                close_ret_pct = ((b["close"] - entry_price) / entry_price) * 100.0
+
+                exit_triggered = False
+                exit_reason = ""
+                exit_price = b["close"]
+
+                # 1. Take Profit
+                if gain_pct >= take_profit_pct:
+                    exit_triggered = True
+                    exit_reason = "TARGET"
+                    exit_price = entry_price * (1.0 + take_profit_pct / 100.0)
+                # 2. Stop Loss
+                elif loss_pct >= stop_loss_pct:
+                    exit_triggered = True
+                    exit_reason = "STOP_LOSS"
+                    exit_price = entry_price * (1.0 - stop_loss_pct / 100.0)
+                # 3. Time Stop
+                elif days_held >= max_holding_days:
+                    exit_triggered = True
+                    exit_reason = "TIME_STOP"
+                    exit_price = b["close"]
+                # 4. Score De-risk Exit
+                elif current_score < exit_score:
+                    exit_triggered = True
+                    exit_reason = "SIGNAL_EXIT"
+                    exit_price = b["close"]
+
+                if exit_triggered:
+                    in_position = False
+                    trade_ret = (exit_price - entry_price) / entry_price
+                    trades.append({
+                        "symbol": symbol.upper(),
+                        "entry_date": entry_date,
+                        "exit_date": d,
+                        "duration_days": days_held,
+                        "entry_price": round(entry_price, 2),
+                        "exit_price": round(exit_price, 2),
+                        "return_pct": round(trade_ret * 100.0, 2),
+                        "win": trade_ret > 0,
+                        "exit_reason": exit_reason,
+                        "entry_score": entry_score,
+                    })
+                    # Apply trade outcome
+                    strat_equity = round(strat_equity * (1.0 + trade_ret), 2)
+                else:
+                    # Daily return while in trade
+                    bar_ret = (b["close"] - bars[i - 1]["close"]) / bars[i - 1]["close"] if i > 0 else 0.0
+                    strat_ret = bar_ret
+                    strat_equity = round(strat_equity * (1.0 + strat_ret), 2)
             else:
-                strat_equity = round(strat_equity * (1.0 + strat_ret), 2)
+                # Check for Entry Trigger
+                # Need minimum 15 bars warmup for indicators
+                if i >= 15 and current_score >= entry_score:
+                    in_position = True
+                    entry_price = b["close"]
+                    entry_date = d
+                    entry_idx = i
+                else:
+                    strat_equity = round(strat_equity * (1.0 + strat_ret), 2)
 
         daily_returns_strat.append(strat_ret)
 
@@ -359,9 +435,13 @@ def run_backtest(
     avg_trade_return = round(sum(t["return_pct"] for t in trades) / len(trades), 2) if trades else 0.0
     avg_holding_days = round(sum(t["duration_days"] for t in trades) / len(trades), 1) if trades else 0.0
 
+    drawdown_avoided_pct = max(0.0, round((bench_max_dd - max_drawdown) * 100.0, 2))
+    capital_preserved = max(0.0, round(strat_equity - bench_equity, 2))
+
     return {
         "parameters": {
             "symbol": symbol.upper(),
+            "strategy_mode": strategy_mode,
             "entry_score": entry_score,
             "exit_score": exit_score,
             "lookback": lookback,
@@ -382,6 +462,9 @@ def run_backtest(
             "cagr_pct": cagr_pct,
             "sharpe_ratio": sharpe_ratio,
             "max_drawdown_pct": round(max_drawdown * 100.0, 2),
+            "benchmark_max_drawdown_pct": round(bench_max_dd * 100.0, 2),
+            "drawdown_avoided_pct": drawdown_avoided_pct,
+            "capital_preserved": capital_preserved,
             "win_rate_pct": win_rate_pct,
             "profit_factor": profit_factor,
             "trades_count": len(trades),

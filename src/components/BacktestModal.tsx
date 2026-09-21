@@ -23,17 +23,20 @@ export function BacktestModal({ onClose, initialSymbol = 'NVDA' }: BacktestModal
   const [rsiMax] = useState(58)
   const [lookback, setLookback] = useState<'6mo' | '1y' | '2y' | '3y'>('1y')
   const [initialCapital, setInitialCapital] = useState(100000)
+  const [strategyMode, setStrategyMode] = useState<'5point_entry' | 'playbook_defense'>('5point_entry')
   const [result, setResult] = useState<BacktestResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleRunSimulation = async () => {
+  const handleRunSimulation = async (modeOverride?: '5point_entry' | 'playbook_defense') => {
     setLoading(true)
     setError(null)
+    const activeMode = modeOverride || strategyMode
     const targetSym = (customSymbol.trim() || symbol).toUpperCase()
     try {
       const res = await api.analyticsBacktest({
         symbol: targetSym,
+        strategy_mode: activeMode,
         entry_score: entryScore,
         exit_score: exitScore,
         lookback,
@@ -158,6 +161,58 @@ export function BacktestModal({ onClose, initialSymbol = 'NVDA' }: BacktestModal
             marginBottom: '18px',
           }}
         >
+          {/* Strategy Mode Toggle */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setStrategyMode('5point_entry')
+                setStopLossPct(5)
+                setTakeProfitPct(15)
+                handleRunSimulation('5point_entry')
+              }}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: strategyMode === '5point_entry' ? 700 : 500,
+                background: strategyMode === '5point_entry' ? 'var(--accent-dark, #0f172a)' : 'var(--surface)',
+                color: strategyMode === '5point_entry' ? '#fff' : 'var(--foreground)',
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+              }}
+            >
+              ⚡ 5-Point Entry Criteria
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStrategyMode('playbook_defense')
+                setStopLossPct(6)
+                setTakeProfitPct(15)
+                handleRunSimulation('playbook_defense')
+              }}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: strategyMode === 'playbook_defense' ? 700 : 500,
+                background: strategyMode === 'playbook_defense' ? '#047857' : 'var(--surface)',
+                color: strategyMode === 'playbook_defense' ? '#fff' : 'var(--foreground)',
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+              }}
+            >
+              🛡️ Playbook Defense (-6% Stop &amp; Profit Trim)
+            </button>
+          </div>
+
+          {strategyMode === 'playbook_defense' && (
+            <div style={{ padding: '8px 12px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '6px', fontSize: '11px', color: '#047857', marginBottom: '14px' }}>
+              <strong>🛡️ Playbook Active Defense:</strong> Holds {customSymbol || symbol} with automated risk defense: -{stopLossPct}% trailing stop exit to cash on breakdowns, 33% profit trim at +{takeProfitPct}%, and 50 SMA momentum re-entry. Benchmarked directly against 100% passive Buy &amp; Hold of {customSymbol || symbol}.
+            </div>
+          )}
+
           {/* Ticker & Lookback Selection */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -311,7 +366,7 @@ export function BacktestModal({ onClose, initialSymbol = 'NVDA' }: BacktestModal
             <button
               type="button"
               className="primary-button"
-              onClick={handleRunSimulation}
+              onClick={() => handleRunSimulation()}
               disabled={loading}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 16px', fontSize: '12px' }}
             >
@@ -329,7 +384,9 @@ export function BacktestModal({ onClose, initialSymbol = 'NVDA' }: BacktestModal
             {/* KPI Performance Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '16px' }}>
               <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '12px', borderRadius: '8px', border: '1px solid var(--green)' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green)', display: 'block' }}>STRATEGY RETURN</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green)', display: 'block' }}>
+                  {strategyMode === 'playbook_defense' ? 'PLAYBOOK DEFENSE' : 'STRATEGY RETURN'}
+                </span>
                 <strong style={{ fontSize: '18px', color: 'var(--green)', fontVariantNumeric: 'tabular-nums' }}>
                   {result.metrics.total_return_pct >= 0 ? '+' : ''}
                   {result.metrics.total_return_pct.toFixed(1)}%
@@ -340,34 +397,62 @@ export function BacktestModal({ onClose, initialSymbol = 'NVDA' }: BacktestModal
               </div>
 
               <div style={{ background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>SPY BENCHMARK</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>
+                  {strategyMode === 'playbook_defense' ? `${activeSymbol} BUY & HOLD` : 'SPY BENCHMARK'}
+                </span>
                 <strong style={{ fontSize: '18px', color: 'var(--foreground)', fontVariantNumeric: 'tabular-nums' }}>
                   {result.metrics.benchmark_return_pct >= 0 ? '+' : ''}
                   {result.metrics.benchmark_return_pct.toFixed(1)}%
                 </strong>
-                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Buy &amp; Hold</small>
+                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Passive Hold</small>
               </div>
 
-              <div style={{ background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>WIN RATE</span>
-                <strong style={{ fontSize: '18px', color: 'var(--foreground)', fontVariantNumeric: 'tabular-nums' }}>
-                  {result.metrics.win_rate_pct.toFixed(0)}%
-                </strong>
-                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>
-                  PF: <strong>{result.metrics.profit_factor}</strong>
-                </small>
-              </div>
+              {strategyMode === 'playbook_defense' ? (
+                <>
+                  <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '12px', borderRadius: '8px', border: '1px solid var(--green)' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--green)', display: 'block' }}>DRAWDOWN AVOIDED</span>
+                    <strong style={{ fontSize: '18px', color: 'var(--green)', fontVariantNumeric: 'tabular-nums' }}>
+                      +{result.metrics.drawdown_avoided_pct || 0}%
+                    </strong>
+                    <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>
+                      DD: -{result.metrics.max_drawdown_pct.toFixed(1)}% vs -{result.metrics.benchmark_max_drawdown_pct || 0}%
+                    </small>
+                  </div>
+
+                  <div style={{ background: 'rgba(37, 99, 235, 0.08)', padding: '12px', borderRadius: '8px', border: '1px solid #2563eb' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#2563eb', display: 'block' }}>CAPITAL PRESERVED</span>
+                    <strong style={{ fontSize: '18px', color: '#2563eb', fontVariantNumeric: 'tabular-nums' }}>
+                      +${result.metrics.capital_preserved ? result.metrics.capital_preserved.toLocaleString() : '0'}
+                    </strong>
+                    <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Losses prevented</small>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>WIN RATE</span>
+                    <strong style={{ fontSize: '18px', color: 'var(--foreground)', fontVariantNumeric: 'tabular-nums' }}>
+                      {result.metrics.win_rate_pct.toFixed(0)}%
+                    </strong>
+                    <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>
+                      PF: <strong>{result.metrics.profit_factor}</strong>
+                    </small>
+                  </div>
+
+                  <div style={{ background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>MAX DRAWDOWN</span>
+                    <strong style={{ fontSize: '18px', color: 'var(--red)', fontVariantNumeric: 'tabular-nums' }}>
+                      -{result.metrics.max_drawdown_pct.toFixed(1)}%
+                    </strong>
+                    <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Peak-to-trough</small>
+                  </div>
+                </>
+              )}
 
               <div style={{ background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>MAX DRAWDOWN</span>
-                <strong style={{ fontSize: '18px', color: 'var(--red)', fontVariantNumeric: 'tabular-nums' }}>
-                  -{result.metrics.max_drawdown_pct.toFixed(1)}%
-                </strong>
-                <small style={{ fontSize: '10px', color: 'var(--muted)', display: 'block' }}>Peak-to-trough</small>
-              </div>
-
-              <div style={{ background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>TOTAL TRADES</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)', display: 'block' }}>
+                  {strategyMode === 'playbook_defense' ? 'DEFENSE ACTIONS' : 'TOTAL TRADES'}
+                </span>
                 <strong style={{ fontSize: '18px', color: 'var(--foreground)', fontVariantNumeric: 'tabular-nums' }}>
                   {result.metrics.trades_count}
                 </strong>
@@ -389,7 +474,9 @@ export function BacktestModal({ onClose, initialSymbol = 'NVDA' }: BacktestModal
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>
-                  EQUITY GROWTH COMPARISON ({activeSymbol} 5-POINT STRATEGY VS SPY)
+                  {strategyMode === 'playbook_defense'
+                    ? `EQUITY GROWTH: ${activeSymbol} PLAYBOOK DEFENSE VS. BUY & HOLD`
+                    : `EQUITY GROWTH COMPARISON (${activeSymbol} 5-POINT STRATEGY VS SPY)`}
                 </span>
                 <div style={{ display: 'flex', gap: '14px', fontSize: '10px' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>

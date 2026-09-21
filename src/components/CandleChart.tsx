@@ -27,21 +27,32 @@ export interface BarsResponse {
   bars: BarData[]
 }
 
+export interface ChartTrigger {
+  id: string
+  type: 'stop_loss' | 'profit_target' | 'dip_buy' | 'custom'
+  price: number
+  label: string
+  actionDirective?: string
+}
+
 interface CandleChartProps {
   symbol: string
   height?: number
   defaultRange?: '1mo' | '3mo' | '6mo' | '1y'
+  triggers?: ChartTrigger[]
 }
 
 type RangeOption = '1mo' | '3mo' | '6mo' | '1y'
 
-export function CandleChart({ symbol, height = 280, defaultRange = '6mo' }: CandleChartProps) {
+export function CandleChart({ symbol, height = 280, defaultRange = '6mo', triggers = [] }: CandleChartProps) {
   const [range, setRange] = useState<RangeOption>(defaultRange)
   const [data, setData] = useState<BarsResponse | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [showSma50, setShowSma50] = useState<boolean>(true)
   const [showSma200, setShowSma200] = useState<boolean>(true)
+  const [showTriggers, setShowTriggers] = useState<boolean>(true)
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const [hoveredTrigger, setHoveredTrigger] = useState<ChartTrigger | null>(null)
 
   useEffect(() => {
     let active = true
@@ -90,13 +101,24 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo' }: Cand
       if (b.volume > volMax) volMax = b.volume
     })
 
+    if (showTriggers && triggers.length > 0) {
+      triggers.forEach((t) => {
+        if (t.price > 0 && min !== Infinity && max !== -Infinity) {
+          if (t.price >= min * 0.7 && t.price <= max * 1.3) {
+            if (t.price < min) min = t.price
+            if (t.price > max) max = t.price
+          }
+        }
+      })
+    }
+
     const pad = (max - min) * 0.05 || 1.0
     return {
       minPrice: min - pad,
       maxPrice: max + pad,
       maxVol: volMax || 1,
     }
-  }, [bars])
+  }, [bars, showTriggers, triggers])
 
   const priceRange = maxPrice - minPrice || 1.0
   const getY = useCallback((price: number) => {
@@ -297,6 +319,64 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo' }: Cand
               <polyline points={sma200Points} fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" opacity="0.9" />
             )}
 
+            {/* Visual Trigger Overlay Lines (Stop-Loss, Target, Dip-Buy) */}
+            {showTriggers && triggers.map((t) => {
+              const y = getY(t.price)
+              if (y < 0 || y > priceHeight) return null
+              const isStop = t.type === 'stop_loss'
+              const isTarget = t.type === 'profit_target'
+              const strokeColor = isStop ? '#ef4444' : isTarget ? '#10b981' : '#3b82f6'
+              const bgColor = isStop ? 'rgba(239, 68, 68, 0.12)' : isTarget ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.12)'
+              const textColor = isStop ? '#b91c1c' : isTarget ? '#047857' : '#1d4ed8'
+              const currentPrice = data?.current_price || (bars.length > 0 ? bars[bars.length - 1].close : 0)
+              const diffPct = currentPrice > 0 ? ((t.price - currentPrice) / currentPrice) * 100 : 0
+              const diffStr = (diffPct >= 0 ? '+' : '') + diffPct.toFixed(1) + '%'
+              const labelText = `${t.label}: $${t.price.toFixed(2)} (${diffStr})`
+
+              return (
+                <g
+                  key={t.id}
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => setHoveredTrigger(t)}
+                  onMouseLeave={() => setHoveredTrigger(null)}
+                >
+                  <title>{`${t.label}: $${t.price.toFixed(2)} (${diffStr})\n${t.actionDirective || ''}`}</title>
+                  {/* Horizontal dashed line across price chart */}
+                  <line
+                    x1={paddingX}
+                    y1={y}
+                    x2={chartWidth - paddingX - 116}
+                    y2={y}
+                    stroke={strokeColor}
+                    strokeDasharray="4 4"
+                    strokeWidth="1.5"
+                    opacity="0.85"
+                  />
+                  {/* Badge pill at right axis */}
+                  <rect
+                    x={chartWidth - paddingX - 114}
+                    y={y - 8}
+                    width="114"
+                    height="16"
+                    rx="3"
+                    fill={bgColor}
+                    stroke={strokeColor}
+                    strokeWidth="0.8"
+                  />
+                  <text
+                    x={chartWidth - paddingX - 57}
+                    y={y + 3.5}
+                    fill={textColor}
+                    fontSize="7.5"
+                    fontWeight="600"
+                    textAnchor="middle"
+                  >
+                    {labelText}
+                  </text>
+                </g>
+              )
+            })}
+
             {/* Hover Crosshair */}
             {hoverIndex !== null && hoverIndex < bars.length && (
               <g>
@@ -321,8 +401,26 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo' }: Cand
             )}
           </svg>
 
+          {/* Hovered Trigger Directive Banner */}
+          {hoveredTrigger && hoveredTrigger.actionDirective && (
+            <div style={{
+              marginTop: '6px',
+              padding: '6px 10px',
+              background: hoveredTrigger.type === 'stop_loss' ? 'rgba(239, 68, 68, 0.1)' : hoveredTrigger.type === 'profit_target' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+              border: `1px solid ${hoveredTrigger.type === 'stop_loss' ? '#ef4444' : hoveredTrigger.type === 'profit_target' ? '#10b981' : '#3b82f6'}`,
+              borderRadius: '6px',
+              fontSize: '11px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <strong>🎯 {hoveredTrigger.label} Directive:</strong>
+              <span>{hoveredTrigger.actionDirective}</span>
+            </div>
+          )}
+
           {/* Indicators Legend Toggles */}
-          <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginTop: '6px', fontSize: '10px', color: 'var(--muted)' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', marginTop: '6px', fontSize: '10px', color: 'var(--muted)' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
               <input type="checkbox" checked={showSma50} onChange={(e) => setShowSma50(e.target.checked)} />
               <span style={{ width: '8px', height: '8px', background: '#d97706', borderRadius: '2px', display: 'inline-block' }} />
@@ -333,8 +431,15 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo' }: Cand
               <span style={{ width: '8px', height: '8px', background: '#2563eb', borderRadius: '2px', display: 'inline-block' }} />
               SMA 200
             </label>
+            {triggers.length > 0 && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={showTriggers} onChange={(e) => setShowTriggers(e.target.checked)} />
+                <span style={{ width: '8px', height: '8px', background: '#ef4444', borderRadius: '2px', display: 'inline-block' }} />
+                Triggers ({triggers.length})
+              </label>
+            )}
             <span style={{ marginLeft: 'auto', fontSize: '9px' }}>
-              Hover for OHLCV inspection
+              Hover for OHLCV &amp; trigger directives
             </span>
           </div>
         </div>

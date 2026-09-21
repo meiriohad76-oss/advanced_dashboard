@@ -653,6 +653,51 @@ def user_alerts_delete(alert_id: str) -> dict:
     return envelope({"id": alert_id, "deleted": deleted})
 
 
+@app.get("/api/v1/alerts/history")
+def alerts_history_get(limit: int = 100) -> dict:
+    """Retrieve audit history of triggered alerts and recorded actions."""
+    return envelope(store.get_alert_history(limit=limit))
+
+
+@app.post("/api/v1/alerts/history")
+def alerts_history_save(payload: dict) -> dict:
+    """Record a triggered alert event into persistent history."""
+    saved = store.save_alert_history_entry(payload)
+    return envelope(saved)
+
+
+@app.post("/api/v1/alerts/history/{entry_id}/action")
+def alerts_history_action(entry_id: str, payload: dict) -> dict:
+    """Record user action taken on a triggered alert (e.g. TRIMMED, STOPPED_OUT_CASH, ACKNOWLEDGED, IGNORED)."""
+    action_taken = str(payload.get("action", payload.get("action_taken", "ACKNOWLEDGED"))).upper()
+    notes = payload.get("notes")
+    alpha = payload.get("alpha_saved_or_locked")
+    alpha_val = float(alpha) if alpha is not None else None
+    res = store.update_alert_history_action(
+        entry_id=entry_id,
+        action_taken=action_taken,
+        notes=notes,
+        alpha_saved_or_locked=alpha_val,
+    )
+    if not res:
+        raise HTTPException(status_code=404, detail="Alert history entry not found")
+    return envelope(res)
+
+
+@app.delete("/api/v1/alerts/history/{entry_id}")
+def alerts_history_delete(entry_id: str) -> dict:
+    """Delete an alert history item."""
+    deleted = store.delete_alert_history_entry(entry_id)
+    return envelope({"id": entry_id, "deleted": deleted})
+
+
+@app.delete("/api/v1/alerts/history")
+def alerts_history_clear() -> dict:
+    """Clear all alert history."""
+    cleared = store.clear_alert_history()
+    return envelope({"cleared": cleared})
+
+
 
 @app.get("/api/v1/notifications/settings")
 def notifications_get_settings() -> dict:
@@ -671,6 +716,25 @@ def notifications_save_settings(payload: dict) -> dict:
 async def notifications_test() -> dict:
     """Test connectivity for enabled notification channels (Telegram / Webhook)."""
     res = await notifications.test_notifications()
+    return envelope(res)
+
+
+@app.post("/api/v1/notifications/briefing/test")
+async def notifications_briefing_test() -> dict:
+    """Trigger on-demand pre-market daily briefing dispatch to Telegram for testing."""
+    holdings_list = current_holdings()
+    statuses = store.get_alert_recommendation_statuses()
+    recs = alert_recommendations.generate_all_recommendations(holdings_list, existing_statuses=statuses)
+    recs_data = [r.model_dump() if hasattr(r, "model_dump") else r.dict() for r in recs]
+    try:
+        shifts = extract_rating_shifts(limit=5)
+    except Exception:
+        shifts = []
+    res = await notifications.send_telegram_premarket_briefing(
+        holdings=holdings_list,
+        recommendations=recs_data,
+        rating_shifts=shifts,
+    )
     return envelope(res)
 
 
@@ -769,6 +833,7 @@ def analytics_backtest(payload: dict | None = None) -> dict:
     max_holding_days = int(p.get("max_holding_days", 20))
     rsi_min = float(p.get("rsi_min", 38.0))
     rsi_max = float(p.get("rsi_max", 58.0))
+    strategy_mode = str(p.get("strategy_mode", "5point_entry"))
 
     holdings = current_holdings()
     res = backtest_service.run_backtest(
@@ -783,6 +848,7 @@ def analytics_backtest(payload: dict | None = None) -> dict:
         max_holding_days=max_holding_days,
         rsi_min=rsi_min,
         rsi_max=rsi_max,
+        strategy_mode=strategy_mode,
     )
     return envelope(res)
 

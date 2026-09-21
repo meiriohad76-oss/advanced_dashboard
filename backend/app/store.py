@@ -50,6 +50,14 @@ def _connect(path: str) -> sqlite3.Connection:
         "condition TEXT NOT NULL, target_value REAL NOT NULL, severity TEXT NOT NULL, "
         "status TEXT NOT NULL, created_at TEXT NOT NULL, payload TEXT)"
     )
+    # Persistent Triggered Alert History & Playbook Alpha Audit Log
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS alert_history ("
+        "id TEXT PRIMARY KEY, alert_id TEXT, symbol TEXT NOT NULL, title TEXT NOT NULL, "
+        "category TEXT, metric TEXT, condition TEXT, target_value REAL, triggered_price REAL, "
+        "triggered_at TEXT NOT NULL, playbook_directive TEXT, action_taken TEXT DEFAULT 'UNACKNOWLEDGED', "
+        "action_timestamp TEXT, alpha_saved_or_locked REAL DEFAULT 0.0, notes TEXT, payload TEXT)"
+    )
     cursor = conn.execute("PRAGMA table_info(imported_lists)")
     cols = [r[1] for r in cursor.fetchall()]
     if "is_active" not in cols:
@@ -453,4 +461,167 @@ def delete_user_alert(alert_id: str, path: str | None = None) -> bool:
         return cur.rowcount > 0
     finally:
         conn.close()
+
+
+def get_alert_history(limit: int = 100, path: str | None = None) -> list[dict[str, Any]]:
+    """Retrieve persisted triggered alert history ordered by triggered_at DESC."""
+    path = path or _db_path()
+    if path != ":memory:" and not os.path.exists(path):
+        return []
+    conn = _connect(path)
+    try:
+        rows = conn.execute(
+            "SELECT id, alert_id, symbol, title, category, metric, condition, target_value, "
+            "triggered_price, triggered_at, playbook_directive, action_taken, action_timestamp, "
+            "alpha_saved_or_locked, notes, payload "
+            "FROM alert_history ORDER BY triggered_at DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+        history: list[dict[str, Any]] = []
+        for r in rows:
+            entry = {
+                "id": r[0],
+                "alert_id": r[1],
+                "symbol": r[2],
+                "title": r[3],
+                "category": r[4],
+                "metric": r[5],
+                "condition": r[6],
+                "target_value": r[7],
+                "triggered_price": r[8],
+                "triggered_at": r[9],
+                "playbook_directive": r[10],
+                "action_taken": r[11] or "UNACKNOWLEDGED",
+                "action_timestamp": r[12],
+                "alpha_saved_or_locked": float(r[13] or 0.0),
+                "notes": r[14],
+            }
+            if r[15]:
+                try:
+                    entry["payload"] = json.loads(r[15])
+                except Exception:
+                    pass
+            history.append(entry)
+        return history
+    finally:
+        conn.close()
+
+
+def save_alert_history_entry(entry: dict[str, Any], path: str | None = None) -> dict[str, Any]:
+    """Persist a new triggered alert event or update existing record."""
+    path = path or _db_path()
+    conn = _connect(path)
+    try:
+        entry_id = str(entry.get("id") or f"hist_{int(datetime.now(timezone.utc).timestamp() * 1000)}")
+        alert_id = str(entry.get("alert_id") or entry.get("alertId") or "")
+        symbol = str(entry.get("symbol", "")).upper()
+        title = str(entry.get("title", f"{symbol} Alert Triggered"))
+        category = str(entry.get("category", "CUSTOM"))
+        metric = str(entry.get("metric", "PRICE"))
+        condition = str(entry.get("condition", "ABOVE"))
+        target_val = float(entry.get("target_value") or entry.get("targetValue") or 0.0)
+        trig_price = float(entry.get("triggered_price") or entry.get("triggeredPrice") or entry.get("currentPrice") or 0.0)
+        trig_at = str(entry.get("triggered_at") or entry.get("triggeredAt") or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        directive = str(entry.get("playbook_directive") or entry.get("playbookDirective") or "")
+        action = str(entry.get("action_taken") or entry.get("actionTaken") or "UNACKNOWLEDGED")
+        act_ts = entry.get("action_timestamp") or entry.get("actionTimestamp")
+        alpha = float(entry.get("alpha_saved_or_locked") or entry.get("alphaSavedOrLocked") or 0.0)
+        notes = entry.get("notes")
+        payload = json.dumps(entry.get("payload") or {})
+
+        conn.execute(
+            "INSERT INTO alert_history (id, alert_id, symbol, title, category, metric, condition, "
+            "target_value, triggered_price, triggered_at, playbook_directive, action_taken, "
+            "action_timestamp, alpha_saved_or_locked, notes, payload) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(id) DO UPDATE SET "
+            "action_taken = excluded.action_taken, "
+            "action_timestamp = excluded.action_timestamp, "
+            "alpha_saved_or_locked = excluded.alpha_saved_or_locked, "
+            "notes = excluded.notes, "
+            "payload = excluded.payload",
+            (entry_id, alert_id, symbol, title, category, metric, condition,
+             target_val, trig_price, trig_at, directive, action, act_ts, alpha, notes, payload),
+        )
+        conn.commit()
+        entry["id"] = entry_id
+        entry["action_taken"] = action
+        return entry
+    finally:
+        conn.close()
+
+
+def update_alert_history_action(
+    entry_id: str,
+    action_taken: str,
+    notes: str | None = None,
+    alpha_saved_or_locked: float | None = None,
+    path: str | None = None,
+) -> dict[str, Any] | None:
+    """Record an audit action taken on a past triggered alert."""
+    path = path or _db_path()
+    conn = _connect(path)
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        if alpha_saved_or_locked is not None and notes is not None:
+            conn.execute(
+                "UPDATE alert_history SET action_taken = ?, action_timestamp = ?, notes = ?, alpha_saved_or_locked = ? WHERE id = ?",
+                (action_taken, now_iso, notes, alpha_saved_or_locked, entry_id),
+            )
+        elif notes is not None:
+            conn.execute(
+                "UPDATE alert_history SET action_taken = ?, action_timestamp = ?, notes = ? WHERE id = ?",
+                (action_taken, now_iso, notes, entry_id),
+            )
+        elif alpha_saved_or_locked is not None:
+            conn.execute(
+                "UPDATE alert_history SET action_taken = ?, action_timestamp = ?, alpha_saved_or_locked = ? WHERE id = ?",
+                (action_taken, now_iso, alpha_saved_or_locked, entry_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE alert_history SET action_taken = ?, action_timestamp = ? WHERE id = ?",
+                (action_taken, now_iso, entry_id),
+            )
+        conn.commit()
+        row = conn.execute("SELECT id, alert_id, symbol, title, action_taken, action_timestamp, alpha_saved_or_locked, notes FROM alert_history WHERE id = ?", (entry_id,)).fetchone()
+        if not row:
+            return None
+        return {
+            "id": row[0],
+            "alert_id": row[1],
+            "symbol": row[2],
+            "title": row[3],
+            "action_taken": row[4],
+            "action_timestamp": row[5],
+            "alpha_saved_or_locked": float(row[6] or 0.0),
+            "notes": row[7],
+        }
+    finally:
+        conn.close()
+
+
+def delete_alert_history_entry(entry_id: str, path: str | None = None) -> bool:
+    """Delete a single history entry by ID."""
+    path = path or _db_path()
+    conn = _connect(path)
+    try:
+        cur = conn.execute("DELETE FROM alert_history WHERE id = ?", (entry_id,))
+        conn.commit()
+        return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
+def clear_alert_history(path: str | None = None) -> bool:
+    """Clear all alert history entries."""
+    path = path or _db_path()
+    conn = _connect(path)
+    try:
+        conn.execute("DELETE FROM alert_history")
+        conn.commit()
+        return True
+    finally:
+        conn.close()
+
 

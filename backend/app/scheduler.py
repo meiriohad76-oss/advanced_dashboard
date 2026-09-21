@@ -31,6 +31,7 @@ class BackgroundSyncRunner:
         self.runs_completed: int = 0
         self.new_records_detected: int = 0
         self._last_max_id: int = 0
+        self._last_briefing_date: str | None = None
         self._task: asyncio.Task | None = None
 
     def _get_current_max_id(self) -> int:
@@ -122,15 +123,31 @@ class BackgroundSyncRunner:
                 self.history = [run_entry] + getattr(self, "history", [])[:19]
                 return {"synced": False, "error": str(exc), "session": session}
         else:
-            self.last_status = "IDLE (No new analyzer runs)"
-            run_entry = {
-                "timestamp": now_iso,
-                "status": self.last_status,
-                "session": session,
-                "records_added": 0,
-            }
             self.history = [run_entry] + getattr(self, "history", [])[:19]
-            return {"synced": False, "reason": "No new records", "session": session, "next_scheduled": next_sched}
+            result = {"synced": False, "reason": "No new records", "session": session, "next_scheduled": next_sched}
+
+        # Check and dispatch daily pre-market briefing if scheduled and enabled
+        today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if session in ("Pre-Market Early", "Pre-Market Active") and self._last_briefing_date != today_date:
+            try:
+                from . import alert_recommendations, notifications, store
+                notif_cfg = notifications.get_settings()
+                if notif_cfg.get("premarket_briefing_enabled") and notif_cfg.get("telegram_enabled"):
+                    raw_holdings = store.latest_list("portfolio")
+                    holdings_list = []
+                    if raw_holdings and "holdings" in raw_holdings:
+                        from .models import Holding
+                        holdings_list = [Holding(**h) for h in raw_holdings["holdings"]]
+                    statuses = store.get_alert_recommendation_statuses()
+                    recs = alert_recommendations.generate_all_recommendations(holdings_list, existing_statuses=statuses)
+                    recs_data = [r.model_dump() if hasattr(r, "model_dump") else r.dict() for r in recs]
+                    await notifications.send_telegram_premarket_briefing(holdings_list, recs_data, shifts if 'shifts' in locals() else None)
+                    self._last_briefing_date = today_date
+                    logger.info(f"Daily pre-market briefing dispatched successfully for {today_date}")
+            except Exception as b_exc:
+                logger.warning(f"Daily pre-market briefing dispatch failed: {b_exc}")
+
+        return result
 
     async def _loop(self):
         while True:

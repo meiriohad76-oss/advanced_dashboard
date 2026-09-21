@@ -26,7 +26,7 @@ import { NotificationSettingsModal } from './components/NotificationSettingsModa
 import { DecisionModal } from './components/DecisionModal'
 import { RebalanceModal } from './components/RebalanceModal'
 import { StockPerformance } from './components/StockPerformance'
-import { CandleChart } from './components/CandleChart'
+import { CandleChart, type ChartTrigger } from './components/CandleChart'
 import { SectorTreemap } from './components/SectorTreemap'
 import { CorrelationHeatmap } from './components/CorrelationHeatmap'
 import { BenchmarkChart } from './components/BenchmarkChart'
@@ -175,6 +175,7 @@ function AssetDrawer({
   holding,
   holdings,
   recommendations = [],
+  userAlerts = [],
   onAcknowledgeRecommendation,
   onDeclineRecommendation,
   onChangeRecommendation,
@@ -184,6 +185,7 @@ function AssetDrawer({
   holding: Holding
   holdings: Holding[]
   recommendations?: RecommendedAlert[]
+  userAlerts?: UserAlert[]
   onAcknowledgeRecommendation?: (rec: RecommendedAlert) => void
   onDeclineRecommendation?: (rec: RecommendedAlert) => void
   onChangeRecommendation?: (rec: RecommendedAlert, customized: UserAlert) => void
@@ -216,6 +218,39 @@ function AssetDrawer({
       true
     )
   }, [recommendations, holding, targets])
+
+  const chartTriggers = useMemo<ChartTrigger[]>(() => {
+    const triggers: ChartTrigger[] = []
+    assetRecs.forEach((rec) => {
+      if (rec.status !== 'DECLINED' && rec.targetValue && rec.targetValue > 0) {
+        const type: 'stop_loss' | 'profit_target' | 'dip_buy' | 'custom' =
+          rec.category === 'STOP_LOSS' ? 'stop_loss' :
+          rec.category === 'PROFIT_TARGET' ? 'profit_target' :
+          rec.category === 'DIP_BUY' ? 'dip_buy' : 'custom'
+        triggers.push({
+          id: rec.id,
+          type,
+          price: rec.targetValue,
+          label: rec.category.replace('_', ' '),
+          actionDirective: rec.actionPlaybook?.directive || rec.actionPlaybook?.checklist?.[0] || rec.rationale,
+        })
+      }
+    })
+    userAlerts.forEach((ua) => {
+      if (ua.symbol.toUpperCase() === holding.symbol.toUpperCase() && ua.status === 'ARMED' && ua.metric === 'PRICE' && ua.targetValue > 0) {
+        const isStop = ua.condition === 'BELOW'
+        const isTarget = ua.condition === 'ABOVE'
+        triggers.push({
+          id: ua.id,
+          type: isStop ? 'stop_loss' : isTarget ? 'profit_target' : 'custom',
+          price: ua.targetValue,
+          label: `Alert ${ua.condition}`,
+          actionDirective: ua.playbookDirective || `Action required when price moves ${ua.condition.toLowerCase()} $${ua.targetValue.toFixed(2)}`,
+        })
+      }
+    })
+    return triggers
+  }, [assetRecs, userAlerts, holding.symbol])
 
   return (
     <ModalOverlay className="asset-drawer" label={`${holding.symbol} signal explanation`} onClose={onClose}>
@@ -407,7 +442,7 @@ function AssetDrawer({
         )}
 
         {/* Interactive Candlestick & Technical Indicator Chart */}
-        {holding.symbol !== 'CASH' && <CandleChart symbol={holding.symbol} />}
+        {holding.symbol !== 'CASH' && <CandleChart symbol={holding.symbol} triggers={chartTriggers} />}
 
         {/* Stock Time-Related Performance Analysis */}
         {holding.symbol !== 'CASH' && <StockPerformance holding={holding} />}
@@ -2087,6 +2122,7 @@ export default function App() {
           holding={selected}
           holdings={holdings}
           recommendations={recommendations}
+          userAlerts={userAlerts}
           onAcknowledgeRecommendation={handleAcknowledgeRecommendation}
           onDeclineRecommendation={handleDeclineRecommendation}
           onChangeRecommendation={handleChangeRecommendation}

@@ -48,6 +48,8 @@ def get_settings() -> dict[str, Any]:
         "webhook_url": cfg.get("webhook_url", os.environ.get("ATLAS_WEBHOOK_URL", "")),
         "webhook_enabled": cfg.get("webhook_enabled", "false").lower() in ("true", "1", "yes"),
         "min_severity": cfg.get("min_severity", "warning").lower(),  # info, warning, critical
+        "premarket_briefing_enabled": cfg.get("premarket_briefing_enabled", "false").lower() in ("true", "1", "yes"),
+        "premarket_briefing_time": cfg.get("premarket_briefing_time", "08:30 ET"),
     }
 
 
@@ -58,13 +60,13 @@ def save_settings(new_settings: dict[str, Any]) -> dict[str, Any]:
     _ensure_settings_table(conn)
     now = datetime.now(timezone.utc).isoformat()
     try:
-        for k in ("telegram_token", "telegram_chat_id", "webhook_url", "min_severity"):
+        for k in ("telegram_token", "telegram_chat_id", "webhook_url", "min_severity", "premarket_briefing_time"):
             if k in new_settings:
                 conn.execute(
                     "INSERT OR REPLACE INTO notification_settings (key, value, updated_at) VALUES (?, ?, ?)",
                     (k, str(new_settings[k]), now),
                 )
-        for k in ("telegram_enabled", "webhook_enabled"):
+        for k in ("telegram_enabled", "webhook_enabled", "premarket_briefing_enabled"):
             if k in new_settings:
                 val = "true" if new_settings[k] else "false"
                 conn.execute(
@@ -409,4 +411,114 @@ async def handle_telegram_update(update: dict[str, Any]) -> dict[str, Any]:
             return {"processed": False, "error": str(exc)}
 
     return {"processed": False, "reason": f"Unknown callback: {cb_data}"}
+
+
+def format_premarket_briefing(
+    holdings: list[Any],
+    recommendations: list[dict[str, Any]] | None = None,
+    rating_shifts: list[dict[str, Any]] | None = None,
+) -> str:
+    """Format an institutional daily pre-market briefing for Telegram."""
+    now_utc = datetime.now(timezone.utc)
+    date_str = now_utc.strftime("%A, %b %d, %Y")
+
+    def _h_val(h: Any) -> float:
+        mv = getattr(h, "marketValue", getattr(h, "market_value", 0.0))
+        if mv:
+            return float(mv)
+        price = float(getattr(h, "price", 0.0) or 0.0)
+        qty = float(getattr(h, "quantity", getattr(h, "shares", 0.0)) or 0.0)
+        return price * qty
+
+    total_val = sum(
+        _h_val(h)
+        for h in holdings
+        if getattr(h, "symbol", "") != "CASH"
+    )
+    cash_h = next((h for h in holdings if getattr(h, "symbol", "") == "CASH"), None)
+    cash_val = _h_val(cash_h) if cash_h else 0.0
+    port_val = total_val + cash_val
+
+    # Find nearing triggers (<3.0% away from target)
+    nearing_triggers: list[str] = []
+    if recommendations:
+        for raw_rec in recommendations:
+            rec = raw_rec.model_dump() if hasattr(raw_rec, "model_dump") else (raw_rec.dict() if hasattr(raw_rec, "dict") else raw_rec)
+            if rec.get("status") != "DECLINED":
+                sym = rec.get("symbol", "")
+                h = next((item for item in holdings if getattr(item, "symbol", "") == sym), None)
+                if h and getattr(h, "price", 0) > 0 and (rec.get("targetValue") or rec.get("target_value")):
+                    curr_p = float(getattr(h, "price", 0))
+                    tgt_p = float(rec.get("targetValue") or rec.get("target_value") or 0.0)
+                    if tgt_p > 0:
+                        diff_pct = abs(tgt_p - curr_p) / curr_p * 100.0
+                        if diff_pct <= 3.5:
+                            cat = rec.get("category", "TRIGGER")
+                            is_stop = "STOP" in cat
+                            icon = "🛡️" if is_stop else "🎯"
+                            nearing_triggers.append(
+                                f"  {icon} `{sym}`: Price `${curr_p:.2f}` is *{diff_pct:.1f}%* from {cat.replace('_', ' ')} (${tgt_p:.2f})"
+                            )
+
+    # Top daily movers
+    stock_holdings = [h for h in holdings if getattr(h, "symbol", "") != "CASH"]
+    sorted_by_change = sorted(stock_holdings, key=lambda x: getattr(x, "dayChange", 0.0), reverse=True)
+    top_gainers = [
+        f"`{h.symbol}` ({'+' if h.dayChange >= 0 else ''}{h.dayChange:.1f}%)"
+        for h in sorted_by_change[:3]
+        if getattr(h, "dayChange", 0) != 0
+    ]
+
+    lines = [
+        "🌅 *ATLAS PRE-MARKET BRIEFING*",
+        f"📅 _{date_str}_",
+        "",
+        "📊 *Portfolio Pulse*",
+        f"• *Holdings*: `{len(stock_holdings)} active assets`",
+        f"• *Total Portfolio Value*: `${port_val:,.2f}`",
+    ]
+    if top_gainers:
+        lines.append(f"• *Top Movers*: {', '.join(top_gainers)}")
+
+    if nearing_triggers:
+        lines.append("")
+        lines.append("⚠️ *Critical Triggers in Range (<3.5%)*")
+        lines.extend(nearing_triggers[:4])
+    else:
+        lines.append("• *Defense Status*: All holdings safe outside breach boundaries.")
+
+    if rating_shifts:
+        lines.append("")
+        lines.append("⚡ *Latest Extractor Rating Shifts*")
+        for s in rating_shifts[:3]:
+            lines.append(f"  • `{s.get('ticker')}`: {s.get('provider')} → *{s.get('current')}* ({s.get('direction')})")
+
+    lines.append("")
+    lines.append("🛡️ *Playbook Alpha*: Alerts armed. Trailing stop protection active.")
+    return "\n".join(lines)
+
+
+async def send_telegram_premarket_briefing(
+    holdings: list[Any],
+    recommendations: list[dict[str, Any]] | None = None,
+    rating_shifts: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Send pre-market morning briefing to Telegram."""
+    settings = get_settings()
+    token = settings.get("telegram_token", "")
+    chat_id = settings.get("telegram_chat_id", "")
+    briefing_text = format_premarket_briefing(holdings, recommendations, rating_shifts)
+
+    if not token or not chat_id:
+        return {
+            "success": False,
+            "channel": "telegram",
+            "error": "Telegram credentials missing",
+            "briefing": briefing_text,
+        }
+
+    res = await send_telegram_message(token, chat_id, briefing_text)
+    res["briefing"] = briefing_text
+    return res
+
 

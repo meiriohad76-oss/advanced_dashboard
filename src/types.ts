@@ -220,6 +220,13 @@ export interface PriceTargets {
 export type RecommendationCategory = 'PROFIT_TARGET' | 'DIP_BUY' | 'STOP_LOSS' | 'BREAKOUT' | 'RSI_REVERSAL'
 export type RecommendationStatus = 'PENDING' | 'ACKNOWLEDGED' | 'DECLINED'
 
+export interface ActionPlaybook {
+  directive: string
+  rationale: string
+  checklist: string[]
+  severity: 'info' | 'warning' | 'critical'
+}
+
 export interface RecommendedAlert {
   id: string
   symbol: string
@@ -241,6 +248,7 @@ export interface RecommendedAlert {
   created_at?: string
   updatedAt?: string | null
   updated_at?: string | null
+  actionPlaybook?: ActionPlaybook
 }
 
 export interface UserAlert {
@@ -255,6 +263,26 @@ export interface UserAlert {
   title?: string
   category?: 'PROFIT_TARGET' | 'STOP_LOSS' | 'DIP_BUY' | 'BREAKOUT' | 'RSI_REVERSAL' | 'CUSTOM' | string
   rationale?: string
+  playbookDirective?: string
+}
+
+export interface AlertHistoryEntry {
+  id: string
+  alert_id?: string
+  symbol: string
+  title: string
+  category?: string
+  metric?: string
+  condition?: string
+  target_value?: number
+  triggered_price?: number
+  triggered_at: string
+  playbook_directive?: string
+  action_taken: 'UNACKNOWLEDGED' | 'ACKNOWLEDGED' | 'TRIMMED' | 'STOPPED_OUT_CASH' | 'IGNORED'
+  action_timestamp?: string | null
+  alpha_saved_or_locked?: number
+  notes?: string | null
+  payload?: any
 }
 
 export interface AlertItem {
@@ -287,6 +315,8 @@ export interface NotificationSettings {
   webhook_url: string
   webhook_enabled: boolean
   min_severity: string
+  premarket_briefing_enabled?: boolean
+  premarket_briefing_time?: string
 }
 
 export interface NotificationTestResult {
@@ -472,6 +502,7 @@ export interface DailyBriefing {
 // Backtest
 export interface BacktestParams {
   symbol?: string
+  strategy_mode?: '5point_entry' | 'playbook_defense'
   entry_score?: number
   exit_score?: number
   lookback?: '6mo' | '1y' | '2y' | '3y'
@@ -492,6 +523,9 @@ export interface BacktestMetrics {
   cagr_pct: number
   sharpe_ratio: number
   max_drawdown_pct: number
+  benchmark_max_drawdown_pct?: number
+  drawdown_avoided_pct?: number
+  capital_preserved?: number
   win_rate_pct: number
   profit_factor: number
   trades_count: number
@@ -527,6 +561,7 @@ export interface BacktestCurvePoint {
 export interface BacktestResult {
   parameters: {
     symbol?: string
+    strategy_mode?: string
     entry_score: number
     exit_score: number
     lookback: string

@@ -145,6 +145,35 @@ export const api = {
     request<{ id: string; deleted: boolean }>(`/api/v1/alerts/user-alerts/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     }),
+  getAlertHistory: (limit = 100) =>
+    request<import('../types').AlertHistoryEntry[]>(`/api/v1/alerts/history?limit=${encodeURIComponent(limit)}`),
+  saveAlertHistoryEntry: (entry: Partial<import('../types').AlertHistoryEntry>) =>
+    request<import('../types').AlertHistoryEntry>('/api/v1/alerts/history', {
+      method: 'POST',
+      body: JSON.stringify(entry),
+    }),
+  recordAlertAction: (
+    id: string,
+    action: 'UNACKNOWLEDGED' | 'ACKNOWLEDGED' | 'TRIMMED' | 'STOPPED_OUT_CASH' | 'IGNORED',
+    notes?: string,
+    alpha_saved_or_locked?: number
+  ) =>
+    request<import('../types').AlertHistoryEntry>(`/api/v1/alerts/history/${encodeURIComponent(id)}/action`, {
+      method: 'POST',
+      body: JSON.stringify({ action, notes, alpha_saved_or_locked }),
+    }),
+  deleteAlertHistoryEntry: (id: string) =>
+    request<{ id: string; deleted: boolean }>(`/api/v1/alerts/history/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+  clearAlertHistory: () =>
+    request<{ cleared: boolean }>('/api/v1/alerts/history', {
+      method: 'DELETE',
+    }),
+  sendTestBriefing: () =>
+    request<{ success: boolean; channel: string; briefing: string; error?: string }>('/api/v1/notifications/briefing/test', {
+      method: 'POST',
+    }),
   marketStatus: () => request<MarketStatus>('/api/v1/market/status'),
   marketQuote: (symbol: string) => request<Quote>(`/api/v1/market/quote/${encodeURIComponent(symbol)}`),
   marketQuotes: (symbols: string[]) => request<Record<string, Quote>>('/api/v1/market/quotes', { method: 'POST', body: JSON.stringify({ symbols }) }),

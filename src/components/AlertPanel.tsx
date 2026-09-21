@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { AlertTriangle, Bell, Check, Plus, Sparkles, Trash2, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AlertTriangle, Bell, Check, CheckCircle2, History, Plus, RefreshCw, ShieldAlert, Sparkles, Trash2, TrendingUp, X } from 'lucide-react'
 import { ModalOverlay } from './ModalOverlay'
-import type { AlertItem, Holding, RecommendedAlert, UserAlert } from '../types'
+import type { AlertHistoryEntry, AlertItem, Holding, RecommendedAlert, UserAlert } from '../types'
 import { RecommendedTriggersView } from './RecommendedTriggers'
 import { getAlertPlaybook } from '../domain/alertPlaybook'
+import { api } from '../api/client'
 
 export interface AlertPanelProps {
   alerts: AlertItem[]
@@ -40,6 +41,11 @@ export function AlertPanel({
   const [severity, setSeverity] = useState<UserAlert['severity']>('warning')
   const [addedNotice, setAddedNotice] = useState(false)
 
+  // Persistent History State
+  const [history, setHistory] = useState<AlertHistoryEntry[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null)
+
   const pendingRecs = recommendations.filter((r) => r.status === 'PENDING')
 
 
@@ -74,6 +80,51 @@ export function AlertPanel({
       setAddedNotice(false)
       setActiveTab('active')
     }, 1200)
+  }
+
+  useEffect(() => {
+    if (activeTab === 'history') {
+      setHistoryLoading(true)
+      api.getAlertHistory(100)
+        .then((res) => {
+          setHistory(res || [])
+          setHistoryLoading(false)
+        })
+        .catch(() => {
+          setHistoryLoading(false)
+        })
+    }
+  }, [activeTab])
+
+  const handleRecordAction = async (id: string, action: AlertHistoryEntry['action_taken']) => {
+    try {
+      setActionBusyId(id)
+      const updated = await api.recordAlertAction(id, action)
+      setHistory((prev) => prev.map((item) => (item.id === id ? { ...item, ...updated } : item)))
+    } catch (err) {
+      console.error('Failed to record action', err)
+    } finally {
+      setActionBusyId(null)
+    }
+  }
+
+  const handleDeleteHistory = async (id: string) => {
+    try {
+      await api.deleteAlertHistoryEntry(id)
+      setHistory((prev) => prev.filter((item) => item.id !== id))
+    } catch (err) {
+      console.error('Failed to delete history item', err)
+    }
+  }
+
+  const handleClearHistory = async () => {
+    if (!window.confirm('Clear all alert audit history?')) return
+    try {
+      await api.clearAlertHistory()
+      setHistory([])
+    } catch (err) {
+      console.error('Failed to clear history', err)
+    }
   }
 
   return (
@@ -247,6 +298,29 @@ export function AlertPanel({
                     <span className={`status-pill ${isTriggered ? 'triggered' : 'armed'}`}>
                       {isTriggered ? 'TRIGGERED' : 'ARMED'}
                     </span>
+                    {isTriggered && (
+                      <button
+                        className="ask-button"
+                        onClick={async () => {
+                          await api.saveAlertHistoryEntry({
+                            alert_id: ua.id,
+                            symbol: ua.symbol,
+                            title: labelStr,
+                            category: ua.category || 'CUSTOM',
+                            metric: ua.metric,
+                            condition: ua.condition,
+                            target_value: ua.targetValue,
+                            triggered_price: holding?.price,
+                            playbook_directive: playbook.primaryActionLabel || playbook.checklist[0],
+                          })
+                          setActiveTab('history')
+                        }}
+                        style={{ fontSize: '10px', padding: '4px 9px', background: 'var(--amber-soft)', color: '#92400e', borderColor: 'var(--amber-line)' }}
+                        title="Log this trigger event into the Playbook Alpha audit history"
+                      >
+                        Log Event
+                      </button>
+                    )}
                     {onInspectAlert && (
                       <button 
                         className="ask-button"
@@ -344,9 +418,253 @@ export function AlertPanel({
       )}
 
       {activeTab === 'history' && (
-        <div style={{ padding: '16px', textAlign: 'center', color: 'var(--muted)', fontSize: '12px' }}>
-          <AlertTriangle size={24} style={{ marginBottom: '8px', opacity: 0.6 }} />
-          <p>Past triggered alerts and webhook execution history are logged here.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Header Action Bar & Summary Metrics */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: '14px', margin: 0, color: 'var(--ink)' }}>Triggered Alerts &amp; Playbook Alpha Log</h3>
+              <p style={{ fontSize: '11px', color: 'var(--muted)', margin: '2px 0 0 0' }}>
+                Audit trail of historical trigger events, playbook recommendations, and user actions.
+              </p>
+            </div>
+            {history.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearHistory}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--line)',
+                  background: 'var(--panel)',
+                  color: 'var(--muted)',
+                  cursor: 'pointer',
+                }}
+              >
+                Clear History
+              </button>
+            )}
+          </div>
+
+          {/* Metrics summary banner */}
+          {history.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+              <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '8px', padding: '10px 12px' }}>
+                <span style={{ fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', display: 'block' }}>Events Logged</span>
+                <strong style={{ fontSize: '16px', color: 'var(--ink)' }}>{history.length}</strong>
+              </div>
+              <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '8px', padding: '10px 12px' }}>
+                <span style={{ fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', display: 'block' }}>Action Taken Rate</span>
+                <strong style={{ fontSize: '16px', color: 'var(--green)' }}>
+                  {Math.round((history.filter((h) => h.action_taken !== 'UNACKNOWLEDGED').length / history.length) * 100)}%
+                </strong>
+              </div>
+              <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '8px', padding: '10px 12px' }}>
+                <span style={{ fontSize: '10px', color: 'var(--muted)', textTransform: 'uppercase', display: 'block' }}>Alpha Defense Status</span>
+                <strong style={{ fontSize: '16px', color: 'var(--accent-dark)' }}>
+                  {history.filter((h) => h.action_taken === 'STOPPED_OUT_CASH' || h.action_taken === 'TRIMMED').length} Protected
+                </strong>
+              </div>
+            </div>
+          )}
+
+          {historyLoading ? (
+            <div style={{ padding: '32px', textAlign: 'center', color: 'var(--muted)', fontSize: '12px' }}>
+              <RefreshCw size={18} className="spin" style={{ marginBottom: '8px' }} />
+              <p>Loading alert history…</p>
+            </div>
+          ) : history.length === 0 ? (
+            <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--muted)', fontSize: '12px', background: 'var(--subtle)', borderRadius: '8px', border: '1px dashed var(--line)' }}>
+              <History size={28} style={{ marginBottom: '8px', opacity: 0.5 }} />
+              <p style={{ fontWeight: 600, color: 'var(--ink)' }}>No Triggered Alerts Logged Yet</p>
+              <p style={{ fontSize: '11px', marginTop: '4px' }}>
+                When market prices hit armed stop-loss or profit-take thresholds, events are automatically saved here with their action playbooks.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {history.map((entry) => {
+                const isPending = entry.action_taken === 'UNACKNOWLEDGED'
+                const isTrimmed = entry.action_taken === 'TRIMMED'
+                const isExited = entry.action_taken === 'STOPPED_OUT_CASH'
+                const isAck = entry.action_taken === 'ACKNOWLEDGED'
+                const isIgnored = entry.action_taken === 'IGNORED'
+
+                const actionBadgeBg = isPending ? 'rgba(245, 158, 11, 0.12)'
+                  : isTrimmed ? 'rgba(16, 185, 129, 0.12)'
+                  : isExited ? 'rgba(59, 130, 246, 0.12)'
+                  : isAck ? 'rgba(14, 165, 233, 0.12)'
+                  : 'rgba(156, 163, 175, 0.12)'
+
+                const actionBadgeColor = isPending ? '#d97706'
+                  : isTrimmed ? '#059669'
+                  : isExited ? '#2563eb'
+                  : isAck ? '#0284c7'
+                  : '#6b7280'
+
+                const actionLabel = isPending ? 'Action Required'
+                  : isTrimmed ? 'Trimmed 33% (Locked Profit)'
+                  : isExited ? 'Exited to Cash (Saved Loss)'
+                  : isAck ? 'Acknowledged'
+                  : 'Ignored'
+
+                const dateStr = new Date(entry.triggered_at).toLocaleDateString([], { month: 'short', day: 'numeric' })
+                const timeStr = new Date(entry.triggered_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+                return (
+                  <div
+                    key={entry.id}
+                    style={{
+                      background: 'var(--panel)',
+                      border: isPending ? '1px solid #f59e0b' : '1px solid var(--line)',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          padding: '2px 7px',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          background: 'var(--subtle)',
+                          color: 'var(--ink)'
+                        }}>
+                          {entry.symbol}
+                        </span>
+                        <strong style={{ fontSize: '13px', color: 'var(--ink)' }}>{entry.title}</strong>
+                        {entry.triggered_price ? (
+                          <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                            @ ${entry.triggered_price.toFixed(2)} (Target: ${entry.target_value?.toFixed(2) || '—'})
+                          </span>
+                        ) : null}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          background: actionBadgeBg,
+                          color: actionBadgeColor,
+                        }}>
+                          {actionLabel}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteHistory(entry.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '2px' }}
+                          title="Delete entry"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Playbook Directive Banner */}
+                    {entry.playbook_directive && (
+                      <div style={{
+                        fontSize: '11px',
+                        background: 'var(--subtle)',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        color: 'var(--ink)',
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        gap: '6px',
+                      }}>
+                        <strong style={{ color: 'var(--accent-dark)', whiteSpace: 'nowrap' }}>Recommended Playbook:</strong>
+                        <span>{entry.playbook_directive}</span>
+                      </div>
+                    )}
+
+                    {/* Action Selector Buttons */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                        Triggered {dateStr} at {timeStr}
+                        {entry.action_timestamp && ` · Action recorded ${new Date(entry.action_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                      </span>
+
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button
+                          type="button"
+                          disabled={actionBusyId === entry.id}
+                          onClick={() => handleRecordAction(entry.id, 'TRIMMED')}
+                          style={{
+                            fontSize: '10px',
+                            padding: '3px 7px',
+                            borderRadius: '4px',
+                            border: isTrimmed ? '1px solid #10b981' : '1px solid var(--line)',
+                            background: isTrimmed ? 'rgba(16, 185, 129, 0.15)' : 'var(--panel)',
+                            color: isTrimmed ? '#047857' : 'var(--ink)',
+                            cursor: 'pointer',
+                            fontWeight: isTrimmed ? 700 : 500,
+                          }}
+                        >
+                          ✂️ Trimmed
+                        </button>
+                        <button
+                          type="button"
+                          disabled={actionBusyId === entry.id}
+                          onClick={() => handleRecordAction(entry.id, 'STOPPED_OUT_CASH')}
+                          style={{
+                            fontSize: '10px',
+                            padding: '3px 7px',
+                            borderRadius: '4px',
+                            border: isExited ? '1px solid #2563eb' : '1px solid var(--line)',
+                            background: isExited ? 'rgba(37, 99, 235, 0.15)' : 'var(--panel)',
+                            color: isExited ? '#1d4ed8' : 'var(--ink)',
+                            cursor: 'pointer',
+                            fontWeight: isExited ? 700 : 500,
+                          }}
+                        >
+                          🛡️ Exited Cash
+                        </button>
+                        <button
+                          type="button"
+                          disabled={actionBusyId === entry.id}
+                          onClick={() => handleRecordAction(entry.id, 'ACKNOWLEDGED')}
+                          style={{
+                            fontSize: '10px',
+                            padding: '3px 7px',
+                            borderRadius: '4px',
+                            border: isAck ? '1px solid #0ea5e9' : '1px solid var(--line)',
+                            background: isAck ? 'rgba(14, 165, 233, 0.15)' : 'var(--panel)',
+                            color: isAck ? '#0369a1' : 'var(--ink)',
+                            cursor: 'pointer',
+                            fontWeight: isAck ? 700 : 500,
+                          }}
+                        >
+                          ✓ Ack
+                        </button>
+                        <button
+                          type="button"
+                          disabled={actionBusyId === entry.id}
+                          onClick={() => handleRecordAction(entry.id, 'IGNORED')}
+                          style={{
+                            fontSize: '10px',
+                            padding: '3px 7px',
+                            borderRadius: '4px',
+                            border: isIgnored ? '1px solid #9ca3af' : '1px solid var(--line)',
+                            background: isIgnored ? 'rgba(156, 163, 175, 0.15)' : 'var(--panel)',
+                            color: isIgnored ? '#4b5563' : 'var(--muted)',
+                            cursor: 'pointer',
+                            fontWeight: isIgnored ? 700 : 500,
+                          }}
+                        >
+                          ✕ Ignore
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
     </ModalOverlay>
