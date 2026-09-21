@@ -13,6 +13,9 @@ export interface BarData {
   sma20?: number | null
   sma50?: number | null
   sma200?: number | null
+  vwap?: number | null
+  vol_sma20?: number | null
+  rsi?: number | null
 }
 
 export interface BarsResponse {
@@ -24,6 +27,8 @@ export interface BarsResponse {
   day_change: number
   sma50?: number | null
   sma200?: number | null
+  vwap?: number | null
+  rsi?: number | null
   bars: BarData[]
 }
 
@@ -43,13 +48,16 @@ interface CandleChartProps {
 }
 
 type RangeOption = '1mo' | '3mo' | '6mo' | '1y'
+type TimeframeOption = '15m' | '1h' | '1d'
 
 export function CandleChart({ symbol, height = 280, defaultRange = '6mo', triggers = [] }: CandleChartProps) {
+  const [timeframe, setTimeframe] = useState<TimeframeOption>('1d')
   const [range, setRange] = useState<RangeOption>(defaultRange)
   const [data, setData] = useState<BarsResponse | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [showSma50, setShowSma50] = useState<boolean>(true)
   const [showSma200, setShowSma200] = useState<boolean>(true)
+  const [showVwap, setShowVwap] = useState<boolean>(true)
   const [showTriggers, setShowTriggers] = useState<boolean>(true)
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
   const [hoveredTrigger, setHoveredTrigger] = useState<ChartTrigger | null>(null)
@@ -57,7 +65,11 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
   useEffect(() => {
     let active = true
     setLoading(true)
-    api.marketBars(symbol, range, '1d')
+
+    const actualInterval = timeframe
+    const actualRange = timeframe === '15m' ? '5d' : (timeframe === '1h' ? '1mo' : range)
+
+    api.marketBars(symbol, actualRange, actualInterval)
       .then((res) => {
         if (active) {
           setData(res)
@@ -70,7 +82,7 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
     return () => {
       active = false
     }
-  }, [symbol, range])
+  }, [symbol, range, timeframe])
 
   const bars = useMemo(() => data?.bars || [], [data])
 
@@ -98,45 +110,55 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
         if (b.sma200 < min) min = b.sma200
         if (b.sma200 > max) max = b.sma200
       }
+      if (b.vwap != null) {
+        if (b.vwap < min) min = b.vwap
+        if (b.vwap > max) max = b.vwap
+      }
       if (b.volume > volMax) volMax = b.volume
     })
 
+    // Also factor in active triggers so lines are never clipped off-screen
     if (showTriggers && triggers.length > 0) {
       triggers.forEach((t) => {
-        if (t.price > 0 && min !== Infinity && max !== -Infinity) {
-          if (t.price >= min * 0.7 && t.price <= max * 1.3) {
-            if (t.price < min) min = t.price
-            if (t.price > max) max = t.price
-          }
+        if (t.price > 0) {
+          if (t.price < min) min = t.price * 0.98
+          if (t.price > max) max = t.price * 1.02
         }
       })
     }
 
-    const pad = (max - min) * 0.05 || 1.0
-    return {
-      minPrice: min - pad,
-      maxPrice: max + pad,
-      maxVol: volMax || 1,
+    if (min === Infinity || max === -Infinity) {
+      min = 0
+      max = 100
+    } else {
+      const pad = (max - min) * 0.05 || 1
+      min = Math.max(0, min - pad)
+      max = max + pad
     }
-  }, [bars, showTriggers, triggers])
+    return { minPrice: min, maxPrice: max, maxVol: volMax || 1 }
+  }, [bars, triggers, showTriggers])
 
-  const priceRange = maxPrice - minPrice || 1.0
+  const priceRange = maxPrice - minPrice || 1
+  const barCount = bars.length
+  const candleSpacing = barCount > 1 ? (chartWidth - paddingX * 2) / (barCount - 1) : 0
+  const candleWidth = Math.max(1.8, Math.min(8, (candleSpacing || 10) * 0.65))
+
   const getY = useCallback((price: number) => {
     return priceHeight - ((price - minPrice) / priceRange) * priceHeight
   }, [priceHeight, minPrice, priceRange])
 
-  const getVolY = (vol: number) => {
-    const vH = (vol / maxVol) * volumeHeight
-    return chartHeight - vH
-  }
+  const getVolY = useCallback((vol: number) => {
+    return chartHeight - ((vol / maxVol) * volumeHeight)
+  }, [chartHeight, maxVol, volumeHeight])
 
-  const barCount = bars.length
-  const candleSpacing = barCount > 1 ? (chartWidth - paddingX * 2) / (barCount - 1) : 10
-  const candleWidth = Math.max(2, Math.min(8, candleSpacing * 0.65))
+  const activeBar = useMemo(() => {
+    if (hoverIndex !== null && hoverIndex < bars.length) {
+      return bars[hoverIndex]
+    }
+    return bars.length > 0 ? bars[bars.length - 1] : null
+  }, [bars, hoverIndex])
 
-  const activeBar = hoverIndex !== null && bars[hoverIndex] ? bars[hoverIndex] : bars[bars.length - 1]
-
-  // Compute SMA polyline paths
+  // Polylines for technical indicators
   const sma50Points = useMemo(() => {
     if (!showSma50 || !bars.length) return ''
     return bars
@@ -163,35 +185,77 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
       .join(' ')
   }, [bars, showSma200, candleSpacing, getY])
 
+  const vwapPoints = useMemo(() => {
+    if (!showVwap || !bars.length) return ''
+    return bars
+      .map((b, i) => {
+        if (b.vwap == null) return null
+        const x = paddingX + i * candleSpacing
+        const y = getY(b.vwap)
+        return `${x},${y}`
+      })
+      .filter(Boolean)
+      .join(' ')
+  }, [bars, showVwap, candleSpacing, getY])
+
   return (
     <section className="drawer-section candle-chart-card" style={{ marginTop: '14px', background: 'var(--subtle)', border: '1px solid var(--line)', borderRadius: '12px', padding: '14px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <BarChart2 size={16} color="var(--accent-dark)" />
           <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-            INTERACTIVE CANDLESTICK &amp; SMA
+            {timeframe === '1d' ? 'DAILY CANDLESTICK & INDICATORS' : `${timeframe.toUpperCase()} INTRADAY WITH VWAP`}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {(['1mo', '3mo', '6mo', '1y'] as RangeOption[]).map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => setRange(r)}
-              style={{
-                padding: '3px 8px',
-                fontSize: '10px',
-                borderRadius: '6px',
-                border: range === r ? '1px solid var(--accent-dark)' : '1px solid var(--line)',
-                background: range === r ? 'var(--accent-soft)' : 'var(--panel)',
-                color: range === r ? 'var(--accent-dark)' : 'var(--muted)',
-                fontWeight: range === r ? 700 : 500,
-                cursor: 'pointer',
-              }}
-            >
-              {r.toUpperCase()}
-            </button>
-          ))}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Timeframe Selector */}
+          <div style={{ display: 'flex', gap: '3px', background: 'var(--panel)', padding: '2px', borderRadius: '6px', border: '1px solid var(--line)' }}>
+            {(['15m', '1h', '1d'] as TimeframeOption[]).map((tf) => (
+              <button
+                key={tf}
+                type="button"
+                onClick={() => setTimeframe(tf)}
+                style={{
+                  padding: '3px 8px',
+                  fontSize: '10px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: timeframe === tf ? 'var(--accent-dark)' : 'transparent',
+                  color: timeframe === tf ? '#fff' : 'var(--muted)',
+                  fontWeight: timeframe === tf ? 700 : 500,
+                  cursor: 'pointer',
+                }}
+              >
+                {tf.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
+          {/* Daily Range Selector (only active on 1d) */}
+          {timeframe === '1d' && (
+            <div style={{ display: 'flex', gap: '3px' }}>
+              {(['1mo', '3mo', '6mo', '1y'] as RangeOption[]).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRange(r)}
+                  style={{
+                    padding: '3px 7px',
+                    fontSize: '10px',
+                    borderRadius: '6px',
+                    border: range === r ? '1px solid var(--accent-dark)' : '1px solid var(--line)',
+                    background: range === r ? 'var(--accent-soft)' : 'var(--panel)',
+                    color: range === r ? 'var(--accent-dark)' : 'var(--muted)',
+                    fontWeight: range === r ? 700 : 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {r.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -204,6 +268,9 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
           <span>L: <strong>${activeBar.low.toFixed(2)}</strong></span>
           <span>C: <strong style={{ color: activeBar.close >= activeBar.open ? 'var(--green)' : 'var(--red)' }}>${activeBar.close.toFixed(2)}</strong></span>
           <span>Vol: <strong>{activeBar.volume > 1e6 ? `${(activeBar.volume / 1e6).toFixed(1)}M` : activeBar.volume.toLocaleString()}</strong></span>
+          {activeBar.vwap != null && showVwap && (
+            <span style={{ color: '#f59e0b' }}>VWAP: <strong>${activeBar.vwap.toFixed(2)}</strong></span>
+          )}
           {activeBar.sma50 != null && showSma50 && (
             <span style={{ color: '#d97706' }}>SMA50: <strong>${activeBar.sma50.toFixed(2)}</strong></span>
           )}
@@ -216,7 +283,7 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
       {loading ? (
         <div style={{ height: `${chartHeight}px`, display: 'grid', placeItems: 'center', color: 'var(--muted)', fontSize: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <RefreshCw size={14} className="spin" /> Loading historical bars for {symbol}…
+            <RefreshCw size={14} className="spin" /> Loading {timeframe.toUpperCase()} bars for {symbol}…
           </div>
         </div>
       ) : bars.length === 0 ? (
@@ -258,75 +325,87 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
             })}
 
             {/* Volume Separator */}
-            <line x1={paddingX} y1={chartHeight - volumeHeight - 4} x2={chartWidth - paddingX} y2={chartHeight - volumeHeight - 4} stroke="#e2e8f0" strokeWidth="1" />
+            <line x1={paddingX} y1={priceHeight + 4} x2={chartWidth - paddingX} y2={priceHeight + 4} stroke="#cbd5e1" strokeWidth="1" />
 
             {/* Volume Bars */}
             {bars.map((b, i) => {
-              const x = paddingX + i * candleSpacing - candleWidth / 2
+              const x = paddingX + i * candleSpacing
               const y = getVolY(b.volume)
-              const vH = chartHeight - y
+              const h = chartHeight - y
               const isBull = b.close >= b.open
               return (
                 <rect
-                  key={`vol-${b.timestamp}-${i}`}
-                  x={x}
+                  key={`vol-${b.timestamp || i}`}
+                  x={x - candleWidth / 2}
                   y={y}
                   width={candleWidth}
-                  height={Math.max(1, vH)}
-                  fill={isBull ? 'rgba(52, 211, 153, 0.4)' : 'rgba(248, 113, 113, 0.4)'}
+                  height={h}
+                  fill={isBull ? 'rgba(34, 197, 94, 0.35)' : 'rgba(239, 68, 68, 0.35)'}
                 />
               )
             })}
 
-            {/* Candlesticks (Wick + Body) */}
+            {/* Price Candles */}
             {bars.map((b, i) => {
-              const xCenter = paddingX + i * candleSpacing
-              const isBull = b.close >= b.open
-              const color = isBull ? '#10b981' : '#ef4444'
+              const x = paddingX + i * candleSpacing
               const yOpen = getY(b.open)
               const yClose = getY(b.close)
               const yHigh = getY(b.high)
               const yLow = getY(b.low)
-              const bodyTop = Math.min(yOpen, yClose)
-              const bodyHeight = Math.max(1.5, Math.abs(yOpen - yClose))
+              const isBull = b.close >= b.open
+              const color = isBull ? '#16a34a' : '#dc2626'
+              const top = Math.min(yOpen, yClose)
+              const heightBox = Math.max(1.5, Math.abs(yOpen - yClose))
 
               return (
-                <g key={`candle-${b.timestamp}-${i}`}>
-                  {/* High/Low Wick */}
-                  <line x1={xCenter} y1={yHigh} x2={xCenter} y2={yLow} stroke={color} strokeWidth="1.2" />
+                <g key={`candle-${b.timestamp || i}`}>
+                  {/* High-Low Wick */}
+                  <line x1={x} y1={yHigh} x2={x} y2={yLow} stroke={color} strokeWidth="1.2" />
                   {/* Real Body */}
                   <rect
-                    x={xCenter - candleWidth / 2}
-                    y={bodyTop}
+                    x={x - candleWidth / 2}
+                    y={top}
                     width={candleWidth}
-                    height={bodyHeight}
-                    fill={isBull ? '#10b981' : '#ef4444'}
-                    stroke={color}
-                    strokeWidth="0.5"
+                    height={heightBox}
+                    fill={color}
                     rx="0.5"
                   />
                 </g>
               )
             })}
 
-            {/* SMA-50 Line (Amber) */}
-            {sma50Points && (
-              <polyline points={sma50Points} fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" opacity="0.9" />
+            {/* VWAP Overlay Line */}
+            {showVwap && vwapPoints && (
+              <polyline
+                points={vwapPoints}
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth="1.6"
+                strokeDasharray="3 3"
+                opacity="0.9"
+              />
             )}
 
-            {/* SMA-200 Line (Blue) */}
-            {sma200Points && (
-              <polyline points={sma200Points} fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" opacity="0.9" />
+            {/* SMA-50 Line */}
+            {showSma50 && sma50Points && (
+              <polyline points={sma50Points} fill="none" stroke="#d97706" strokeWidth="1.6" strokeDasharray="4 2" />
             )}
 
-            {/* Visual Trigger Overlay Lines (Stop-Loss, Target, Dip-Buy) */}
+            {/* SMA-200 Line */}
+            {showSma200 && sma200Points && (
+              <polyline points={sma200Points} fill="none" stroke="#2563eb" strokeWidth="1.8" />
+            )}
+
+            {/* Visual Trigger Lines & Badges */}
             {showTriggers && triggers.map((t) => {
+              if (t.price <= 0) return null
               const y = getY(t.price)
               if (y < 0 || y > priceHeight) return null
+
               const isStop = t.type === 'stop_loss'
               const isTarget = t.type === 'profit_target'
               const strokeColor = isStop ? '#ef4444' : isTarget ? '#10b981' : '#3b82f6'
-              const bgColor = isStop ? 'rgba(239, 68, 68, 0.12)' : isTarget ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.12)'
+              const bgColor = isStop ? '#fee2e2' : isTarget ? '#d1fae5' : '#dbeafe'
               const textColor = isStop ? '#b91c1c' : isTarget ? '#047857' : '#1d4ed8'
               const currentPrice = data?.current_price || (bars.length > 0 ? bars[bars.length - 1].close : 0)
               const diffPct = currentPrice > 0 ? ((t.price - currentPrice) / currentPrice) * 100 : 0
@@ -421,6 +500,13 @@ export function CandleChart({ symbol, height = 280, defaultRange = '6mo', trigge
 
           {/* Indicators Legend Toggles */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', marginTop: '6px', fontSize: '10px', color: 'var(--muted)' }}>
+            {timeframe !== '1d' && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={showVwap} onChange={(e) => setShowVwap(e.target.checked)} />
+                <span style={{ width: '8px', height: '8px', background: '#f59e0b', borderRadius: '2px', display: 'inline-block' }} />
+                VWAP
+              </label>
+            )}
             <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
               <input type="checkbox" checked={showSma50} onChange={(e) => setShowSma50(e.target.checked)} />
               <span style={{ width: '8px', height: '8px', background: '#d97706', borderRadius: '2px', display: 'inline-block' }} />

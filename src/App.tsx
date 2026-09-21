@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Activity, AlertTriangle, ArrowRight, BarChart2, BarChart3, Bell, BrainCircuit, BriefcaseBusiness,
-  Calendar, Check, CheckCircle2, ChevronRight, CircleDollarSign, Database, Edit3, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
+  Calendar, Check, CheckCircle2, ChevronRight, CircleDollarSign, Database, Edit3, FileText, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
   Moon, Plus, Radar, Search, ServerCog, Settings, ShieldCheck, Sparkles, Sun,
   Target, TrendingDown, TrendingUp, Upload, X, Zap, Scale, LayoutGrid, Table,
   Compass, Info, Shield,
@@ -34,6 +34,7 @@ import { CatalystRadar } from './components/CatalystRadar'
 import { MorningBriefingModal } from './components/MorningBriefingModal'
 import { BacktestModal } from './components/BacktestModal'
 import { QuickActionsMenu } from './components/QuickActionsMenu'
+import { ReportModal } from './components/ReportModal'
 import { CommandPalette } from './components/CommandPalette'
 import { PortfolioSwitcher } from './components/PortfolioSwitcher'
 import { resolveCompanyName } from './data/companyNames'
@@ -1562,6 +1563,7 @@ export default function App() {
   const [alertPanelOpen, setAlertPanelOpen] = useState(false)
   const [notificationModalOpen, setNotificationModalOpen] = useState(false)
   const [rebalanceModalOpen, setRebalanceModalOpen] = useState(false)
+  const [reportModalOpen, setReportModalOpen] = useState(false)
   const [userAlerts, setUserAlerts] = useState<UserAlert[]>(() => {
     try {
       const saved = localStorage.getItem('atlas_user_alerts')
@@ -2078,7 +2080,25 @@ export default function App() {
               {refreshingLive ? 'Refreshing…' : '⚡ Refresh'}
             </button>
 
+            <button
+              className="refresh-data-btn"
+              style={{
+                background: 'rgba(2, 132, 199, 0.1)',
+                borderColor: 'rgba(2, 132, 199, 0.3)',
+                color: 'var(--accent-dark)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+              onClick={() => setReportModalOpen(true)}
+              title="Generate and download or send Executive PDF Performance & Defense Report"
+            >
+              <FileText size={14} />
+              <span>PDF Report</span>
+            </button>
+
             <QuickActionsMenu
+              onOpenReport={() => setReportModalOpen(true)}
               onOpenBriefing={() => setBriefingOpen(true)}
               onOpenBacktest={() => setBacktestOpen(true)}
               onOpenRebalance={() => setRebalanceModalOpen(true)}
@@ -2150,6 +2170,13 @@ export default function App() {
         />
       )}
       {notificationModalOpen && <NotificationSettingsModal onClose={() => setNotificationModalOpen(false)} />}
+      {reportModalOpen && (
+        <ReportModal
+          isOpen={reportModalOpen}
+          onClose={() => setReportModalOpen(false)}
+          portfolioValue={holdings.reduce((acc, h) => acc + (h.price * h.quantity), 0)}
+        />
+      )}
       {rebalanceModalOpen && <RebalanceModal onClose={() => setRebalanceModalOpen(false)} onSuccess={reloadState} />}
       {briefingOpen && <MorningBriefingModal onClose={() => setBriefingOpen(false)} />}
       {backtestOpen && (

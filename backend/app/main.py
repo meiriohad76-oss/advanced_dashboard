@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import glob
+import io
 import json
 import os
 import random
@@ -21,7 +22,7 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from . import alert_recommendations, alerts, analytics_service, backtest_service, bars_service, briefing_service, catalysts_service, imports, notifications, ratings_ingest, store
+from . import alert_recommendations, alerts, analytics_service, backtest_service, bars_service, briefing_service, catalysts_service, imports, intraday_service, notifications, ratings_ingest, report_service, store
 from .broker.alpaca_broker import alpaca_broker, calculate_portfolio_rebalance
 from .company_names import resolve_company_name
 from .sectors import resolve_sector
@@ -778,6 +779,55 @@ async def notifications_send_trade_prompt(payload: dict) -> dict:
     return envelope(res)
 
 
+@app.get("/api/v1/reports/weekly-pdf")
+def reports_weekly_pdf() -> StreamingResponse:
+    """Generate and stream the publication-grade executive weekly performance & defense report PDF."""
+    summary = portfolio_summary().get("data", {})
+    holdings = current_holdings()
+    history = store.get_alert_history(limit=50)
+    pdf_bytes = report_service.generate_weekly_performance_pdf(
+        summary_data=summary,
+        holdings=holdings,
+        history_entries=history,
+    )
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=Atlas_Portfolio_Defense_Report.pdf"},
+    )
+
+
+@app.post("/api/v1/reports/send-telegram")
+async def reports_send_telegram() -> dict:
+    """Generate the executive weekly performance PDF and send it directly to the configured Telegram chat."""
+    settings = notifications.get_settings()
+    token = settings.get("telegram_token", "")
+    chat_id = settings.get("telegram_chat_id", "")
+    if not token or not chat_id:
+        raise HTTPException(status_code=400, detail="Telegram bot token or chat ID is not configured in Notification Settings")
+
+    summary = portfolio_summary().get("data", {})
+    holdings = current_holdings()
+    history = store.get_alert_history(limit=50)
+    pdf_bytes = report_service.generate_weekly_performance_pdf(
+        summary_data=summary,
+        holdings=holdings,
+        history_entries=history,
+    )
+
+    now_date = datetime.now(timezone.utc).strftime("%b %d, %Y")
+    caption = f"📊 *Atlas Executive Portfolio & Defense Report*\n📅 _{now_date}_\nTotal Value: `${summary.get('total_value', 0.0):,.2f}`"
+
+    res = await notifications.send_telegram_document(
+        token=token,
+        chat_id=chat_id,
+        document_bytes=pdf_bytes,
+        filename=f"Atlas_Defense_Report_{datetime.now(timezone.utc).strftime('%Y%m%d')}.pdf",
+        caption=caption,
+    )
+    return envelope(res)
+
+
 @app.get("/api/v1/scheduler/status")
 def scheduler_status() -> dict:
     """Get status of automated extractor background runner."""
@@ -945,6 +995,20 @@ async def market_bars(symbol: str, range: str = "6mo", interval: str = "1d") -> 
     base_price = h.price if h else None
     bars_data = await bars_service.get_symbol_bars(sym, range_str=range, interval=interval, base_price=base_price)
     return envelope(bars_data)
+
+
+@app.get("/api/v1/market/intraday-triggers")
+async def market_intraday_triggers(symbol: str | None = None) -> dict:
+    """Evaluate and return multi-timeframe intraday triggers (15m, 1h, VWAP, Volume)."""
+    holdings = current_holdings()
+    if symbol:
+        sym = symbol.strip().upper()
+        h = next((item for item in holdings if item.symbol == sym), None)
+        base_p = h.price if h else None
+        triggers = await intraday_service.evaluate_ticker_intraday(sym, base_price=base_p)
+    else:
+        triggers = await intraday_service.evaluate_intraday_triggers_for_holdings(holdings)
+    return envelope([t.model_dump() if hasattr(t, "model_dump") else t.dict() for t in triggers])
 
 
 @app.post("/api/v1/market/quotes")

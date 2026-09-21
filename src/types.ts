@@ -602,5 +602,20 @@ export interface SchedulerStatus {
   }>
 }
 
+export interface IntradayTrigger {
+  id: string
+  symbol: string
+  timeframe: '15m' | '1h' | '1d'
+  category: 'VOLUME_SURGE' | 'VWAP_RECLAIM' | 'VWAP_BREAKDOWN' | 'BREAKOUT' | 'RSI_EXTREME'
+  title: string
+  message: string
+  severity: 'info' | 'warning' | 'critical'
+  price: number
+  vwap?: number | null
+  relative_volume: number
+  action_directive: string
+  detected_at: string
+}
+
 
 

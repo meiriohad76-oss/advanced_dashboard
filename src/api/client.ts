@@ -257,5 +257,12 @@ export const api = {
     request<{ synced: boolean; session?: string; next_scheduled?: string; details?: any; shifts?: any[]; reason?: string }>('/api/v1/scheduler/run-now', {
       method: 'POST',
     }),
+  marketIntradayTriggers: (symbol?: string) =>
+    request<import('../types').IntradayTrigger[]>(symbol ? `/api/v1/market/intraday-triggers?symbol=${encodeURIComponent(symbol)}` : '/api/v1/market/intraday-triggers'),
+  reportsWeeklyPdfUrl: () => '/api/v1/reports/weekly-pdf',
+  reportsSendTelegram: () =>
+    request<{ success: boolean; channel: string; error?: string }>('/api/v1/reports/send-telegram', {
+      method: 'POST',
+    }),
 }
 

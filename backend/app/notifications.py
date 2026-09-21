@@ -522,3 +522,36 @@ async def send_telegram_premarket_briefing(
     return res
 
 
+async def send_telegram_document(
+    token: str,
+    chat_id: str,
+    document_bytes: bytes,
+    filename: str = "Atlas_Report.pdf",
+    caption: str = "",
+) -> dict[str, Any]:
+    """Upload and send a document file (PDF) to Telegram using sendDocument endpoint."""
+    if not token or not chat_id:
+        return {"success": False, "channel": "telegram", "error": "Telegram token or chat_id missing"}
+
+    url = f"https://api.telegram.org/bot{token}/sendDocument"
+    files = {
+        "document": (filename, document_bytes, "application/pdf"),
+    }
+    data = {
+        "chat_id": chat_id,
+        "caption": caption,
+        "parse_mode": "Markdown",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(url, data=data, files=files)
+            return {
+                "success": resp.status_code == 200,
+                "channel": "telegram",
+                "status_code": resp.status_code,
+                "error": None if resp.status_code == 200 else resp.text,
+            }
+    except Exception as exc:
+        return {"success": False, "channel": "telegram", "error": str(exc)}
+
+

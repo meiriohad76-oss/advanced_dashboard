@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import {
   BarChart2,
   ChevronDown,
+  FileText,
   Moon,
   Play,
   Radio,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react'
 
 interface QuickActionsMenuProps {
+  onOpenReport?: () => void
   onOpenBriefing: () => void
   onOpenBacktest: () => void
   onOpenRebalance: () => void
@@ -24,6 +26,7 @@ interface QuickActionsMenuProps {
 }
 
 export function QuickActionsMenu({
+  onOpenReport,
   onOpenBriefing,
   onOpenBacktest,
   onOpenRebalance,
@@ -74,6 +77,24 @@ export function QuickActionsMenu({
 
       {open && (
         <div className="quick-actions-dropdown" role="menu">
+          {onOpenReport && (
+            <button
+              type="button"
+              className="quick-action-item"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false)
+                onOpenReport()
+              }}
+            >
+              <FileText size={15} color="#0284c7" />
+              <div>
+                <strong>Executive Performance PDF</strong>
+                <small>Download vector report or dispatch to Telegram</small>
+              </div>
+            </button>
+          )}
+
           <button
             type="button"
             className="quick-action-item"
