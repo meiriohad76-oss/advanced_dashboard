@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Atlas Portfolio & Entry Radar — User Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 14mm 14mm;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    font-size: 9pt;
+    line-height: 1.45;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .page {
+    page-break-after: always;
+    min-height: 98%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .page:last-child {
+    page-break-after: avoid;
+  }
+
+  .page-content {
+    flex: 1;
+  }
+
+  /* Header banner */
+  .header-card {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #0284c7 100%);
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .header-badge {
+    display: inline-block;
+    background: rgba(56, 189, 248, 0.2);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .header-version {
+    font-size: 8pt;
+    color: #94a3b8;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .header-title {
+    font-size: 19pt;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 2px;
+    color: #f8fafc;
+  }
+
+  .header-subtitle {
+    font-size: 9.5pt;
+    color: #cbd5e1;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 8pt;
+    color: #cbd5e1;
+  }
+
+  .header-meta span strong {
+    color: #ffffff;
+  }
+
+  /* Page Running Header for pages 2 & 3 */
+  .subpage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid #0284c7;
+  }
+
+  .subpage-title {
+    font-size: 11pt;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+  }
+
+  .subpage-meta {
+    font-size: 8pt;
+    color: #64748b;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Section Styles */
+  .section {
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #0f172a;
+    border-left: 4px solid #0284c7;
+    padding-left: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-badge {
+    font-size: 7.5pt;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-bottom: 6px;
+  }
+
+  th {
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 10px;
+    font-size: 8pt;
+    letter-spacing: 0.3px;
+  }
+
+  th:first-child {
+    border-top-left-radius: 5px;
+  }
+  th:last-child {
+    border-top-right-radius: 5px;
+  }
+
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  .tab-pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 7.5pt;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    white-space: nowrap;
+  }
+
+  /* Grids */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Info Cards */
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .card-title {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .card p, .card li {
+    font-size: 8.5pt;
+    color: #334155;
+  }
+
+  .card ul {
+    margin-left: 14px;
+    margin-top: 4px;
+  }
+
+  .card li {
+    margin-bottom: 3px;
+  }
+
+  /* 5-Point Setup Box */
+  .setup-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .setup-item {
+    display: flex;
+    align-items: flex-start;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #0284c7;
+    border-radius: 5px;
+    padding: 6px 10px;
+  }
+
+  .setup-num {
+    background: #0284c7;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 8pt;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .setup-content {
+    flex: 1;
+  }
+
+  .setup-title {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .setup-metric {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt;
+    font-weight: 700;
+    color: #0369a1;
+    background: #e0f2fe;
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid #bae6fd;
+  }
+
+  .setup-desc {
+    font-size: 8pt;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  /* Status Pills */
+  .pill-strong {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .pill-approaching {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .pill-neutral {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Callout box */
+  .callout {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #16a34a;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 8.5pt;
+    color: #166534;
+  }
+
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .code-inline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+  }
+
+  .page-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 7.5pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 6px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- =================================================================== -->
+  <!-- PAGE 1: OVERVIEW & PORTFOLIO EXECUTION -->
+  <!-- =================================================================== -->
+  <div class="page">
+    <div class="page-content">
+      
+      <!-- HERO HEADER -->
+      <div class="header-card">
+        <div class="header-top">
+          <div class="header-badge">Institutional Dashboard Manual</div>
+          <div class="header-version">v2.4 &bull; LIVE DEPLOYMENT</div>
+        </div>
+        <div class="header-title">Atlas Portfolio & Entry Radar</div>
+        <div class="header-subtitle">Executive User Guide & Quantitative Strategy Playbook</div>
+        <div class="header-meta">
+          <span><strong>System Architecture:</strong> FastAPI + React / TypeScript</span>
+          <span><strong>Multi-Source Consensus:</strong> SA Quant / Wall St / Zacks</span>
+          <span><strong>Real-Time Quotes:</strong> Yahoo & Alpaca Feeds</span>
+        </div>
+      </div>
+
+      <!-- SECTION 1: SYSTEM NAVIGATION -->
+      <div class="section">
+        <div class="section-title">
+          <span>1. Workspace Navigation & Modules</span>
+          <span class="section-badge">6 Integrated Hubs</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 26%;">Workspace Tab</th>
+              <th style="width: 46%;">Core Intelligence & Analytics</th>
+              <th style="width: 28%;">Primary Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tab-pill">Portfolio</span></td>
+              <td>Real-time inventory of holdings, true daily moves (<span class="code-inline">Today %</span>), unrealized P&L, sector heatmap, and concentration caps.</td>
+              <td>Rebalance book, export CSV, switch active portfolios, trigger live quote refresh.</td>
+            </tr>
+            <tr>
+              <td><span class="tab-pill">Signal Center</span></td>
+              <td>Objective 0–100 technical scoring combining momentum, trend strength, moving averages, and portfolio fit.</td>
+              <td>Filter Strong Entry / Approaching, inspect RSI and MACD drivers.</td>
+            </tr>
+            <tr>
+              <td><span class="tab-pill">Watchlist & Entry Radar</span></td>
+              <td>Candidate screening command center: multi-source ratings consensus + 5-point setup validation + price targets.</td>
+              <td>Review setup drawer, arm automated entry triggers, launch strategy backtester.</td>
+            </tr>
+            <tr>
+              <td><span class="tab-pill">Analytics & Risk</span></td>
+              <td>Institutional risk diagnostics: Portfolio Beta, 95% Value-at-Risk (VaR), correlation matrix, SPY/QQQ benchmark tracking.</td>
+              <td>Stress-test shocks, inspect sector exposure, analyze asset correlations.</td>
+            </tr>
+            <tr>
+              <td><span class="tab-pill">Catalysts</span></td>
+              <td>Forward corporate events: Earnings releases (BMO/AMC), dividend calendar, yields, and distribution safety scores.</td>
+              <td>Pre-earnings risk audit, dividend capture timing, event alerts.</td>
+            </tr>
+            <tr>
+              <td><span class="tab-pill">Alerts</span></td>
+              <td>Central armed trigger hub for Price, RSI, and Risk Drawdown conditions, trigger history log, and Telegram push dispatcher.</td>
+              <td>Create custom threshold triggers, review fired alerts, configure Telegram bot.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECTION 2: PORTFOLIO MANAGEMENT -->
+      <div class="section">
+        <div class="section-title">
+          <span>2. Portfolio Execution & Performance Tracking</span>
+          <span class="section-badge">Real-Time Book</span>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Table & Heatmap Visualizer</span>
+            </div>
+            <ul>
+              <li><strong>Today % Column</strong>: Displays single-day performance calculated strictly against the prior trading day's official close (<span class="code-inline">closes[-2]</span>), completely separated from cumulative unrealized return.</li>
+              <li><strong>Unrealized Return ($ / %)</strong>: Tracks cumulative open profit or loss from original acquisition cost basis.</li>
+              <li><strong>Interactive Treemap</strong>: Color-coded by daily performance with rectangle sizes proportional to total portfolio capital weight.</li>
+              <li><strong>Dynamic Sorting</strong>: Click any header to instantly sort by Today %, Total Return, Score, or Position Weight.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Action Toolbar & Portfolio Switcher</span>
+            </div>
+            <ul>
+              <li><strong>⚡ Refresh All Data</strong>: Fetches latest real-time prices, re-evaluates all indicators (RSI, SMAs, MACD), and recalculates book metrics.</li>
+              <li><strong>Scale / Rebalance & Trade</strong>: Automatically produces trim and buy orders to maintain position (&le;20%) and sector (&le;35%) guardrails.</li>
+              <li><strong>Portfolio Switcher</strong>: Instantly switch between uploaded files (e.g. <span class="code-inline">AHAD portfolio 17092026.xlsx</span>) or live brokerage accounts.</li>
+              <li><strong>Export CSV</strong>: One-click extraction of complete portfolio state for accounting and external reporting.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    
+    <div class="page-footer">
+      <span>Atlas Advanced Portfolio & Entry Radar &bull; Operations Playbook</span>
+      <span>Page 1 of 3</span>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- PAGE 2: WATCHLIST & 5-POINT SETUP CRITERIA -->
+  <!-- =================================================================== -->
+  <div class="page">
+    <div class="page-content">
+      
+      <div class="subpage-header">
+        <span class="subpage-title">3. Watchlist & 5-Point Entry Setup Engine</span>
+        <span class="subpage-meta">QUANTITATIVE CRITERIA SPECIFICATION</span>
+      </div>
+
+      <div class="section">
+        <p style="font-size: 8.5pt; color: #475569; margin-bottom: 10px;">
+          The <strong>Watchlist & Entry Radar</strong> evaluates candidate stocks through a strict 5-point quantitative gate. Candidates passing all criteria earn the <span class="pill-strong">STRONG ENTRY</span> status, highlighting prime risk/reward setups.
+        </p>
+
+        <div class="setup-container">
+          <div class="setup-item">
+            <div class="setup-num">1</div>
+            <div class="setup-content">
+              <div class="setup-title">
+                <span>Multi-Source Ratings Consensus</span>
+                <span class="setup-metric">Score &ge; 65 / 100</span>
+              </div>
+              <div class="setup-desc">Synthesizes Seeking Alpha Quant (algorithmic factor model), Wall Street Consensus (sell-side analyst targets), Zacks Investment Research (earnings momentum), and Investing.com into a normalized 0–100 scale. Ensures rigorous multi-firm validation.</div>
+            </div>
+          </div>
+
+          <div class="setup-item">
+            <div class="setup-num">2</div>
+            <div class="setup-content">
+              <div class="setup-title">
+                <span>RSI Momentum Buy-Zone</span>
+                <span class="setup-metric">38 &le; RSI &le; 58</span>
+              </div>
+              <div class="setup-desc">Filters out dangerous overbought extremes (RSI &gt; 70) while targeting candidates consolidating or reversing out of oversold territory with accelerating positive momentum.</div>
+            </div>
+          </div>
+
+          <div class="setup-item">
+            <div class="setup-num">3</div>
+            <div class="setup-content">
+              <div class="setup-title">
+                <span>Moving Average Trend Alignment</span>
+                <span class="setup-metric">Price &gt; SMA50 &gt; SMA200</span>
+              </div>
+              <div class="setup-desc">Demands confirmed structural alignment: Market Price must trade above an upward-sloping 50-day Simple Moving Average, which in turn must remain above the institutional 200-day trendline.</div>
+            </div>
+          </div>
+
+          <div class="setup-item">
+            <div class="setup-num">4</div>
+            <div class="setup-content">
+              <div class="setup-title">
+                <span>Volume Accumulation Confirmation</span>
+                <span class="setup-metric">Relative Volume &ge; 1.0&times;</span>
+              </div>
+              <div class="setup-desc">Confirms that price movement is backed by real institutional liquidity. Trading volume must match or exceed the trailing 20-day average volume to validate institutional accumulation.</div>
+            </div>
+          </div>
+
+          <div class="setup-item">
+            <div class="setup-num">5</div>
+            <div class="setup-content">
+              <div class="setup-title">
+                <span>Consensus Target Upside Potential</span>
+                <span class="setup-metric">Upside &ge; +15.0%</span>
+              </div>
+              <div class="setup-desc">Calculates margin of safety based on mean analyst price targets. Guarantees that the expected reward meaningfully justifies the capital at risk before opening a position.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: SIGNAL CENTER & SCORING MECHANICS -->
+      <div class="section">
+        <div class="section-title">
+          <span>4. Signal Center: 0–100 Scoring Engine</span>
+          <span class="section-badge">Ranking Algorithm</span>
+        </div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Technical Score (0–100)</span></div>
+            <p>Calculated using 4 quantitative sub-components:</p>
+            <ul>
+              <li><strong>RSI Momentum</strong> (25 pts)</li>
+              <li><strong>Trend Alignment</strong> (30 pts)</li>
+              <li><strong>MACD Crossover</strong> (25 pts)</li>
+              <li><strong>Volume Breakout</strong> (20 pts)</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Portfolio Fit Adjuster</span></div>
+            <p>Dynamic multiplier based on active portfolio risk:</p>
+            <ul>
+              <li><strong>Concentration Penalty</strong>: -15 pts if position &gt; 18% or sector &gt; 30%.</li>
+              <li><strong>Diversification Bonus</strong>: +5 pts for underrepresented high-alpha sectors.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Action Status Pills</span></div>
+            <p>Clear trade directives derived from composite score:</p>
+            <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+              <div><span class="pill-strong">STRONG ENTRY</span> &ge; 75 &amp; 5/5 setup</div>
+              <div><span class="pill-approaching">APPROACHING</span> 60–74 or 3–4/5</div>
+              <div><span class="pill-neutral">NEUTRAL / TRIM</span> &lt; 60 or overbought</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANDIDATE CONTROLS & SCHEDULER -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Candidate Radar Controls</span></div>
+          <ul>
+            <li><strong>Review Setup</strong>: Expands setup drawer with individual metric scores and price targets.</li>
+            <li><strong>🔔 Arm Trigger</strong>: Sets an automated limit alert when price reaches target entry level.</li>
+            <li><strong>Quick Add</strong>: Input any ticker symbol + optional investment thesis note.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Automated Market-Aware Sync</span></div>
+          <ul>
+            <li><strong>Regular Hours</strong>: Automatic live refresh every 30 minutes.</li>
+            <li><strong>Pre / After-Market</strong>: Scheduled refresh every 60 minutes.</li>
+            <li><strong>Manual Override</strong>: Click <em>Sync Now</em> anytime to immediately pull article analysis and quotes.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+    
+    <div class="page-footer">
+      <span>Atlas Advanced Portfolio & Entry Radar &bull; Quantitative Criteria</span>
+      <span>Page 2 of 3</span>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- PAGE 3: BACKTESTER, ALERTS & OPERATIONAL PLAYBOOK -->
+  <!-- =================================================================== -->
+  <div class="page">
+    <div class="page-content">
+      
+      <div class="subpage-header">
+        <span class="subpage-title">5. Strategy Backtesting & Alert Infrastructure</span>
+        <span class="subpage-meta">EXECUTION & VERIFICATION</span>
+      </div>
+
+      <!-- SECTION 5: BACKTESTER -->
+      <div class="section">
+        <div class="section-title">
+          <span>5. 5-Point Strategy Backtester</span>
+          <span class="section-badge">Historical Simulation</span>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Simulation Parameters</span>
+            </div>
+            <ul>
+              <li><strong>Entry Threshold</strong> (Default: 75): Minimum composite score required to open a simulated trade.</li>
+              <li><strong>Take-Profit Target</strong> (Default: +15%): Closes trade when price hits target gain.</li>
+              <li><strong>Stop-Loss Guard</strong> (Default: -5%): Cuts position if trade moves against thesis.</li>
+              <li><strong>Time-Stop Barrier</strong> (Default: 20 days): Exits position if neither target nor stop is triggered within 20 trading sessions.</li>
+              <li><strong>Lookback Windows</strong>: Selectable across 6mo, 1y, 2y, or 3y daily historical data.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Performance Analytics & Audit</span>
+            </div>
+            <ul>
+              <li><strong>Benchmark Comparison</strong>: Direct alpha and return comparison against SPY (S&amp;P 500 ETF).</li>
+              <li><strong>Risk Metrics</strong>: Displays Sharpe Ratio, Win Rate %, Profit Factor, and Maximum Drawdown.</li>
+              <li><strong>Equity Curve Chart</strong>: Visualizes strategy account trajectory vs. buy-and-hold benchmark.</li>
+              <li><strong>Trade Ledger</strong>: Full audit log detailing Entry Date, Exit Date, Realized Return %, and Exit Reason (<span class="code-inline">TARGET</span>, <span class="code-inline">STOP_LOSS</span>, <span class="code-inline">TIME_STOP</span>).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: ALERTS & NOTIFICATIONS -->
+      <div class="section">
+        <div class="section-title">
+          <span>6. Armed Triggers & Telegram Push Notifications</span>
+          <span class="section-badge">Continuous Monitoring</span>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Trigger Types & Management</span>
+            </div>
+            <ul>
+              <li><strong>Price Level Alerts</strong>: Trigger when price moves <span class="code-inline">ABOVE</span> resistance or <span class="code-inline">BELOW</span> dip-buy entry target.</li>
+              <li><strong>RSI Alerts</strong>: Trigger on momentum reversals (e.g. RSI crossing below 40 or above 70).</li>
+              <li><strong>Risk Drawdown Alerts</strong>: Automated alerts for portfolio-wide drawdown or sector breaches.</li>
+              <li><strong>Armed State</strong>: Background worker evaluates all active triggers every market cycle.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Telegram Bot Integration</span>
+            </div>
+            <ul>
+              <li><strong>Real-Time Delivery</strong>: Instant mobile notifications when any trigger fires.</li>
+              <li><strong>Actionable Alerts</strong>: Messages include ticker, trigger price, current RSI, and setup grade.</li>
+              <li><strong>Zero Polling</strong>: Runs autonomously on the background worker server.</li>
+              <li><strong>Configuration</strong>: Set Bot Token and Chat ID in Settings &bull; Alerts tab.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 7: OPERATIONAL PLAYBOOK CALLOUT -->
+      <div class="callout" style="margin-top: 10px;">
+        <div class="callout-title">
+          <span>Institutional Daily Operating Playbook</span>
+        </div>
+        <div>
+          <strong>Step 1 &mdash; Morning Scan:</strong> Open <em>Watchlist & Entry Radar</em> to review candidate stocks scoring 4/5 or 5/5 on the criteria gate.<br>
+          <strong>Step 2 &mdash; Empirical Validation:</strong> Click <em>🧪 Backtest</em> on prime candidates to confirm positive alpha and win rate in recent market regimes.<br>
+          <strong>Step 3 &mdash; Risk Check:</strong> Open <em>Analytics & Risk</em> to verify that adding the position will not breach the 35% sector cap or spike portfolio Beta.<br>
+          <strong>Step 4 &mdash; Order Dispatch / Arm Trigger:</strong> Click <em>🔔 Arm Trigger</em> to notify when entry price is reached, or execute directly via <em>Scale / Rebalance</em>.
+        </div>
+      </div>
+
+    </div>
+    
+    <div class="page-footer">
+      <span>Atlas Advanced Portfolio & Entry Radar &bull; Execution Playbook</span>
+      <span>Page 3 of 3</span>
+    </div>
+  </div>
+
+</body>
+</html>

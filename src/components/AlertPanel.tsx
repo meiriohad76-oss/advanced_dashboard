@@ -1,25 +1,44 @@
 import { useState } from 'react'
-import { AlertTriangle, Bell, Check, Plus, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Bell, Check, Plus, Sparkles, Trash2, X } from 'lucide-react'
 import { ModalOverlay } from './ModalOverlay'
-import type { AlertItem, Holding, UserAlert } from '../types'
+import type { AlertItem, Holding, RecommendedAlert, UserAlert } from '../types'
+import { RecommendedTriggersView } from './RecommendedTriggers'
 
 export interface AlertPanelProps {
   alerts: AlertItem[]
   userAlerts: UserAlert[]
   holdings: Holding[]
+  recommendations?: RecommendedAlert[]
   onClose: () => void
   onAddAlert: (alert: UserAlert) => void
   onDeleteAlert: (id: string) => void
+  onAcknowledgeRecommendation?: (rec: RecommendedAlert) => void
+  onDeclineRecommendation?: (rec: RecommendedAlert) => void
+  onChangeRecommendation?: (rec: RecommendedAlert, customized: UserAlert) => void
 }
 
-export function AlertPanel({ alerts, userAlerts, holdings, onClose, onAddAlert, onDeleteAlert }: AlertPanelProps) {
-  const [activeTab, setActiveTab] = useState<'active' | 'create' | 'history'>('active')
+export function AlertPanel({
+  alerts,
+  userAlerts,
+  holdings,
+  recommendations = [],
+  onClose,
+  onAddAlert,
+  onDeleteAlert,
+  onAcknowledgeRecommendation,
+  onDeclineRecommendation,
+  onChangeRecommendation,
+}: AlertPanelProps) {
+  const [activeTab, setActiveTab] = useState<'active' | 'recommended' | 'create' | 'history'>('active')
   const [symbol, setSymbol] = useState(holdings[0]?.symbol || '')
   const [metric, setMetric] = useState<UserAlert['metric']>('PRICE')
   const [condition, setCondition] = useState<UserAlert['condition']>('ABOVE')
   const [targetValue, setTargetValue] = useState<number>(() => holdings[0]?.price || 50)
   const [severity, setSeverity] = useState<UserAlert['severity']>('warning')
   const [addedNotice, setAddedNotice] = useState(false)
+
+  const pendingRecs = recommendations.filter((r) => r.status === 'PENDING')
+
 
   const selectedHolding = holdings.find((h) => h.symbol === symbol)
 
@@ -67,9 +86,21 @@ export function AlertPanel({ alerts, userAlerts, holdings, onClose, onAddAlert, 
 
       <div className="tabs" style={{ marginTop: '14px', marginBottom: '16px' }}>
         <button className={activeTab === 'active' ? 'active' : ''} onClick={() => setActiveTab('active')}>Active ({alerts.length + userAlerts.length})</button>
+        <button className={activeTab === 'recommended' ? 'active' : ''} onClick={() => setActiveTab('recommended')}>
+          <Sparkles size={13} style={{ marginRight: '4px' }} /> Recommended ({pendingRecs.length})
+        </button>
         <button className={activeTab === 'create' ? 'active' : ''} onClick={() => setActiveTab('create')}><Plus size={14} style={{ marginRight: '4px' }} /> Create Alert</button>
         <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>History</button>
       </div>
+
+      {activeTab === 'recommended' && (
+        <RecommendedTriggersView
+          recommendations={recommendations}
+          onAcknowledge={onAcknowledgeRecommendation || (() => {})}
+          onDecline={onDeclineRecommendation || (() => {})}
+          onChange={onChangeRecommendation || (() => {})}
+        />
+      )}
 
       {activeTab === 'create' && (
         <form className="alert-form" onSubmit={handleSubmit} style={{ background: 'var(--panel)', padding: '16px', borderRadius: '12px', border: '1px solid var(--line)' }}>

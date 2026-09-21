@@ -8,6 +8,7 @@ import {
   Check,
   CheckCircle2,
   Database,
+  Edit3,
   ExternalLink,
   Flame,
   Plus,
@@ -16,6 +17,7 @@ import {
   Sparkles,
   Target,
   Trash2,
+  TrendingDown,
   TrendingUp,
   X,
   Zap,
@@ -25,7 +27,9 @@ import { resolveCompanyName } from '../data/companyNames'
 import { getPriceTargets } from '../domain/ratings'
 import { buildTickerRatings } from '../domain/ratings'
 import { assessCandidateEntry } from '../domain/entryAnalysis'
-import type { Holding, Quote, SchedulerStatus, TickerRatings, UserAlert, WatchlistData, WatchlistItem } from '../types'
+import { generateTickerRecommendations } from '../domain/alertRecommendations'
+import { ChangeRecommendationModal } from './RecommendedTriggers'
+import type { Holding, Quote, RecommendedAlert, SchedulerStatus, TickerRatings, UserAlert, WatchlistData, WatchlistItem } from '../types'
 
 interface WatchlistEntryRadarProps {
   onSelectHolding: (holding: Holding) => void
@@ -35,9 +39,13 @@ interface WatchlistEntryRadarProps {
   userAlerts?: UserAlert[]
   onAddUserAlert?: (alert: Omit<UserAlert, 'id' | 'createdAt' | 'status'>) => void
   onDeleteUserAlert?: (id: string) => void
+  recommendations?: RecommendedAlert[]
+  onAcknowledgeRecommendation?: (rec: RecommendedAlert) => void
+  onDeclineRecommendation?: (rec: RecommendedAlert) => void
+  onChangeRecommendation?: (rec: RecommendedAlert, customized: UserAlert) => void
 }
 
-type FilterTab = 'all' | 'ready' | 'approaching' | 'strong_ratings' | 'high_upside' | 'has_alerts'
+type FilterTab = 'all' | 'ready' | 'approaching' | 'strong_ratings' | 'high_upside' | 'has_alerts' | 'recommendations'
 type SortField = 'entry_score' | 'ratings' | 'upside' | 'rsi' | 'symbol' | 'change'
 
 export function WatchlistEntryRadar({
@@ -48,6 +56,10 @@ export function WatchlistEntryRadar({
   userAlerts = [],
   onAddUserAlert,
   onDeleteUserAlert,
+  recommendations = [],
+  onAcknowledgeRecommendation,
+  onDeclineRecommendation,
+  onChangeRecommendation,
 }: WatchlistEntryRadarProps) {
   const [watchlistData, setWatchlistData] = useState<WatchlistData | null>(null)
   const [quotes, setQuotes] = useState<Record<string, Quote>>({})
@@ -76,6 +88,19 @@ export function WatchlistEntryRadar({
   const [alertMetric, setAlertMetric] = useState<'PRICE' | 'RSI'>('PRICE')
   const [alertCondition, setAlertCondition] = useState<'BELOW' | 'ABOVE'>('BELOW')
   const [alertSuccessMsg, setAlertSuccessMsg] = useState<string | null>(null)
+
+  // Recommendation customization modal state
+  const [customizingRec, setCustomizingRec] = useState<RecommendedAlert | null>(null)
+
+  const recommendationsBySymbol = useMemo(() => {
+    const map: Record<string, RecommendedAlert[]> = {}
+    recommendations.forEach((r) => {
+      const sym = r.symbol.toUpperCase()
+      if (!map[sym]) map[sym] = []
+      map[sym].push(r)
+    })
+    return map
+  }, [recommendations])
 
   // Initial load
   const loadWatchlist = async () => {
@@ -261,6 +286,25 @@ export function WatchlistEntryRadar({
       const hasTriggeredAlert = candidateAlerts.some((a) => a.status === 'TRIGGERED')
       const hasActiveAlert = candidateAlerts.length > 0
 
+      // Candidate-specific recommended triggers
+      const existingRecs = recommendationsBySymbol[sym] || []
+      const candidateRecs = existingRecs.length > 0
+        ? existingRecs
+        : generateTickerRecommendations(
+            sym,
+            it.name || resolveCompanyName(sym) || sym,
+            price,
+            existing?.avgCost,
+            rsi,
+            aboveSma50,
+            aboveSma200,
+            relativeVolume,
+            targetPrice,
+            Boolean(existing)
+          )
+      const pendingRecs = candidateRecs.filter((r) => r.status === 'PENDING')
+      const hasPendingRecs = pendingRecs.length > 0
+
       return {
         item: it,
         symbol: sym,
@@ -282,9 +326,12 @@ export function WatchlistEntryRadar({
         candidateAlerts,
         hasTriggeredAlert,
         hasActiveAlert,
+        candidateRecs,
+        pendingRecs,
+        hasPendingRecs,
       }
     })
-  }, [items, quotes, ratingsMap, existingHoldings, userAlerts])
+  }, [items, quotes, ratingsMap, existingHoldings, userAlerts, recommendationsBySymbol])
 
   // Filter and sort candidates
   const filteredCandidates = useMemo(() => {
@@ -316,6 +363,9 @@ export function WatchlistEntryRadar({
         if (filterTab === 'has_alerts') {
           return c.hasActiveAlert
         }
+        if (filterTab === 'recommendations') {
+          return c.hasPendingRecs
+        }
         return true
       })
       .sort((a, b) => {
@@ -344,6 +394,9 @@ export function WatchlistEntryRadar({
   const totalUserTriggers = userAlerts.length
   const triggeredAlertsCount = userAlerts.filter((a) => a.status === 'TRIGGERED').length
   const candidatesWithAlertsCount = enrichedCandidates.filter((c) => c.hasActiveAlert).length
+  const totalPendingRecs = useMemo(() => {
+    return enrichedCandidates.reduce((acc, c) => acc + c.pendingRecs.length, 0)
+  }, [enrichedCandidates])
   const avgUpside = useMemo(() => {
     const valid = enrichedCandidates.map((c) => c.upsidePct).filter((u): u is number => u !== null && u > -50 && u < 300)
     if (valid.length === 0) return 0
@@ -355,6 +408,12 @@ export function WatchlistEntryRadar({
     if (!alertModalTicker) return []
     return userAlerts.filter((a) => a.symbol.toUpperCase() === alertModalTicker.toUpperCase())
   }, [alertModalTicker, userAlerts])
+
+  const modalRecommendations = useMemo(() => {
+    if (!alertModalTicker) return []
+    const cand = enrichedCandidates.find((c) => c.symbol.toUpperCase() === alertModalTicker.toUpperCase())
+    return cand?.candidateRecs || []
+  }, [alertModalTicker, enrichedCandidates])
 
   // Handle open drawer for candidate
   const handleSelectCandidate = (candidate: typeof enrichedCandidates[0]) => {
@@ -723,6 +782,17 @@ export function WatchlistEntryRadar({
           >
             🚀 High Upside (&gt;15%)
           </button>
+          <button
+            type="button"
+            className={`secondary-button ${filterTab === 'recommendations' ? 'active' : ''}`}
+            onClick={() => setFilterTab('recommendations')}
+            style={{
+              color: filterTab === 'recommendations' ? 'var(--accent)' : undefined,
+              borderColor: totalPendingRecs > 0 ? 'rgba(59, 130, 246, 0.4)' : undefined,
+            }}
+          >
+            💡 Recommendations ({totalPendingRecs})
+          </button>
         </div>
 
         {/* Sort selector */}
@@ -960,6 +1030,27 @@ export function WatchlistEntryRadar({
                         </span>
                       )}
                     </button>
+                    {candidate.pendingRecs.length > 0 && (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        title={`${candidate.pendingRecs.length} smart trigger recommendation(s) available`}
+                        style={{
+                          padding: '6px 10px',
+                          fontSize: '11px',
+                          borderColor: 'var(--accent)',
+                          color: 'var(--accent)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          background: 'rgba(59, 130, 246, 0.08)',
+                        }}
+                        onClick={() => handleOpenAlertModal(candidate.symbol, candidate.price, candidate.rsi)}
+                      >
+                        <Sparkles size={12} />
+                        <span>{candidate.pendingRecs.length} Recs</span>
+                      </button>
+                    )}
                     {onOpenBacktest && (
                       <button
                         type="button"
@@ -982,6 +1073,154 @@ export function WatchlistEntryRadar({
                     </button>
                   </div>
                 </div>
+
+                {/* Recommended Alerts & Triggers on this Candidate */}
+                {candidate.candidateRecs.length > 0 && (
+                  <div
+                    style={{
+                      background: 'rgba(59, 130, 246, 0.04)',
+                      border: '1px solid rgba(59, 130, 246, 0.22)',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Sparkles size={14} color="var(--accent)" />
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase' }}>
+                          Smart Recommended Triggers ({candidate.pendingRecs.length} actionable)
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                        Acknowledge (Arm), Change (Customize), or Decline
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {candidate.candidateRecs.map((rec) => {
+                        const isPending = rec.status === 'PENDING'
+                        const isAck = rec.status === 'ACKNOWLEDGED'
+                        const isDec = rec.status === 'DECLINED'
+
+                        const catLabel =
+                          rec.category === 'PROFIT_TARGET' ? '🎯 Target' :
+                          rec.category === 'DIP_BUY' ? '📉 Dip Buy' :
+                          rec.category === 'STOP_LOSS' ? '🛡️ Stop' :
+                          rec.category === 'BREAKOUT' ? '⚡ Breakout' : '🔄 RSI'
+
+                        return (
+                          <div
+                            key={rec.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              flexWrap: 'wrap',
+                              gap: '8px',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              background: isAck ? 'rgba(16, 185, 129, 0.08)' : isDec ? 'rgba(156, 163, 175, 0.08)' : 'var(--surface)',
+                              border: `1px solid ${isAck ? 'rgba(16, 185, 129, 0.3)' : isDec ? 'rgba(156, 163, 175, 0.2)' : 'var(--border)'}`,
+                              opacity: isDec ? 0.65 : 1,
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 300px', flexWrap: 'wrap' }}>
+                              <span
+                                style={{
+                                  fontSize: '10px',
+                                  fontWeight: 800,
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  background: 'rgba(59, 130, 246, 0.15)',
+                                  color: '#60a5fa',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {catLabel}
+                              </span>
+                              <strong style={{ fontSize: '12px' }}>{rec.title}</strong>
+                              <span
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  color: 'var(--foreground)',
+                                  background: 'var(--surface-hover)',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                }}
+                              >
+                                {rec.metric === 'PRICE' ? `$${rec.targetValue.toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue}`}
+                              </span>
+                              {rec.potentialDeltaPct != null && (
+                                <span style={{ fontSize: '11px', fontWeight: 700, color: rec.potentialDeltaPct >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                                  {rec.potentialDeltaPct >= 0 ? `+${rec.potentialDeltaPct.toFixed(1)}%` : `${rec.potentialDeltaPct.toFixed(1)}%`}
+                                </span>
+                              )}
+                              <span style={{ fontSize: '11px', color: 'var(--muted)', flex: '1 1 180px' }}>
+                                {rec.rationale}
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              {isPending && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="primary-button"
+                                    title="Acknowledge and arm this trigger"
+                                    style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--green)', borderColor: 'var(--green)' }}
+                                    onClick={() => onAcknowledgeRecommendation?.(rec)}
+                                  >
+                                    <Check size={12} /> Arm Alert
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="secondary-button"
+                                    title="Customize this trigger"
+                                    style={{ padding: '4px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    onClick={() => setCustomizingRec(rec)}
+                                  >
+                                    <Edit3 size={11} /> Change
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="icon-button"
+                                    title="Decline recommendation"
+                                    style={{ padding: '4px 6px', color: 'var(--muted)', fontSize: '11px' }}
+                                    onClick={() => onDeclineRecommendation?.(rec)}
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                </>
+                              )}
+                              {isAck && (
+                                <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <CheckCircle2 size={13} /> Trigger Armed &amp; Active
+                                </span>
+                              )}
+                              {isDec && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Declined</span>
+                                  <button
+                                    type="button"
+                                    className="secondary-button"
+                                    style={{ padding: '2px 6px', fontSize: '10px' }}
+                                    onClick={() => onAcknowledgeRecommendation?.(rec)}
+                                  >
+                                    Restore
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* User Triggers / Alerts on this Candidate */}
                 {candidate.candidateAlerts.length > 0 && (
@@ -1301,6 +1540,68 @@ export function WatchlistEntryRadar({
               </div>
             )}
 
+            {/* Quick Apply Recommendations inside Modal */}
+            {modalRecommendations.length > 0 && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '10px 12px',
+                  background: 'rgba(59, 130, 246, 0.06)',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: 'var(--accent)',
+                    textTransform: 'uppercase',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                >
+                  <Sparkles size={12} />
+                  <span>Recommended Presets for {alertModalTicker}:</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {modalRecommendations.map((rec) => (
+                    <button
+                      key={rec.id}
+                      type="button"
+                      onClick={() => {
+                        setAlertMetric(rec.metric === 'RSI' ? 'RSI' : 'PRICE')
+                        setAlertCondition(rec.condition === 'BELOW' ? 'BELOW' : 'ABOVE')
+                        setAlertTargetPrice(String(rec.targetValue))
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 10px',
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        color: 'var(--foreground)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700 }}>{rec.title}</span>
+                        <span style={{ fontSize: '11px', color: 'var(--accent)' }}>
+                          ({rec.metric === 'PRICE' ? `$${rec.targetValue.toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue}`})
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 600 }}>Click to Apply ➜</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: '4px' }}>
@@ -1393,6 +1694,18 @@ export function WatchlistEntryRadar({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Trigger Customizer Modal */}
+      {customizingRec && (
+        <ChangeRecommendationModal
+          recommendation={customizingRec}
+          onClose={() => setCustomizingRec(null)}
+          onSave={(customizedAlert) => {
+            onChangeRecommendation?.(customizingRec, customizedAlert)
+            setCustomizingRec(null)
+          }}
+        />
       )}
     </div>
   )

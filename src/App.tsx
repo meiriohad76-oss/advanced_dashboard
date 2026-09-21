@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Activity, AlertTriangle, ArrowRight, BarChart2, BarChart3, Bell, BrainCircuit, BriefcaseBusiness,
-  Calendar, ChevronRight, CircleDollarSign, Database, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
+  Calendar, Check, CheckCircle2, ChevronRight, CircleDollarSign, Database, Edit3, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
   Moon, Plus, Radar, Search, ServerCog, Settings, ShieldCheck, Sparkles, Sun,
   Target, TrendingDown, TrendingUp, Upload, X, Zap, Scale, LayoutGrid, Table,
 } from 'lucide-react'
@@ -38,7 +38,9 @@ import { PortfolioSwitcher } from './components/PortfolioSwitcher'
 import { resolveCompanyName } from './data/companyNames'
 import { buildTickerRatings, getPriceTargets } from './domain/ratings'
 import { evaluateAlert } from './domain/alertEngine'
-import type { AlertItem, Holding, PortfolioSource, ScoreComponent, TickerRatings, UserAlert } from './types'
+import { ChangeRecommendationModal, RecommendedTriggersView } from './components/RecommendedTriggers'
+import { convertRecommendationToUserAlert, generateAllRecommendations, generateTickerRecommendations } from './domain/alertRecommendations'
+import type { AlertItem, Holding, PortfolioSource, RecommendationStatus, RecommendedAlert, ScoreComponent, TickerRatings, UserAlert } from './types'
 
 
 type Page = 'Overview' | 'Portfolio' | 'Signals' | 'Catalysts' | 'Watchlist' | 'Alerts' | 'Analytics' | 'Import' | 'System'
@@ -167,7 +169,26 @@ function ComponentBar({ component }: { component: ScoreComponent }) {
   )
 }
 
-function AssetDrawer({ holding, holdings, onClose, onOpenDecision }: { holding: Holding; holdings: Holding[]; onClose: () => void; onOpenDecision?: () => void }) {
+function AssetDrawer({
+  holding,
+  holdings,
+  recommendations = [],
+  onAcknowledgeRecommendation,
+  onDeclineRecommendation,
+  onChangeRecommendation,
+  onClose,
+  onOpenDecision,
+}: {
+  holding: Holding
+  holdings: Holding[]
+  recommendations?: RecommendedAlert[]
+  onAcknowledgeRecommendation?: (rec: RecommendedAlert) => void
+  onDeclineRecommendation?: (rec: RecommendedAlert) => void
+  onChangeRecommendation?: (rec: RecommendedAlert, customized: UserAlert) => void
+  onClose: () => void
+  onOpenDecision?: () => void
+}) {
+  const [customizingRec, setCustomizingRec] = useState<RecommendedAlert | null>(null)
   const assessment = assessHolding(holding)
   const ready = holding.hasSignalInputs !== false
   const targets = getPriceTargets(holding.symbol, holding.price)
@@ -176,6 +197,23 @@ function AssetDrawer({ holding, holdings, onClose, onOpenDecision }: { holding: 
   const saDiffPct = holding.price > 0 ? (saDiff / holding.price) * 100 : 0
   const zacksDiff = targets.zacks ? targets.zacks - holding.price : 0
   const zacksDiffPct = holding.price > 0 ? (zacksDiff / holding.price) * 100 : 0
+
+  const assetRecs = useMemo(() => {
+    const list = recommendations.filter((r) => r.symbol.toUpperCase() === holding.symbol.toUpperCase())
+    if (list.length > 0) return list
+    return generateTickerRecommendations(
+      holding.symbol,
+      holding.name,
+      holding.price,
+      holding.avgCost,
+      holding.rsi,
+      holding.aboveSma50,
+      holding.aboveSma200,
+      holding.relativeVolume,
+      targets.saWallStreet || targets.zacks,
+      true
+    )
+  }, [recommendations, holding, targets])
 
   return (
     <ModalOverlay className="asset-drawer" label={`${holding.symbol} signal explanation`} onClose={onClose}>
@@ -246,6 +284,126 @@ function AssetDrawer({ holding, holdings, onClose, onOpenDecision }: { holding: 
           </section>
         )}
 
+        {/* Recommended Alerts & Triggers Card */}
+        {holding.symbol !== 'CASH' && assetRecs.length > 0 && (
+          <section className="target-card" style={{ marginTop: '14px' }}>
+            <div className="target-card-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={16} color="var(--accent)" />
+                <span className="eyebrow" style={{ margin: 0, color: 'var(--accent)' }}>
+                  RECOMMENDED ALERTS &amp; TRIGGERS
+                </span>
+              </div>
+              <small style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                {assetRecs.filter((r) => r.status === 'PENDING').length} actionable
+              </small>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+              {assetRecs.map((rec) => {
+                const isAck = rec.status === 'ACKNOWLEDGED'
+                const isDec = rec.status === 'DECLINED'
+                const isPending = rec.status === 'PENDING'
+                return (
+                  <div
+                    key={rec.id}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      background: isAck ? 'rgba(16, 185, 129, 0.08)' : isDec ? 'rgba(156, 163, 175, 0.08)' : 'var(--surface-hover)',
+                      border: `1px solid ${isAck ? 'rgba(16, 185, 129, 0.3)' : isDec ? 'rgba(156, 163, 175, 0.2)' : 'var(--border)'}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                      opacity: isDec ? 0.65 : 1,
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span
+                          style={{
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            textTransform: 'uppercase',
+                            background: 'rgba(59, 130, 246, 0.15)',
+                            color: '#60a5fa',
+                          }}
+                        >
+                          {rec.category.replace('_', ' ')}
+                        </span>
+                        <strong style={{ fontSize: '12px' }}>{rec.title}</strong>
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--foreground)' }}>
+                        {rec.metric === 'PRICE' ? `$${rec.targetValue.toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue}`}
+                        {rec.potentialDeltaPct != null && (
+                          <span style={{ marginLeft: '6px', color: rec.potentialDeltaPct >= 0 ? 'var(--green)' : 'var(--red)', fontSize: '11px' }}>
+                            ({rec.potentialDeltaPct >= 0 ? '+' : ''}{rec.potentialDeltaPct.toFixed(1)}%)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', lineHeight: '1.4' }}>
+                      {rec.rationale}
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                      {isPending && (
+                        <>
+                          <button
+                            type="button"
+                            className="icon-button"
+                            title="Decline this recommendation"
+                            style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border)', color: 'var(--muted)' }}
+                            onClick={() => onDeclineRecommendation?.(rec)}
+                          >
+                            Decline
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            title="Customize trigger thresholds"
+                            style={{ fontSize: '11px', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => setCustomizingRec(rec)}
+                          >
+                            <Edit3 size={11} /> Change
+                          </button>
+                          <button
+                            type="button"
+                            className="primary-button"
+                            title="Acknowledge and arm this trigger"
+                            style={{ fontSize: '11px', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--green)', borderColor: 'var(--green)' }}
+                            onClick={() => onAcknowledgeRecommendation?.(rec)}
+                          >
+                            <Check size={12} /> Acknowledge (Arm)
+                          </button>
+                        </>
+                      )}
+                      {isAck && (
+                        <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <CheckCircle2 size={13} /> Trigger Armed &amp; Active
+                        </span>
+                      )}
+                      {isDec && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Declined</span>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            style={{ padding: '2px 6px', fontSize: '10px' }}
+                            onClick={() => onAcknowledgeRecommendation?.(rec)}
+                          >
+                            Restore
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
         {/* Interactive Candlestick & Technical Indicator Chart */}
         {holding.symbol !== 'CASH' && <CandleChart symbol={holding.symbol} />}
 
@@ -255,6 +413,18 @@ function AssetDrawer({ holding, holdings, onClose, onOpenDecision }: { holding: 
         <PortfolioFitPanel holding={holding} holdings={holdings}/>
         <RatingsGauge symbol={holding.symbol}/>
         <section className="provenance"><Database size={17}/><div><strong>Source is current</strong><span>Seeded market feed · as of 14:42 ET · calculations local</span></div></section>
+
+        {/* Trigger Customizer Modal */}
+        {customizingRec && (
+          <ChangeRecommendationModal
+            recommendation={customizingRec}
+            onClose={() => setCustomizingRec(null)}
+            onSave={(customizedAlert) => {
+              onChangeRecommendation?.(customizingRec, customizedAlert)
+              setCustomizingRec(null)
+            }}
+          />
+        )}
     </ModalOverlay>
   )
 }
@@ -878,18 +1048,28 @@ function AlertsPage({
   alerts,
   userAlerts,
   holdings,
+  recommendations,
   onSelect,
   onNavigate,
   onOpenDecision,
   onOpenPanel,
+  onAcknowledgeRecommendation,
+  onDeclineRecommendation,
+  onChangeRecommendation,
+  onRestoreRecommendation,
 }: {
   alerts: AlertItem[]
   userAlerts: UserAlert[]
   holdings: Holding[]
+  recommendations: RecommendedAlert[]
   onSelect: (holding: Holding) => void
   onNavigate: (page: Page) => void
   onOpenDecision: (holding: Holding) => void
   onOpenPanel: () => void
+  onAcknowledgeRecommendation: (rec: RecommendedAlert) => void
+  onDeclineRecommendation: (rec: RecommendedAlert) => void
+  onChangeRecommendation: (rec: RecommendedAlert, customized: UserAlert) => void
+  onRestoreRecommendation: (rec: RecommendedAlert) => void
 }) {
   const [inspectingAlert, setInspectingAlert] = useState<AlertItem | UserAlert | null>(null)
   const totalCount = alerts.length + userAlerts.length
@@ -915,6 +1095,15 @@ function AlertsPage({
         <KpiCard label="Armed & Active" value={String(totalCount)} detail="Monitoring conditions" icon={Radar}/>
         <KpiCard label="Cooldown" value={String(alerts.filter(a => a.status === 'COOLDOWN').length)} detail="Repeat alerts suppressed" icon={Gauge}/>
       </div>
+
+      <RecommendedTriggersView
+        recommendations={recommendations}
+        onAcknowledge={onAcknowledgeRecommendation}
+        onDecline={onDeclineRecommendation}
+        onChange={onChangeRecommendation}
+        onRestore={onRestoreRecommendation}
+      />
+
       <section className="panel alerts-table">
         <div className="tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '22px' }}>
@@ -1247,6 +1436,15 @@ export default function App() {
     } catch { /* ignore */ }
     return []
   })
+  const [recommendations, setRecommendations] = useState<RecommendedAlert[]>([])
+  const [recStatuses, setRecStatuses] = useState<Record<string, RecommendationStatus>>(() => {
+    try {
+      const saved = localStorage.getItem('atlas_rec_statuses')
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  })
   const [liveStreaming, setLiveStreaming] = useState(false)
   const [liveTicks, setLiveTicks] = useState<Record<string, { price: number; changePct: number }>>({})
   const [liveToast, setLiveToast] = useState<{ title: string; detail: string; symbol: string } | null>(null)
@@ -1304,6 +1502,12 @@ export default function App() {
       localStorage.setItem('atlas_user_alerts', JSON.stringify(userAlerts))
     } catch { /* ignore */ }
   }, [userAlerts])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('atlas_rec_statuses', JSON.stringify(recStatuses))
+    } catch { /* ignore */ }
+  }, [recStatuses])
 
   useEffect(() => {
     if (!liveToast) return
@@ -1499,6 +1703,131 @@ export default function App() {
     })
   }
 
+  const loadRecommendations = useCallback(async () => {
+    try {
+      const data = await api.getAlertRecommendations()
+      if (Array.isArray(data) && data.length > 0) {
+        setRecommendations(data)
+        return
+      }
+    } catch {
+      /* Fallback to domain generator if server is starting */
+    }
+    try {
+      const wl = await api.watchlist()
+      const wlItems = wl?.items || []
+      const local = generateAllRecommendations(holdings, wlItems, recStatuses)
+      setRecommendations(local)
+    } catch {
+      const local = generateAllRecommendations(holdings, [], recStatuses)
+      setRecommendations(local)
+    }
+  }, [holdings, recStatuses])
+
+  useEffect(() => {
+    loadRecommendations()
+  }, [loadRecommendations])
+
+  useEffect(() => {
+    api.getUserAlerts().then((serverAlerts) => {
+      if (Array.isArray(serverAlerts) && serverAlerts.length > 0) {
+        setUserAlerts((prev) => {
+          const map = new Map<string, UserAlert>()
+          prev.forEach((a) => map.set(a.id, a))
+          serverAlerts.forEach((a) => map.set(a.id, a))
+          return Array.from(map.values())
+        })
+      }
+    }).catch(() => { /* offline-first */ })
+  }, [])
+
+  const handleAcknowledgeRecommendation = useCallback(async (rec: RecommendedAlert) => {
+    const newAlert = convertRecommendationToUserAlert(rec)
+    setUserAlerts((prev) => [newAlert, ...prev.filter((a) => a.id !== newAlert.id)])
+    setRecommendations((prev) =>
+      prev.map((r) => (r.id === rec.id ? { ...r, status: 'ACKNOWLEDGED' as const } : r))
+    )
+    setRecStatuses((prev) => {
+      const next = { ...prev, [rec.id]: 'ACKNOWLEDGED' as const }
+      try { localStorage.setItem('atlas_rec_statuses', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+    setLiveToast({
+      title: `Trigger Armed: ${rec.symbol}`,
+      detail: `Armed ${rec.title} (${rec.metric} ${rec.condition} ${rec.targetValue}).`,
+      symbol: rec.symbol,
+    })
+    try {
+      await api.actOnAlertRecommendation(rec.id, 'acknowledge', {
+        symbol: rec.symbol,
+        category: rec.category,
+        custom_alert: newAlert,
+      })
+      await api.saveUserAlert(newAlert)
+    } catch { /* offline-first */ }
+  }, [])
+
+  const handleDeclineRecommendation = useCallback(async (rec: RecommendedAlert) => {
+    setRecommendations((prev) =>
+      prev.map((r) => (r.id === rec.id ? { ...r, status: 'DECLINED' as const } : r))
+    )
+    setRecStatuses((prev) => {
+      const next = { ...prev, [rec.id]: 'DECLINED' as const }
+      try { localStorage.setItem('atlas_rec_statuses', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+    setLiveToast({
+      title: `${rec.symbol} Recommendation Declined`,
+      detail: `${rec.title} moved to declined archive.`,
+      symbol: rec.symbol,
+    })
+    try {
+      await api.actOnAlertRecommendation(rec.id, 'decline', {
+        symbol: rec.symbol,
+        category: rec.category,
+      })
+    } catch { /* offline-first */ }
+  }, [])
+
+  const handleChangeRecommendation = useCallback(async (rec: RecommendedAlert, customized: UserAlert) => {
+    setUserAlerts((prev) => [customized, ...prev.filter((a) => a.id !== customized.id)])
+    setRecommendations((prev) =>
+      prev.map((r) => (r.id === rec.id ? { ...r, status: 'ACKNOWLEDGED' as const } : r))
+    )
+    setRecStatuses((prev) => {
+      const next = { ...prev, [rec.id]: 'ACKNOWLEDGED' as const }
+      try { localStorage.setItem('atlas_rec_statuses', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+    setLiveToast({
+      title: `Custom Trigger Armed: ${rec.symbol}`,
+      detail: `${customized.metric} ${customized.condition} ${customized.targetValue}`,
+      symbol: rec.symbol,
+    })
+    try {
+      await api.actOnAlertRecommendation(rec.id, 'change', {
+        symbol: rec.symbol,
+        category: rec.category,
+        custom_alert: customized,
+      })
+      await api.saveUserAlert(customized)
+    } catch { /* offline-first */ }
+  }, [])
+
+  const handleRestoreRecommendation = useCallback(async (rec: RecommendedAlert) => {
+    setRecommendations((prev) =>
+      prev.map((r) => (r.id === rec.id ? { ...r, status: 'PENDING' as const } : r))
+    )
+    setRecStatuses((prev) => {
+      const next = { ...prev }
+      delete next[rec.id]
+      try { localStorage.setItem('atlas_rec_statuses', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+  }, [])
+
+  const pendingRecsCount = recommendations.filter((r) => r.status === 'PENDING').length
+
   const renderPage = () => {
     if (page === 'Portfolio') return <PortfolioPage holdings={holdings} onSelect={setSelected} onRefresh={handleRefreshAllData} refreshing={refreshingLive} onOpenRebalance={() => setRebalanceModalOpen(true)}/>
     if (page === 'Signals') return <SignalsPage holdings={holdings} onSelect={setSelected}/>
@@ -1512,6 +1841,10 @@ export default function App() {
         onAddUserAlert={handleAddUserAlertFromCandidate}
         onDeleteUserAlert={handleDeleteAlert}
         onOpenBacktest={handleOpenBacktest}
+        recommendations={recommendations}
+        onAcknowledgeRecommendation={handleAcknowledgeRecommendation}
+        onDeclineRecommendation={handleDeclineRecommendation}
+        onChangeRecommendation={handleChangeRecommendation}
       />
     )
     if (page === 'Alerts') return (
@@ -1519,10 +1852,15 @@ export default function App() {
         alerts={alerts} 
         userAlerts={userAlerts} 
         holdings={holdings} 
+        recommendations={recommendations}
         onSelect={setSelected} 
         onNavigate={(p) => setPage(p)}
         onOpenDecision={(h) => setDecisionHolding(h)}
         onOpenPanel={() => setAlertPanelOpen(true)}
+        onAcknowledgeRecommendation={handleAcknowledgeRecommendation}
+        onDeclineRecommendation={handleDeclineRecommendation}
+        onChangeRecommendation={handleChangeRecommendation}
+        onRestoreRecommendation={handleRestoreRecommendation}
       />
     )
     if (page === 'Analytics') return <AnalyticsPage holdings={holdings} onOpenBacktest={() => handleOpenBacktest()}/>
@@ -1535,7 +1873,7 @@ export default function App() {
     <div className="app-shell">
       <aside className={`sidebar ${mobileNav ? 'open' : ''}`}>
         <div className="brand"><span><Activity size={21}/></span><div><strong>ATLAS</strong><small>Portfolio intelligence</small></div><button className="mobile-close" onClick={() => setMobileNav(false)}><X/></button></div>
-        <nav>{navItems.map(({label,icon:Icon}) => <button key={label} className={page === label ? 'active' : ''} onClick={() => {setPage(label);setMobileNav(false)}}><Icon size={18}/><span>{label}</span>{label === 'Alerts' && (scenario || userAlerts.length > 0) && <b>{1 + userAlerts.length}</b>}</button>)}</nav>
+        <nav>{navItems.map(({label,icon:Icon}) => <button key={label} className={page === label ? 'active' : ''} onClick={() => {setPage(label);setMobileNav(false)}}><Icon size={18}/><span>{label}</span>{label === 'Alerts' && (scenario || userAlerts.length > 0 || pendingRecsCount > 0) && <b>{userAlerts.length + (pendingRecsCount > 0 ? pendingRecsCount : (scenario ? 1 : 0))}</b>}{label === 'Watchlist' && pendingRecsCount > 0 && <b style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa' }}>{pendingRecsCount}</b>}</button>)}</nav>
         <div className="sidebar-bottom">
           <div className="demo-badge" style={{ background: '#eaf7f0', color: '#0b6847', border: '1px solid #b5e4cb' }}>
             <Zap size={16} color="#0b6847" />
@@ -1611,7 +1949,7 @@ export default function App() {
 
             <button className="icon-button" onClick={() => setAlertPanelOpen(true)} title="Alert Center">
               <Bell size={18}/>
-              {(scenario || userAlerts.length > 0) && <i className="notification-dot"/>}
+              {(scenario || userAlerts.length > 0 || pendingRecsCount > 0) && <i className="notification-dot"/>}
             </button>
           </div>
         </header>
@@ -1627,9 +1965,33 @@ export default function App() {
         </main>
       </div>
       {mobileNav && <div className="nav-backdrop" role="button" tabIndex={0} aria-label="Close navigation" onClick={() => setMobileNav(false)} onKeyDown={(event) => { if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') setMobileNav(false) }}/>}
-      {selected && <AssetDrawer holding={selected} holdings={holdings} onClose={() => setSelected(null)} onOpenDecision={() => setDecisionHolding(selected)}/>}
+      {selected && (
+        <AssetDrawer
+          holding={selected}
+          holdings={holdings}
+          recommendations={recommendations}
+          onAcknowledgeRecommendation={handleAcknowledgeRecommendation}
+          onDeclineRecommendation={handleDeclineRecommendation}
+          onChangeRecommendation={handleChangeRecommendation}
+          onClose={() => setSelected(null)}
+          onOpenDecision={() => setDecisionHolding(selected)}
+        />
+      )}
       {decisionHolding && <DecisionModal holding={decisionHolding} holdings={holdings} onClose={() => setDecisionHolding(null)} />}
-      {alertPanelOpen && <AlertPanel alerts={alerts} userAlerts={userAlerts} holdings={holdings} onClose={() => setAlertPanelOpen(false)} onAddAlert={handleAddAlert} onDeleteAlert={handleDeleteAlert} />}
+      {alertPanelOpen && (
+        <AlertPanel
+          alerts={alerts}
+          userAlerts={userAlerts}
+          holdings={holdings}
+          recommendations={recommendations}
+          onClose={() => setAlertPanelOpen(false)}
+          onAddAlert={handleAddAlert}
+          onDeleteAlert={handleDeleteAlert}
+          onAcknowledgeRecommendation={handleAcknowledgeRecommendation}
+          onDeclineRecommendation={handleDeclineRecommendation}
+          onChangeRecommendation={handleChangeRecommendation}
+        />
+      )}
       {notificationModalOpen && <NotificationSettingsModal onClose={() => setNotificationModalOpen(false)} />}
       {rebalanceModalOpen && <RebalanceModal onClose={() => setRebalanceModalOpen(false)} onSuccess={reloadState} />}
       {briefingOpen && <MorningBriefingModal onClose={() => setBriefingOpen(false)} />}

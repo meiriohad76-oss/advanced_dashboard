@@ -217,6 +217,32 @@ export interface PriceTargets {
   zacks?: number
 }
 
+export type RecommendationCategory = 'PROFIT_TARGET' | 'DIP_BUY' | 'STOP_LOSS' | 'BREAKOUT' | 'RSI_REVERSAL'
+export type RecommendationStatus = 'PENDING' | 'ACKNOWLEDGED' | 'DECLINED'
+
+export interface RecommendedAlert {
+  id: string
+  symbol: string
+  name?: string
+  category: RecommendationCategory
+  title: string
+  rationale: string
+  metric: UserAlert['metric']
+  condition: UserAlert['condition']
+  targetValue: number
+  target_value?: number
+  currentValue: number
+  current_value?: number
+  potentialDeltaPct?: number | null
+  potential_delta_pct?: number | null
+  severity: UserAlert['severity']
+  status: RecommendationStatus
+  createdAt: string
+  created_at?: string
+  updatedAt?: string | null
+  updated_at?: string | null
+}
+
 export interface UserAlert {
   id: string
   symbol: string

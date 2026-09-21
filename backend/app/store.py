@@ -37,6 +37,19 @@ def _connect(path: str) -> sqlite3.Connection:
         "id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, name TEXT, "
         "imported_at TEXT NOT NULL, payload TEXT NOT NULL, is_active INTEGER DEFAULT 0)"
     )
+    # Smart Recommended Alerts & Triggers
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS alert_recommendations ("
+        "id TEXT PRIMARY KEY, symbol TEXT NOT NULL, category TEXT NOT NULL, "
+        "status TEXT NOT NULL, payload TEXT, created_at TEXT NOT NULL, updated_at TEXT)"
+    )
+    # Active User Armed Alerts
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS user_alerts ("
+        "id TEXT PRIMARY KEY, symbol TEXT NOT NULL, metric TEXT NOT NULL, "
+        "condition TEXT NOT NULL, target_value REAL NOT NULL, severity TEXT NOT NULL, "
+        "status TEXT NOT NULL, created_at TEXT NOT NULL, payload TEXT)"
+    )
     cursor = conn.execute("PRAGMA table_info(imported_lists)")
     cols = [r[1] for r in cursor.fetchall()]
     if "is_active" not in cols:
@@ -326,3 +339,118 @@ def evaluate_freshness(extracted_at: str, now: datetime, threshold_days: int = S
         "stale": age_days > threshold_days,
         "threshold_days": threshold_days,
     }
+
+
+def get_alert_recommendation_statuses(path: str | None = None) -> dict[str, str]:
+    """Return map of recommendation ID to status ('PENDING', 'ACKNOWLEDGED', 'DECLINED')."""
+    path = path or _db_path()
+    if path != ":memory:" and not os.path.exists(path):
+        return {}
+    conn = _connect(path)
+    try:
+        rows = conn.execute("SELECT id, status FROM alert_recommendations").fetchall()
+        return {r[0]: r[1] for r in rows}
+    finally:
+        conn.close()
+
+
+def save_alert_recommendation_action(
+    rec_id: str,
+    symbol: str,
+    category: str,
+    status: str,
+    payload: dict | None = None,
+    path: str | None = None,
+) -> None:
+    """Save or update user action on a recommendation (ACKNOWLEDGED or DECLINED)."""
+    path = path or _db_path()
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    conn = _connect(path)
+    try:
+        payload_json = json.dumps(payload) if payload else None
+        conn.execute(
+            "INSERT INTO alert_recommendations (id, symbol, category, status, payload, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(id) DO UPDATE SET status = excluded.status, payload = excluded.payload, updated_at = excluded.updated_at",
+            (rec_id, symbol.upper(), category, status, payload_json, now_iso, now_iso),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_user_alerts(path: str | None = None) -> list[dict[str, Any]]:
+    """Return all stored armed user alerts."""
+    path = path or _db_path()
+    if path != ":memory:" and not os.path.exists(path):
+        return []
+    conn = _connect(path)
+    try:
+        rows = conn.execute(
+            "SELECT id, symbol, metric, condition, target_value, severity, status, created_at, payload "
+            "FROM user_alerts ORDER BY created_at DESC"
+        ).fetchall()
+        alerts: list[dict[str, Any]] = []
+        for r in rows:
+            alert = {
+                "id": r[0],
+                "symbol": r[1],
+                "metric": r[2],
+                "condition": r[3],
+                "targetValue": r[4],
+                "severity": r[5],
+                "status": r[6],
+                "createdAt": r[7],
+            }
+            if r[8]:
+                try:
+                    alert.update(json.loads(r[8]))
+                except Exception:
+                    pass
+            alerts.append(alert)
+        return alerts
+    finally:
+        conn.close()
+
+
+def save_user_alert(alert_data: dict[str, Any], path: str | None = None) -> dict[str, Any]:
+    """Persist or update an active user alert."""
+    path = path or _db_path()
+    conn = _connect(path)
+    try:
+        alert_id = str(alert_data.get("id") or f"usr_{int(datetime.now(timezone.utc).timestamp() * 1000)}")
+        symbol = str(alert_data.get("symbol", "")).upper()
+        metric = str(alert_data.get("metric", "PRICE"))
+        condition = str(alert_data.get("condition", "ABOVE"))
+        target_val = float(alert_data.get("targetValue", 0.0) or 0.0)
+        severity = str(alert_data.get("severity", "warning"))
+        status = str(alert_data.get("status", "ARMED"))
+        created_at = str(alert_data.get("createdAt") or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        payload_json = json.dumps(alert_data)
+
+        conn.execute(
+            "INSERT INTO user_alerts (id, symbol, metric, condition, target_value, severity, status, created_at, payload) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(id) DO UPDATE SET "
+            "symbol = excluded.symbol, metric = excluded.metric, condition = excluded.condition, "
+            "target_value = excluded.target_value, severity = excluded.severity, status = excluded.status, payload = excluded.payload",
+            (alert_id, symbol, metric, condition, target_val, severity, status, created_at, payload_json),
+        )
+        conn.commit()
+        alert_data["id"] = alert_id
+        return alert_data
+    finally:
+        conn.close()
+
+
+def delete_user_alert(alert_id: str, path: str | None = None) -> bool:
+    """Delete a user alert by ID."""
+    path = path or _db_path()
+    conn = _connect(path)
+    try:
+        cur = conn.execute("DELETE FROM user_alerts WHERE id = ?", (alert_id,))
+        conn.commit()
+        return cur.rowcount > 0
+    finally:
+        conn.close()
+

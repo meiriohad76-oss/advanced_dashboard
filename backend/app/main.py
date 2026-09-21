@@ -21,7 +21,7 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from . import alerts, analytics_service, backtest_service, bars_service, briefing_service, catalysts_service, imports, notifications, ratings_ingest, store
+from . import alert_recommendations, alerts, analytics_service, backtest_service, bars_service, briefing_service, catalysts_service, imports, notifications, ratings_ingest, store
 from .broker.alpaca_broker import alpaca_broker, calculate_portfolio_rebalance
 from .company_names import resolve_company_name
 from .sectors import resolve_sector
@@ -573,6 +573,85 @@ def alerts_dispatch(webhook_url: str | None = None) -> dict:
     triggered = [a for a in active_alerts if a.status == "TRIGGERED"]
     results = [alerts.dispatch_alert(a, webhook_url=webhook_url) for a in triggered]
     return envelope({"triggered_count": len(triggered), "dispatches": results})
+
+
+@app.get("/api/v1/alerts/recommendations")
+async def alerts_recommendations(symbol: str | None = None) -> dict:
+    """Generate and return smart alert recommendations for portfolio holdings and watchlist tickers."""
+    holdings = _live_enriched_holdings if _live_enriched_holdings is not None else current_holdings()
+    wl = _watchlist_payload().get("items", [])
+    
+    # Enrich watchlist candidates with quotes if missing price
+    wl_symbols = [str(w.get("symbol", "")).upper() for w in wl if w.get("symbol")]
+    quotes = {}
+    if wl_symbols:
+        try:
+            quotes = await market_router.get_quotes(wl_symbols)
+        except Exception:
+            quotes = {}
+
+    enriched_wl = []
+    for w in wl:
+        sym = str(w.get("symbol", "")).upper()
+        item = dict(w)
+        q = quotes.get(sym)
+        if q and getattr(q, "price", 0) > 0:
+            item["price"] = q.price
+            if getattr(q, "change_pct", None) is not None:
+                item["change_pct"] = q.change_pct
+        enriched_wl.append(item)
+
+    statuses = store.get_alert_recommendation_statuses()
+    recs = alert_recommendations.generate_all_recommendations(holdings, enriched_wl, existing_statuses=statuses)
+    if symbol:
+        recs = [r for r in recs if r.symbol.upper() == symbol.upper()]
+    return envelope([r.model_dump() for r in recs])
+
+
+@app.post("/api/v1/alerts/recommendations/{rec_id}/action")
+def alerts_recommendations_action(rec_id: str, payload: dict) -> dict:
+    """Acknowledge, decline, or customize/change a recommended alert."""
+    action = str(payload.get("action", "")).lower()
+    if action not in {"acknowledge", "decline", "change"}:
+        raise HTTPException(status_code=400, detail="Action must be 'acknowledge', 'decline', or 'change'")
+
+    status = "ACKNOWLEDGED" if action in {"acknowledge", "change"} else "DECLINED"
+    symbol = str(payload.get("symbol", "")).upper()
+    category = str(payload.get("category", "PROFIT_TARGET"))
+
+    custom_alert = payload.get("custom_alert")
+    if action in {"acknowledge", "change"} and custom_alert:
+        store.save_user_alert(custom_alert)
+
+    store.save_alert_recommendation_action(
+        rec_id=rec_id,
+        symbol=symbol,
+        category=category,
+        status=status,
+        payload=payload,
+    )
+    return envelope({"id": rec_id, "status": status, "action": action})
+
+
+@app.get("/api/v1/alerts/user-alerts")
+def user_alerts_get() -> dict:
+    """Get active armed user alerts persisted in the backend database."""
+    return envelope(store.get_user_alerts())
+
+
+@app.post("/api/v1/alerts/user-alerts")
+def user_alerts_save(payload: dict) -> dict:
+    """Save or update an armed user alert in the backend database."""
+    saved = store.save_user_alert(payload)
+    return envelope(saved)
+
+
+@app.delete("/api/v1/alerts/user-alerts/{alert_id}")
+def user_alerts_delete(alert_id: str) -> dict:
+    """Delete an armed user alert from the backend database."""
+    deleted = store.delete_user_alert(alert_id)
+    return envelope({"id": alert_id, "deleted": deleted})
+
 
 
 @app.get("/api/v1/notifications/settings")

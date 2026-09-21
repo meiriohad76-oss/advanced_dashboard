@@ -119,6 +119,32 @@ export const api = {
   pollRatings: (url?: string) => request<RatingsStatus>(`/api/v1/ratings/poll${url ? `?url=${encodeURIComponent(url)}` : ''}`, { method: 'POST' }),
   testAlert: (webhookUrl?: string) => request<{ status: string; http_code?: number; reason?: string }>('/api/v1/alerts/test', { method: 'POST', body: JSON.stringify({ webhook_url: webhookUrl }) }),
   dispatchAlerts: (webhookUrl?: string) => request<{ triggered_count: number; dispatches: Array<{ status: string }> }>('/api/v1/alerts/dispatch', { method: 'POST', body: JSON.stringify({ webhook_url: webhookUrl }) }),
+  getAlertRecommendations: (symbol?: string) =>
+    request<import('../types').RecommendedAlert[]>(
+      `/api/v1/alerts/recommendations${symbol ? `?symbol=${encodeURIComponent(symbol)}` : ''}`
+    ),
+  actOnAlertRecommendation: (
+    id: string,
+    action: 'acknowledge' | 'decline' | 'change',
+    payload?: { symbol?: string; category?: string; custom_alert?: import('../types').UserAlert }
+  ) =>
+    request<{ id: string; status: string; action: string }>(
+      `/api/v1/alerts/recommendations/${encodeURIComponent(id)}/action`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ action, ...payload }),
+      }
+    ),
+  getUserAlerts: () => request<import('../types').UserAlert[]>('/api/v1/alerts/user-alerts'),
+  saveUserAlert: (alert: import('../types').UserAlert) =>
+    request<import('../types').UserAlert>('/api/v1/alerts/user-alerts', {
+      method: 'POST',
+      body: JSON.stringify(alert),
+    }),
+  deleteUserAlert: (id: string) =>
+    request<{ id: string; deleted: boolean }>(`/api/v1/alerts/user-alerts/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
   marketStatus: () => request<MarketStatus>('/api/v1/market/status'),
   marketQuote: (symbol: string) => request<Quote>(`/api/v1/market/quote/${encodeURIComponent(symbol)}`),
   marketQuotes: (symbols: string[]) => request<Record<string, Quote>>('/api/v1/market/quotes', { method: 'POST', body: JSON.stringify({ symbols }) }),
