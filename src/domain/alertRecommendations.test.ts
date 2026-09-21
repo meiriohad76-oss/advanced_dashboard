@@ -52,8 +52,20 @@ describe('alertRecommendations domain service', () => {
     expect(pt.status).toBe('PENDING')
 
     const sl = recs.find((r) => r.category === 'STOP_LOSS')!
-    expect(sl.targetValue).toBeLessThan(120.0)
+    expect(sl.targetValue).toBeLessThan(150.0)
+    expect(sl.targetValue).toBe(141.0)
+    expect(sl.potentialDeltaPct).toBe(-6.0)
     expect(sl.severity).toBe('critical')
+  })
+
+  it('sets stop-loss below current price even when holding is in a severe drawdown', () => {
+    // Current price is $15.37, cost basis is $28.35
+    const recs = generateTickerRecommendations('PLTR', 'Palantir', 15.37, 28.35, 42.0, false, true, 1.1, undefined, true)
+    const sl = recs.find((r) => r.category === 'STOP_LOSS')!
+    expect(sl.targetValue).toBeLessThan(15.37)
+    expect(sl.targetValue).toBe(14.45) // 15.37 * 0.94 = 14.4478 -> 14.45
+    expect(sl.potentialDeltaPct).toBe(-6.0)
+    expect(sl.rationale).toContain('6.0% below current price $15.37')
   })
 
   it('converts recommendation to an armed UserAlert seamlessly', () => {

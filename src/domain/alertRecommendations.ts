@@ -98,21 +98,21 @@ export function generateTickerRecommendations(
 
   // 3. Stop-Loss (for owned) or Breakout (for watchlist)
   if (isOwned) {
-    const cost = avgCost && avgCost > 0 ? avgCost : price
-    const stopPrice = Number((cost * 0.94).toFixed(2))
-    const deltaPct = ((stopPrice - price) / price) * 100
+    const stopPrice = Number((price * 0.94).toFixed(2))
+    const deltaPct = -6.0
+    const costContext = avgCost && avgCost > 0 ? ` (entry cost $${avgCost.toFixed(2)})` : ''
     recs.push({
       id: `rec-${sym}-stop-loss`,
       symbol: sym,
       name: name || sym,
       category: 'STOP_LOSS',
       title: 'Protective Trailing Stop (6%)',
-      rationale: `Capital protection stop at $${stopPrice.toFixed(2)} (6% below entry cost $${cost.toFixed(2)}). Cuts adverse drawdown quickly.`,
+      rationale: `Capital protection trailing stop at $${stopPrice.toFixed(2)} (6.0% below current price $${price.toFixed(2)})${costContext}. Enforces downside discipline.`,
       metric: 'PRICE',
       condition: 'BELOW',
       targetValue: stopPrice,
       currentValue: Number(price.toFixed(2)),
-      potentialDeltaPct: Number(deltaPct.toFixed(1)),
+      potentialDeltaPct: deltaPct,
       severity: 'critical',
       status: 'PENDING',
       createdAt: now,
@@ -241,5 +241,8 @@ export function convertRecommendationToUserAlert(
     severity: customOverrides?.severity || rec.severity,
     status: 'ARMED',
     createdAt: new Date().toISOString(),
+    title: customOverrides?.title || rec.title,
+    category: customOverrides?.category || rec.category,
+    rationale: customOverrides?.rationale || rec.rationale,
   }
 }

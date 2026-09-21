@@ -140,8 +140,9 @@ def generate_ticker_recommendations(
     # 3. Stop-Loss / Capital Preservation (strongly recommended for owned holdings)
     if is_owned:
         cost = avg_cost if (avg_cost and avg_cost > 0) else price
-        stop_price = round(cost * 0.94, 2)  # -6% stop
-        delta_pct = ((stop_price - price) / price) * 100.0
+        stop_price = round(price * 0.94, 2)  # -6% trailing stop below current price
+        delta_pct = -6.0
+        cost_str = f" (entry cost ${cost:.2f})" if cost != price else ""
         recs.append(
             RecommendedAlert(
                 id=f"rec-{symbol_upper}-stop-loss",
@@ -149,7 +150,7 @@ def generate_ticker_recommendations(
                 name=name or symbol_upper,
                 category="STOP_LOSS",
                 title="Protective Trailing Stop (6%)",
-                rationale=f"Risk management baseline. Set an automated warning if price drops below ${stop_price:.2f} (6.0% below cost basis ${cost:.2f}) to enforce capital discipline.",
+                rationale=f"Risk management baseline. Set an automated warning if price drops below ${stop_price:.2f} (6.0% below current price ${price:.2f}{cost_str}) to enforce capital discipline.",
                 metric="PRICE",
                 condition="BELOW",
                 target_value=stop_price,

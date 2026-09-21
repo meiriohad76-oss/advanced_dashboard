@@ -252,6 +252,9 @@ export interface UserAlert {
   severity: 'info' | 'warning' | 'critical'
   status: 'ARMED' | 'TRIGGERED' | 'COOLDOWN'
   createdAt: string
+  title?: string
+  category?: 'PROFIT_TARGET' | 'STOP_LOSS' | 'DIP_BUY' | 'BREAKOUT' | 'RSI_REVERSAL' | 'CUSTOM' | string
+  rationale?: string
 }
 
 export interface AlertItem {

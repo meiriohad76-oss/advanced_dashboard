@@ -364,19 +364,22 @@ export function RecommendedTriggersView({
                 {/* User Action Footer: Acknowledge / Decline / Change */}
                 <div style={{ borderTop: '1px solid var(--line)', paddingTop: '10px' }}>
                   {isPending && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '6px' }}>
-                      {/* 1. Acknowledge & Arm */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      {/* 1. Arm Trigger */}
                       <button
                         className="ask-button"
                         onClick={() => onAcknowledge(rec)}
                         style={{
+                          flex: '1 1 auto',
+                          minWidth: '100px',
+                          whiteSpace: 'nowrap',
                           background: 'var(--emerald)',
                           borderColor: 'var(--emerald)',
                           color: '#ffffff',
                           fontSize: '11px',
                           padding: '6px 10px',
                           borderRadius: '6px',
-                          display: 'flex',
+                          display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           gap: '4px',
@@ -386,7 +389,7 @@ export function RecommendedTriggersView({
                         title="Acknowledge and arm this trigger immediately"
                       >
                         <Check size={13} />
-                        Acknowledge &amp; Arm
+                        <span>Arm Trigger</span>
                       </button>
 
                       {/* 2. Change / Customize */}
@@ -394,11 +397,13 @@ export function RecommendedTriggersView({
                         className="icon-button"
                         onClick={() => setEditingRec(rec)}
                         style={{
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap',
                           border: '1px solid var(--line)',
                           borderRadius: '6px',
-                          padding: '6px 9px',
+                          padding: '6px 10px',
                           fontSize: '11px',
-                          display: 'flex',
+                          display: 'inline-flex',
                           alignItems: 'center',
                           gap: '4px',
                           color: 'var(--accent-dark)',
@@ -416,12 +421,16 @@ export function RecommendedTriggersView({
                         className="icon-button"
                         onClick={() => onDecline(rec)}
                         style={{
+                          flexShrink: 0,
                           border: '1px solid var(--line)',
                           borderRadius: '6px',
                           padding: '6px 9px',
                           color: 'var(--muted)',
                           background: 'var(--panel)',
                           cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
                         title="Decline this recommendation"
                       >
@@ -513,6 +522,9 @@ export function ChangeRecommendationModal({ recommendation, onClose, onSave }: C
       severity,
       status: 'ARMED',
       createdAt: new Date().toISOString(),
+      title: recommendation.title,
+      category: recommendation.category,
+      rationale: recommendation.rationale,
     }
     onSave(customized)
   }

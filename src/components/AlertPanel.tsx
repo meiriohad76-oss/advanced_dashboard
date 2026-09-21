@@ -3,6 +3,7 @@ import { AlertTriangle, Bell, Check, Plus, Sparkles, Trash2, X } from 'lucide-re
 import { ModalOverlay } from './ModalOverlay'
 import type { AlertItem, Holding, RecommendedAlert, UserAlert } from '../types'
 import { RecommendedTriggersView } from './RecommendedTriggers'
+import { getAlertPlaybook } from '../domain/alertPlaybook'
 
 export interface AlertPanelProps {
   alerts: AlertItem[]
@@ -15,6 +16,7 @@ export interface AlertPanelProps {
   onAcknowledgeRecommendation?: (rec: RecommendedAlert) => void
   onDeclineRecommendation?: (rec: RecommendedAlert) => void
   onChangeRecommendation?: (rec: RecommendedAlert, customized: UserAlert) => void
+  onInspectAlert?: (alert: AlertItem | UserAlert) => void
 }
 
 export function AlertPanel({
@@ -28,6 +30,7 @@ export function AlertPanel({
   onAcknowledgeRecommendation,
   onDeclineRecommendation,
   onChangeRecommendation,
+  onInspectAlert,
 }: AlertPanelProps) {
   const [activeTab, setActiveTab] = useState<'active' | 'recommended' | 'create' | 'history'>('active')
   const [symbol, setSymbol] = useState(holdings[0]?.symbol || '')
@@ -199,6 +202,9 @@ export function AlertPanel({
       {activeTab === 'active' && (
         <div className="alert-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {userAlerts.map((ua) => {
+            const holding = holdings.find((h) => h.symbol.toUpperCase() === ua.symbol.toUpperCase())
+            const playbook = getAlertPlaybook(ua, holding)
+            const isTriggered = ua.status === 'TRIGGERED'
             const isInd = ua.metric === 'MACD' || ua.metric.startsWith('SMA')
             const isAbove = ua.condition.includes('ABOVE')
             const labelStr = isInd
@@ -212,37 +218,128 @@ export function AlertPanel({
               : `${ua.symbol} · Drawdown > ${ua.targetValue}%`
 
             return (
-              <div key={ua.id} className="alert-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'var(--panel)', borderRadius: '8px', border: '1px solid var(--line)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span className={`attention-icon ${ua.severity}`}><Bell size={16} /></span>
-                  <div>
-                    <strong style={{ fontSize: '13px', display: 'block', color: 'var(--ink)' }}>{labelStr}</strong>
-                    <small style={{ fontSize: '10px', color: 'var(--muted)' }}>User Alert · Armed {new Date(ua.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+              <div 
+                key={ua.id} 
+                className="alert-row" 
+                style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px', 
+                  padding: '12px', 
+                  background: 'var(--panel)', 
+                  borderRadius: '8px', 
+                  border: isTriggered ? '1px solid var(--red-line)' : '1px solid var(--line)' 
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className={`attention-icon ${ua.severity}`}><Bell size={16} /></span>
+                    <div>
+                      <strong style={{ fontSize: '13px', display: 'block', color: 'var(--ink)' }}>{labelStr}</strong>
+                      <small style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                        {isTriggered 
+                          ? '⚠️ Trigger condition fulfilled — Action required' 
+                          : `User Alert · Armed ${new Date(ua.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                      </small>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={`status-pill ${isTriggered ? 'triggered' : 'armed'}`}>
+                      {isTriggered ? 'TRIGGERED' : 'ARMED'}
+                    </span>
+                    {onInspectAlert && (
+                      <button 
+                        className="ask-button"
+                        onClick={() => onInspectAlert(ua)}
+                        style={{ fontSize: '10px', padding: '4px 9px', gap: '3px' }}
+                        title="View What Happened & Action Playbook"
+                      >
+                        Playbook
+                      </button>
+                    )}
+                    <button className="icon-button" onClick={() => onDeleteAlert(ua.id)} title="Delete Alert"><Trash2 size={15} color="var(--red)" /></button>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="status-pill armed">ARMED</span>
-                  <button className="icon-button" onClick={() => onDeleteAlert(ua.id)} title="Delete Alert"><Trash2 size={15} color="var(--red)" /></button>
+
+                {/* Directive & What to do banner */}
+                <div style={{ 
+                  fontSize: '11px', 
+                  background: isTriggered ? 'var(--red-soft)' : 'var(--subtle)', 
+                  padding: '6px 10px', 
+                  borderRadius: '5px', 
+                  color: isTriggered ? 'var(--red)' : 'var(--ink)', 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  lineHeight: 1.4
+                }}>
+                  <span>
+                    <strong>{isTriggered ? '🚨 Action Playbook: ' : '🎯 Target Action: '}</strong>
+                    {playbook.checklist[0]}
+                  </span>
                 </div>
               </div>
             )
           })}
 
-          {alerts.map((alert) => (
-            <div key={alert.id} className="alert-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'var(--panel)', borderRadius: '8px', border: '1px solid var(--line)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span className={`attention-icon ${alert.severity}`}><Bell size={16} /></span>
-                <div>
-                  <strong style={{ fontSize: '13px', display: 'block', color: 'var(--ink)' }}>{alert.symbol ? `${alert.symbol} · ` : ''}{alert.title}</strong>
-                  <small style={{ fontSize: '10px', color: 'var(--muted)' }}>{alert.message}</small>
+          {alerts.map((alert) => {
+            const holding = alert.symbol ? holdings.find((h) => h.symbol.toUpperCase() === alert.symbol!.toUpperCase()) : undefined
+            const playbook = getAlertPlaybook(alert, holding)
+            const isTriggered = alert.status === 'TRIGGERED'
+
+            return (
+              <div 
+                key={alert.id} 
+                className="alert-row" 
+                style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px', 
+                  padding: '12px', 
+                  background: 'var(--panel)', 
+                  borderRadius: '8px', 
+                  border: isTriggered ? '1px solid var(--amber-line)' : '1px solid var(--line)' 
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span className={`attention-icon ${alert.severity}`}><Bell size={16} /></span>
+                    <div>
+                      <strong style={{ fontSize: '13px', display: 'block', color: 'var(--ink)' }}>
+                        {alert.symbol ? `${alert.symbol} · ` : ''}{alert.title}
+                      </strong>
+                      <small style={{ fontSize: '10px', color: 'var(--muted)' }}>{alert.message}</small>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={`status-pill ${alert.status.toLowerCase()}`}>{alert.status}</span>
+                    <time style={{ fontSize: '11px', color: 'var(--muted)' }}>{alert.time}</time>
+                    {onInspectAlert && (
+                      <button 
+                        className="ask-button"
+                        onClick={() => onInspectAlert(alert)}
+                        style={{ fontSize: '10px', padding: '4px 9px', gap: '3px' }}
+                        title="View What Happened & Action Playbook"
+                      >
+                        Playbook
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ 
+                  fontSize: '11px', 
+                  background: isTriggered ? 'var(--amber-soft)' : 'var(--subtle)', 
+                  padding: '6px 10px', 
+                  borderRadius: '5px', 
+                  color: isTriggered ? '#92400e' : 'var(--ink)',
+                  lineHeight: 1.4
+                }}>
+                  <span><strong>🎯 Recommended Action: </strong>{playbook.checklist[0]}</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className={`status-pill ${alert.status.toLowerCase()}`}>{alert.status}</span>
-                <time style={{ fontSize: '11px', color: 'var(--muted)' }}>{alert.time}</time>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

@@ -4,6 +4,7 @@ import {
   Calendar, Check, CheckCircle2, ChevronRight, CircleDollarSign, Database, Edit3, Gauge, HeartPulse, LayoutDashboard, ListChecks, Menu,
   Moon, Plus, Radar, Search, ServerCog, Settings, ShieldCheck, Sparkles, Sun,
   Target, TrendingDown, TrendingUp, Upload, X, Zap, Scale, LayoutGrid, Table,
+  Compass, Info, Shield,
 } from 'lucide-react'
 import { answerQuestion, assessHolding, portfolioRisk } from './domain/engine'
 import { baseAlerts, performance, scenarioAlert, scenarioHoldings } from './data/demo'
@@ -38,6 +39,7 @@ import { PortfolioSwitcher } from './components/PortfolioSwitcher'
 import { resolveCompanyName } from './data/companyNames'
 import { buildTickerRatings, getPriceTargets } from './domain/ratings'
 import { evaluateAlert } from './domain/alertEngine'
+import { getAlertPlaybook } from './domain/alertPlaybook'
 import { ChangeRecommendationModal, RecommendedTriggersView } from './components/RecommendedTriggers'
 import { convertRecommendationToUserAlert, generateAllRecommendations, generateTickerRecommendations } from './domain/alertRecommendations'
 import type { AlertItem, Holding, PortfolioSource, RecommendationStatus, RecommendedAlert, ScoreComponent, TickerRatings, UserAlert } from './types'
@@ -942,6 +944,7 @@ function AlertDetailModal({
   onInspectSymbol,
   onNavigate,
   onOpenDecision,
+  onOpenRebalance,
 }: {
   alert: AlertItem | UserAlert
   holdings: Holding[]
@@ -949,10 +952,13 @@ function AlertDetailModal({
   onInspectSymbol: (symbol: string) => void
   onNavigate: (page: Page) => void
   onOpenDecision: (holding: Holding) => void
+  onOpenRebalance?: (symbol?: string) => void
 }) {
   const isUserAlert = 'metric' in alert && 'createdAt' in alert
   const symbol = alert.symbol
   const isPortfolioAlert = !symbol || symbol.toUpperCase() === 'PORTFOLIO'
+  const holding = symbol ? holdings.find((h) => h.symbol.toUpperCase() === symbol.toUpperCase()) : undefined
+  const playbook = getAlertPlaybook(alert, holding)
 
   return (
     <ModalOverlay label="Alert Details" className="asset-drawer" onClose={onClose}>
@@ -963,44 +969,117 @@ function AlertDetailModal({
           <Bell size={22}/>
         </span>
         <div>
-          <span className="eyebrow">ALERT INSPECTION &amp; DIRECTIVE</span>
+          <span className="eyebrow">{playbook.categoryTitle.toUpperCase()}</span>
           <h2 style={{ margin: '4px 0', fontSize: '18px' }}>
-            {isUserAlert ? `${alert.symbol} · ${alert.metric} Alert` : alert.title}
+            {isUserAlert ? `${alert.symbol} · ${alert.title || (alert.metric + ' Alert')}` : alert.title}
           </h2>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', margin: '14px 0' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', margin: '14px 0', flexWrap: 'wrap' }}>
         <StatusPill state={alert.status}/>
         <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
-          {isUserAlert ? 'User Configured Threshold' : `Triggered: ${alert.time}`}
+          {isUserAlert ? 'Automated Risk Monitor' : `Triggered: ${alert.time}`}
         </span>
+        {holding && (
+          <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: 'var(--subtle)', color: 'var(--ink)', fontWeight: 600 }}>
+            Market: ${holding.price.toFixed(2)} ({holding.dayChange >= 0 ? '+' : ''}{holding.dayChange}%)
+          </span>
+        )}
       </div>
 
-      <section className="drawer-section">
-        <span className="eyebrow">TRIGGER CONDITION &amp; REASONING</span>
-        <div style={{ background: '#f6f8f7', padding: '14px', borderRadius: '10px', marginTop: '6px', border: '1px solid var(--line)' }}>
-          <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'var(--ink)' }}>
-            {isUserAlert 
-              ? `Monitors ${alert.symbol} for threshold: ${alert.metric} ${alert.condition} ${alert.targetValue}.`
-              : (alert as AlertItem).message}
+      {/* 1. What is this alert about? */}
+      <section className="drawer-section" style={{ marginBottom: '16px' }}>
+        <span className="eyebrow" style={{ color: 'var(--accent-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Info size={13} /> WHAT IS THIS ALERT ABOUT?
+        </span>
+        <div style={{ background: 'var(--subtle)', padding: '14px', borderRadius: '10px', marginTop: '6px', border: '1px solid var(--line)' }}>
+          <p style={{ margin: '0 0 8px 0', fontSize: '13px', lineHeight: 1.5, color: 'var(--ink)', fontWeight: 600 }}>
+            {playbook.whatHappened}
+          </p>
+          <div style={{ fontSize: '11px', color: 'var(--muted)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <span>{playbook.conditionDetail}</span>
+            {isUserAlert && (alert as UserAlert).rationale && (
+              <span>Thesis: {(alert as UserAlert).rationale}</span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Strategic Context (What it means) */}
+      <section className="drawer-section" style={{ marginBottom: '16px' }}>
+        <span className="eyebrow" style={{ color: '#b45309', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Compass size={13} /> STRATEGIC CONTEXT (WHAT IT MEANS)
+        </span>
+        <div style={{ background: 'var(--amber-soft)', padding: '14px', borderRadius: '10px', marginTop: '6px', border: '1px solid var(--amber-line)' }}>
+          <p style={{ margin: '0 0 6px 0', fontSize: '12.5px', lineHeight: 1.5, color: '#78350f' }}>
+            {playbook.whatItMeans}
+          </p>
+          <p style={{ margin: 0, fontSize: '11px', color: '#92400e', opacity: 0.9 }}>
+            {playbook.technicalContext}
           </p>
         </div>
       </section>
 
+      {/* 3. Action Playbook (What you should do now) */}
+      <section className="drawer-section" style={{ marginBottom: '18px' }}>
+        <span className="eyebrow" style={{ color: 'var(--emerald)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <CheckCircle2 size={13} /> ACTION PLAYBOOK: WHAT YOU SHOULD DO NOW
+        </span>
+        <div style={{ background: 'var(--panel)', padding: '14px', borderRadius: '10px', marginTop: '6px', border: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {playbook.checklist.map((step, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '12px', lineHeight: 1.5, color: 'var(--ink)' }}>
+                <span style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  width: '20px', 
+                  height: '20px', 
+                  borderRadius: '50%', 
+                  background: 'var(--emerald-soft)', 
+                  color: 'var(--emerald)', 
+                  fontSize: '11px', 
+                  fontWeight: 700, 
+                  flexShrink: 0,
+                  marginTop: '1px'
+                }}>
+                  {idx + 1}
+                </span>
+                <span>{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Interactive 1-Click Action Buttons */}
       <section className="drawer-section">
-        <span className="eyebrow">RECOMMENDED ACTIONS</span>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+        <span className="eyebrow">EXECUTE DIRECTIVE</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+          {onOpenRebalance && (
+            <button
+              className="ask-button"
+              style={{ justifyContent: 'center', padding: '10px 16px', fontSize: '12.5px', background: 'var(--emerald)', borderColor: 'var(--emerald)', color: '#ffffff' }}
+              onClick={() => {
+                onClose()
+                onOpenRebalance(symbol)
+              }}
+            >
+              <Zap size={15} /> 1-Click Action: {playbook.primaryActionLabel} <ArrowRight size={14}/>
+            </button>
+          )}
+
           {symbol && (
             <button
               className="ask-button"
-              style={{ justifyContent: 'center', padding: '11px 16px', fontSize: '13px' }}
+              style={{ justifyContent: 'center', padding: '10px 16px', fontSize: '12.5px' }}
               onClick={() => {
                 onClose()
                 onInspectSymbol(symbol)
               }}
             >
-              <Target size={16} /> Inspect {symbol} Setup &amp; Price Targets <ArrowRight size={15}/>
+              <Target size={15} /> Inspect {symbol} Setup &amp; Price Targets <ArrowRight size={14}/>
             </button>
           )}
 
@@ -1008,24 +1087,24 @@ function AlertDetailModal({
             <>
               <button
                 className="ask-button"
-                style={{ justifyContent: 'center', padding: '11px 16px', fontSize: '13px' }}
+                style={{ justifyContent: 'center', padding: '10px 16px', fontSize: '12.5px' }}
                 onClick={() => {
                   onClose()
                   onNavigate('Analytics')
                 }}
               >
-                <TrendingUp size={16} /> Open Risk Analytics &amp; Stress Testing <ArrowRight size={15}/>
+                <TrendingUp size={15} /> Open Risk Analytics &amp; Stress Testing <ArrowRight size={15}/>
               </button>
               <button
                 className="ask-button"
-                style={{ justifyContent: 'center', padding: '11px 16px', fontSize: '13px', background: 'var(--ink)' }}
+                style={{ justifyContent: 'center', padding: '10px 16px', fontSize: '12.5px', background: 'var(--ink)' }}
                 onClick={() => {
                   onClose()
                   const h = holdings.find((x) => x.sector === 'Semiconductors') || holdings[0]
                   onOpenDecision(h)
                 }}
               >
-                <Target size={16} /> Open Strategy Decision Directive <ArrowRight size={15}/>
+                <Target size={15} /> Open Strategy Decision Directive <ArrowRight size={15}/>
               </button>
             </>
           )}
@@ -1033,10 +1112,10 @@ function AlertDetailModal({
           <button
             type="button"
             className="secondary-button"
-            style={{ justifyContent: 'center', padding: '9px 14px', fontSize: '12px' }}
+            style={{ justifyContent: 'center', padding: '8px 14px', fontSize: '11px', marginTop: '4px' }}
             onClick={onClose}
           >
-            Close Alert Details
+            Close Alert Directive
           </button>
         </div>
       </section>
@@ -1057,6 +1136,7 @@ function AlertsPage({
   onDeclineRecommendation,
   onChangeRecommendation,
   onRestoreRecommendation,
+  onOpenRebalance,
 }: {
   alerts: AlertItem[]
   userAlerts: UserAlert[]
@@ -1070,6 +1150,7 @@ function AlertsPage({
   onDeclineRecommendation: (rec: RecommendedAlert) => void
   onChangeRecommendation: (rec: RecommendedAlert, customized: UserAlert) => void
   onRestoreRecommendation: (rec: RecommendedAlert) => void
+  onOpenRebalance?: (symbol?: string) => void
 }) {
   const [inspectingAlert, setInspectingAlert] = useState<AlertItem | UserAlert | null>(null)
   const totalCount = alerts.length + userAlerts.length
@@ -1116,75 +1197,94 @@ function AlertsPage({
           </button>
         </div>
         
-        {userAlerts.map((ua) => (
-          <div 
-            className="alert-row" 
-            key={ua.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => setInspectingAlert(ua)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                setInspectingAlert(ua)
-              }
-            }}
-          >
-            <span className={`attention-icon ${ua.severity}`}><Bell size={17}/></span>
-            <span className="alert-copy">
-              <strong>{ua.symbol} · {ua.metric} {ua.condition} {ua.targetValue}</strong>
-              <small>User configured alert threshold · Click to inspect</small>
-            </span>
-            <StatusPill state="ARMED"/>
-            <time>Now</time>
-            <button 
-              className="icon-button"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleAction(ua)
-              }}
-              title={`Inspect ${ua.symbol} in Asset Drawer`}
-              aria-label={`Inspect ${ua.symbol}`}
-            >
-              <ChevronRight size={17}/>
-            </button>
-          </div>
-        ))}
+        {userAlerts.map((ua) => {
+          const h = ua.symbol ? holdings.find((x) => x.symbol.toUpperCase() === ua.symbol.toUpperCase()) : undefined
+          const playbook = getAlertPlaybook(ua, h)
+          const isTriggered = ua.status === 'TRIGGERED'
 
-        {alerts.map((alert) => (
-          <div 
-            className="alert-row" 
-            key={alert.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => setInspectingAlert(alert)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                setInspectingAlert(alert)
-              }
-            }}
-          >
-            <span className={`attention-icon ${alert.severity}`}><Bell size={17}/></span>
-            <span className="alert-copy">
-              <strong>{alert.symbol ? `${alert.symbol} · ` : ''}{alert.title}</strong>
-              <small>{alert.message}</small>
-            </span>
-            <StatusPill state={alert.status}/>
-            <time>{alert.time}</time>
-            <button 
-              className="icon-button"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleAction(alert)
+          return (
+            <div 
+              className="alert-row" 
+              key={ua.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setInspectingAlert(ua)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setInspectingAlert(ua)
+                }
               }}
-              title={alert.symbol ? `Inspect ${alert.symbol} in Asset Drawer` : 'View in Risk Analytics'}
-              aria-label={alert.symbol ? `Inspect ${alert.symbol}` : 'View in Risk Analytics'}
+              style={{ cursor: 'pointer' }}
             >
-              <ChevronRight size={17}/>
-            </button>
-          </div>
-        ))}
+              <span className={`attention-icon ${ua.severity}`}><Bell size={17}/></span>
+              <span className="alert-copy">
+                <strong>{ua.symbol} · {ua.title || `${ua.metric} ${ua.condition} ${ua.targetValue}`}</strong>
+                <small style={{ color: isTriggered ? 'var(--red)' : undefined }}>
+                  {isTriggered ? `🚨 ACTION: ${playbook.checklist[0]}` : `🎯 Action: ${playbook.checklist[0]}`}
+                </small>
+              </span>
+              <StatusPill state={ua.status}/>
+              <time>Now</time>
+              <button 
+                className="icon-button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setInspectingAlert(ua)
+                }}
+                title={`Open Action Playbook for ${ua.symbol}`}
+                aria-label={`Open Playbook for ${ua.symbol}`}
+              >
+                <ChevronRight size={17}/>
+              </button>
+            </div>
+          )
+        })}
+
+        {alerts.map((alert) => {
+          const sym = alert.symbol?.toUpperCase()
+          const h = sym ? holdings.find((x) => x.symbol.toUpperCase() === sym) : undefined
+          const playbook = getAlertPlaybook(alert, h)
+          const isTriggered = alert.status === 'TRIGGERED'
+
+          return (
+            <div 
+              className="alert-row" 
+              key={alert.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setInspectingAlert(alert)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setInspectingAlert(alert)
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <span className={`attention-icon ${alert.severity}`}><Bell size={17}/></span>
+              <span className="alert-copy">
+                <strong>{alert.symbol ? `${alert.symbol} · ` : ''}{alert.title}</strong>
+                <small style={{ color: isTriggered ? '#b45309' : undefined }}>
+                  {isTriggered ? `🚨 ACTION: ${playbook.checklist[0]}` : alert.message}
+                </small>
+              </span>
+              <StatusPill state={alert.status}/>
+              <time>{alert.time}</time>
+              <button 
+                className="icon-button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setInspectingAlert(alert)
+                }}
+                title="Open Action Playbook"
+                aria-label="Open Action Playbook"
+              >
+                <ChevronRight size={17}/>
+              </button>
+            </div>
+          )
+        })}
         {userAlerts.length === 0 && alerts.length === 0 && (
           <div style={{ padding: '36px 20px', textAlign: 'center', color: 'var(--muted)' }}>
             <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)', marginBottom: '6px' }}>No active triggers or custom alerts</p>
@@ -1206,6 +1306,7 @@ function AlertsPage({
           onInspectSymbol={handleInspectSymbol}
           onNavigate={onNavigate}
           onOpenDecision={onOpenDecision}
+          onOpenRebalance={onOpenRebalance}
         />
       )}
     </>
@@ -1447,7 +1548,8 @@ export default function App() {
   })
   const [liveStreaming, setLiveStreaming] = useState(false)
   const [liveTicks, setLiveTicks] = useState<Record<string, { price: number; changePct: number }>>({})
-  const [liveToast, setLiveToast] = useState<{ title: string; detail: string; symbol: string } | null>(null)
+  const [liveToast, setLiveToast] = useState<{ title: string; detail: string; symbol: string; alert?: AlertItem | UserAlert } | null>(null)
+  const [rootInspectingAlert, setRootInspectingAlert] = useState<AlertItem | UserAlert | null>(null)
   const [askOpen, setAskOpen] = useState(false)
   const [mobileNav, setMobileNav] = useState(false)
   const [apiHoldings, setApiHoldings] = useState<Holding[] | null>(null)
@@ -1545,8 +1647,15 @@ export default function App() {
           if (!h) return
           const evalRes = evaluateAlert(alert, h)
           if (evalRes.triggered) {
-            setUserAlerts((prev) => prev.map((a) => a.id === alert.id ? { ...a, status: 'TRIGGERED' } : a))
-            setLiveToast({ title: `${alert.symbol} Alert Triggered`, detail: evalRes.message, symbol: alert.symbol })
+            const triggeredAlert = { ...alert, status: 'TRIGGERED' as const }
+            setUserAlerts((prev) => prev.map((a) => a.id === alert.id ? triggeredAlert : a))
+            const playbook = getAlertPlaybook(triggeredAlert, h)
+            setLiveToast({
+              title: `🚨 ${alert.symbol} · ${playbook.categoryTitle}`,
+              detail: `${evalRes.message} — 🎯 Action: ${playbook.checklist[0]}`,
+              symbol: alert.symbol,
+              alert: triggeredAlert,
+            })
           }
         })
         const ranksNotice = (res as { ratings_sync?: { synced?: boolean; tickers_count?: number; imported_rows?: number } }).ratings_sync?.synced
@@ -1622,8 +1731,15 @@ export default function App() {
         const simHolding = { ...holding, price: tick.price }
         const res = evaluateAlert(alert, simHolding)
         if (res.triggered) {
-          setUserAlerts((prev) => prev.map((a) => a.id === alert.id ? { ...a, status: 'TRIGGERED' } : a))
-          setLiveToast({ title: `${alert.symbol} Alert Triggered`, detail: res.message, symbol: alert.symbol })
+          const triggeredAlert = { ...alert, status: 'TRIGGERED' as const }
+          setUserAlerts((prev) => prev.map((a) => a.id === alert.id ? triggeredAlert : a))
+          const playbook = getAlertPlaybook(triggeredAlert, simHolding)
+          setLiveToast({
+            title: `🚨 ${alert.symbol} · ${playbook.categoryTitle}`,
+            detail: `${res.message} — 🎯 Action: ${playbook.checklist[0]}`,
+            symbol: alert.symbol,
+            alert: triggeredAlert,
+          })
         }
       })
     }
@@ -1861,6 +1977,7 @@ export default function App() {
         onDeclineRecommendation={handleDeclineRecommendation}
         onChangeRecommendation={handleChangeRecommendation}
         onRestoreRecommendation={handleRestoreRecommendation}
+        onOpenRebalance={() => setRebalanceModalOpen(true)}
       />
     )
     if (page === 'Analytics') return <AnalyticsPage holdings={holdings} onOpenBacktest={() => handleOpenBacktest()}/>
@@ -1990,6 +2107,10 @@ export default function App() {
           onAcknowledgeRecommendation={handleAcknowledgeRecommendation}
           onDeclineRecommendation={handleDeclineRecommendation}
           onChangeRecommendation={handleChangeRecommendation}
+          onInspectAlert={(alert) => {
+            setAlertPanelOpen(false)
+            setRootInspectingAlert(alert)
+          }}
         />
       )}
       {notificationModalOpen && <NotificationSettingsModal onClose={() => setNotificationModalOpen(false)} />}
@@ -2019,11 +2140,23 @@ export default function App() {
       {liveToast && (
         <div className={`scenario-toast live-toast ${scenario ? 'stacked' : ''}`}>
           <span><Bell size={18} /></span>
-          <div>
-            <strong>{liveToast.title}</strong>
-            <small>{liveToast.detail}</small>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <strong style={{ display: 'block' }}>{liveToast.title}</strong>
+            <small style={{ display: 'block', lineHeight: 1.4 }}>{liveToast.detail}</small>
           </div>
-          {liveToast.symbol && liveToast.symbol !== 'LIVE' && liveToast.symbol !== 'WARN' && (
+          {liveToast.alert && (
+            <button 
+              className="ask-button"
+              style={{ padding: '6px 11px', fontSize: '11px', background: 'var(--emerald)', borderColor: 'var(--emerald)', color: '#ffffff', whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setRootInspectingAlert(liveToast.alert!)
+                setLiveToast(null)
+              }}
+            >
+              Action Playbook <ArrowRight size={13} />
+            </button>
+          )}
+          {liveToast.symbol && liveToast.symbol !== 'LIVE' && liveToast.symbol !== 'WARN' && !liveToast.alert && (
             <button onClick={() => {
               const h = holdings.find((x) => x.symbol.toUpperCase() === liveToast.symbol.toUpperCase())
               if (h) setSelected(h)
@@ -2032,6 +2165,30 @@ export default function App() {
           )}
           <button className="toast-close" onClick={() => setLiveToast(null)} aria-label="Dismiss notification"><X size={15} /></button>
         </div>
+      )}
+      {rootInspectingAlert && (
+        <AlertDetailModal
+          alert={rootInspectingAlert}
+          holdings={holdings}
+          onClose={() => setRootInspectingAlert(null)}
+          onInspectSymbol={(sym) => {
+            setRootInspectingAlert(null)
+            const h = getOrBuildHolding(sym, holdings)
+            setSelected(h)
+          }}
+          onNavigate={(p) => {
+            setRootInspectingAlert(null)
+            setPage(p)
+          }}
+          onOpenDecision={(h) => {
+            setRootInspectingAlert(null)
+            setDecisionHolding(h)
+          }}
+          onOpenRebalance={() => {
+            setRootInspectingAlert(null)
+            setRebalanceModalOpen(true)
+          }}
+        />
       )}
       <CommandPalette
         open={paletteOpen}

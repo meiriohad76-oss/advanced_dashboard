@@ -127,8 +127,56 @@ async def send_webhook_notification(url: str, payload: dict[str, Any]) -> dict[s
         return {"success": False, "channel": "webhook", "error": str(exc)}
 
 
+def get_alert_directive(alert_data: dict[str, Any]) -> dict[str, str]:
+    """Provide plain-English what happened, strategic context, and actionable playbook steps."""
+    title = str(alert_data.get("title", "")).lower()
+    msg = str(alert_data.get("message", "")).lower()
+    metric = str(alert_data.get("metric", "")).upper()
+    condition = str(alert_data.get("condition", "")).upper()
+    category = str(alert_data.get("category", "")).upper()
+    symbol = str(alert_data.get("symbol", "PORTFOLIO")).upper()
+
+    if "stop" in title or "drawdown" in msg or metric == "STOP_LOSS" or category == "STOP_LOSS":
+        return {
+            "what_happened": f"Price breached below protective stop-loss target for {symbol}.",
+            "what_it_means": "Downside technical risk limit violated. Capital preservation rule is active.",
+            "what_to_do": "1. Execute exit or trim order to cut remaining downside exposure.\n2. Do not average down into the downtrend.\n3. Move proceeds to cash reserves.",
+        }
+    if "profit" in title or "target" in title or (metric == "PRICE" and "ABOVE" in condition) or category == "PROFIT_TARGET":
+        return {
+            "what_happened": f"{symbol} hit upside profit target objective.",
+            "what_it_means": "Price reached target resistance. Risk/reward for continuing to hold is now less favorable.",
+            "what_to_do": "1. Trim 25% to 50% to bank realized profits.\n2. Raise trailing stop on remainder to breakeven/support.\n3. Reallocate capital to high-conviction setups.",
+        }
+    if "rsi" in title or metric == "RSI" or category == "DIP_BUY":
+        if "BELOW" in condition or "dip" in title:
+            return {
+                "what_happened": f"{symbol} RSI entered oversold mean-reversion territory.",
+                "what_it_means": "Short-term selling is mathematically extended, offering asymmetric entry risk/reward.",
+                "what_to_do": "1. Check broader market stabilization (SPY/QQQ).\n2. Scale in with a 25-33% starter tranche.\n3. Place stop loss 3-5% below swing low.",
+            }
+        else:
+            return {
+                "what_happened": f"{symbol} RSI reached overbought exhaustion zone.",
+                "what_it_means": "Buying momentum is extended. Pullback or consolidation risk is elevated.",
+                "what_to_do": "1. Pause chasing new long exposure.\n2. Tighten stops to previous day's low.\n3. Prepare to take partial profits on trend exhaustion.",
+            }
+    if "concentration" in title or "sector" in msg or "exposure" in title:
+        return {
+            "what_happened": "Single sector exposure has exceeded diversification guidelines (>35%).",
+            "what_it_means": "Portfolio is vulnerable to correlated sector shocks.",
+            "what_to_do": "1. Review Risk Analytics Sector breakdown.\n2. Trim overweight positions by 10-20%.\n3. Rebalance proceeds into cash or underweight assets.",
+        }
+
+    return {
+        "what_happened": alert_data.get("message", f"Trigger condition met for {symbol}."),
+        "what_it_means": "Automated portfolio monitoring rule activated.",
+        "what_to_do": f"1. Inspect {symbol} chart and technical setup in Atlas.\n2. Verify risk limits and position sizing.\n3. Adjust trigger or execute trade as needed.",
+    }
+
+
 async def dispatch_alert(alert_data: dict[str, Any]) -> dict[str, Any]:
-    """Dispatch an alert to all enabled channels."""
+    """Dispatch an alert to all enabled channels with actionable playbook guidance."""
     settings = get_settings()
     results = {}
 
@@ -137,11 +185,15 @@ async def dispatch_alert(alert_data: dict[str, Any]) -> dict[str, Any]:
     symbol = alert_data.get("symbol", "PORTFOLIO")
     severity = alert_data.get("severity", "info").upper()
 
+    directive = get_alert_directive(alert_data)
+
     sev_icon = "🚨" if severity == "CRITICAL" else ("⚠️" if severity == "WARNING" else "ℹ️")
     tg_text = (
         f"{sev_icon} *ATLAS ALERT [{severity}]*\n"
         f"*{symbol}*: {title}\n\n"
-        f"{msg}\n\n"
+        f"📊 *WHAT HAPPENED:*\n{directive['what_happened']}\n\n"
+        f"💡 *STRATEGIC CONTEXT:*\n{directive['what_it_means']}\n\n"
+        f"🎯 *ACTION PLAYBOOK (WHAT TO DO):*\n{directive['what_to_do']}\n\n"
         f"⏰ _{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}_"
     )
 
@@ -151,7 +203,11 @@ async def dispatch_alert(alert_data: dict[str, Any]) -> dict[str, Any]:
         )
 
     if settings.get("webhook_enabled") and settings.get("webhook_url"):
-        results["webhook"] = await send_webhook_notification(settings["webhook_url"], alert_data)
+        payload = {
+            **alert_data,
+            "playbook": directive,
+        }
+        results["webhook"] = await send_webhook_notification(settings["webhook_url"], payload)
 
     return {
         "dispatched": bool(results),
