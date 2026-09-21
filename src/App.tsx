@@ -384,42 +384,93 @@ function AssetDrawer({
                     <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', lineHeight: '1.4' }}>
                       {rec.rationale}
                     </p>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
                       {isPending && (
                         <>
                           <button
                             type="button"
-                            className="icon-button"
-                            title="Decline this recommendation"
-                            style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border)', color: 'var(--muted)' }}
-                            onClick={() => onDeclineRecommendation?.(rec)}
+                            className="primary-button"
+                            title="Acknowledge and arm this trigger immediately"
+                            style={{
+                              flex: '1 1 auto',
+                              minWidth: '105px',
+                              whiteSpace: 'nowrap',
+                              padding: '6px 12px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              background: 'var(--green, #10b981)',
+                              borderColor: 'var(--green, #10b981)',
+                              color: '#ffffff',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => onAcknowledgeRecommendation?.(rec)}
                           >
-                            Decline
+                            <Check size={13} />
+                            <span>Arm Trigger</span>
                           </button>
                           <button
                             type="button"
                             className="secondary-button"
                             title="Customize trigger thresholds"
-                            style={{ fontSize: '11px', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            style={{
+                              flexShrink: 0,
+                              whiteSpace: 'nowrap',
+                              padding: '6px 10px',
+                              fontSize: '11px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                            }}
                             onClick={() => setCustomizingRec(rec)}
                           >
-                            <Edit3 size={11} /> Change
+                            <Edit3 size={11} />
+                            <span>Change</span>
                           </button>
                           <button
                             type="button"
-                            className="primary-button"
-                            title="Acknowledge and arm this trigger"
-                            style={{ fontSize: '11px', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--green)', borderColor: 'var(--green)' }}
-                            onClick={() => onAcknowledgeRecommendation?.(rec)}
+                            className="icon-button"
+                            title="Decline this recommendation"
+                            style={{
+                              flexShrink: 0,
+                              padding: '6px 9px',
+                              fontSize: '11px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1px solid var(--border)',
+                              color: 'var(--muted)',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                            }}
+                            onClick={() => onDeclineRecommendation?.(rec)}
                           >
-                            <Check size={12} /> Acknowledge (Arm)
+                            <X size={13} />
                           </button>
                         </>
                       )}
                       {isAck && (
-                        <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <CheckCircle2 size={13} /> Trigger Armed &amp; Active
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                          <span style={{ fontSize: '11px', color: 'var(--green)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={13} /> Trigger Armed &amp; Active
+                          </span>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            title="Modify trigger parameters"
+                            style={{ padding: '2px 8px', fontSize: '10px', display: 'flex', alignItems: 'center', gap: '3px' }}
+                            onClick={() => setCustomizingRec(rec)}
+                          >
+                            <Edit3 size={10} /> Edit
+                          </button>
+                        </div>
                       )}
                       {isDec && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

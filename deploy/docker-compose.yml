@@ -1,0 +1,36 @@
+services:
+  atlas-api:
+    image: python:3.11-slim
+    container_name: atlas-api
+    working_dir: /app
+    volumes:
+      - /home/ahad/atlas/backend:/app
+    environment:
+      - ATLAS_DB=/app/data/atlas.db
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    expose:
+      - "8000"
+    mem_limit: 512m
+    memswap_limit: 768m
+    cpus: 0.5
+    pids_limit: 64
+    restart: unless-stopped
+    networks: [atlas]
+  atlas-web:
+    image: nginx:alpine
+    container_name: atlas-web
+    volumes:
+      - /home/ahad/atlas/dist:/usr/share/nginx/html:ro
+      - /home/ahad/atlas/deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8100:80"
+    depends_on: [atlas-api]
+    mem_limit: 128m
+    memswap_limit: 192m
+    cpus: 0.25
+    pids_limit: 32
+    restart: unless-stopped
+    networks: [atlas]
+networks:
+  atlas:
+    name: atlas

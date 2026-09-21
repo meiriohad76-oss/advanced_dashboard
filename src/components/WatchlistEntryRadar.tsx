@@ -1164,14 +1164,14 @@ export function WatchlistEntryRadar({
                               </span>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                               {isPending && (
                                 <>
                                   <button
                                     type="button"
                                     className="primary-button"
                                     title="Acknowledge and arm this trigger"
-                                    style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--green)', borderColor: 'var(--green)' }}
+                                    style={{ padding: '5px 10px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--green)', borderColor: 'var(--green)', whiteSpace: 'nowrap', flexShrink: 0 }}
                                     onClick={() => onAcknowledgeRecommendation?.(rec)}
                                   >
                                     <Check size={12} /> Arm Alert
@@ -1180,7 +1180,7 @@ export function WatchlistEntryRadar({
                                     type="button"
                                     className="secondary-button"
                                     title="Customize this trigger"
-                                    style={{ padding: '4px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                    style={{ padding: '5px 9px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}
                                     onClick={() => setCustomizingRec(rec)}
                                   >
                                     <Edit3 size={11} /> Change
@@ -1189,7 +1189,7 @@ export function WatchlistEntryRadar({
                                     type="button"
                                     className="icon-button"
                                     title="Decline recommendation"
-                                    style={{ padding: '4px 6px', color: 'var(--muted)', fontSize: '11px' }}
+                                    style={{ padding: '5px 7px', color: 'var(--muted)', fontSize: '11px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                                     onClick={() => onDeclineRecommendation?.(rec)}
                                   >
                                     <X size={12} />
