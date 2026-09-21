@@ -119,10 +119,25 @@ export const api = {
   pollRatings: (url?: string) => request<RatingsStatus>(`/api/v1/ratings/poll${url ? `?url=${encodeURIComponent(url)}` : ''}`, { method: 'POST' }),
   testAlert: (webhookUrl?: string) => request<{ status: string; http_code?: number; reason?: string }>('/api/v1/alerts/test', { method: 'POST', body: JSON.stringify({ webhook_url: webhookUrl }) }),
   dispatchAlerts: (webhookUrl?: string) => request<{ triggered_count: number; dispatches: Array<{ status: string }> }>('/api/v1/alerts/dispatch', { method: 'POST', body: JSON.stringify({ webhook_url: webhookUrl }) }),
-  getAlertRecommendations: (symbol?: string) =>
-    request<import('../types').RecommendedAlert[]>(
+  getAlertRecommendations: async (symbol?: string): Promise<import('../types').RecommendedAlert[]> => {
+    const raw = await request<any[]>(
       `/api/v1/alerts/recommendations${symbol ? `?symbol=${encodeURIComponent(symbol)}` : ''}`
-    ),
+    )
+    if (!Array.isArray(raw)) return []
+    return raw.map((r) => ({
+      ...r,
+      targetValue: typeof r.targetValue === 'number' && !isNaN(r.targetValue) ? r.targetValue : (Number(r.targetValue ?? r.target_value) || 0),
+      target_value: typeof r.targetValue === 'number' && !isNaN(r.targetValue) ? r.targetValue : (Number(r.targetValue ?? r.target_value) || 0),
+      currentValue: typeof r.currentValue === 'number' && !isNaN(r.currentValue) ? r.currentValue : (Number(r.currentValue ?? r.current_value) || 0),
+      current_value: typeof r.currentValue === 'number' && !isNaN(r.currentValue) ? r.currentValue : (Number(r.currentValue ?? r.current_value) || 0),
+      potentialDeltaPct: r.potentialDeltaPct ?? r.potential_delta_pct ?? null,
+      potential_delta_pct: r.potentialDeltaPct ?? r.potential_delta_pct ?? null,
+      createdAt: r.createdAt ?? r.created_at ?? new Date().toISOString(),
+      created_at: r.createdAt ?? r.created_at ?? new Date().toISOString(),
+      updatedAt: r.updatedAt ?? r.updated_at ?? null,
+      updated_at: r.updatedAt ?? r.updated_at ?? null,
+    }))
+  },
   actOnAlertRecommendation: (
     id: string,
     action: 'acknowledge' | 'decline' | 'change',
@@ -135,7 +150,15 @@ export const api = {
         body: JSON.stringify({ action, ...payload }),
       }
     ),
-  getUserAlerts: () => request<import('../types').UserAlert[]>('/api/v1/alerts/user-alerts'),
+  getUserAlerts: async (): Promise<import('../types').UserAlert[]> => {
+    const raw = await request<any[]>('/api/v1/alerts/user-alerts')
+    if (!Array.isArray(raw)) return []
+    return raw.map((a) => ({
+      ...a,
+      targetValue: typeof a.targetValue === 'number' && !isNaN(a.targetValue) ? a.targetValue : (Number(a.targetValue ?? a.target_value) || 0),
+      createdAt: a.createdAt ?? a.created_at ?? new Date().toISOString(),
+    }))
+  },
   saveUserAlert: (alert: import('../types').UserAlert) =>
     request<import('../types').UserAlert>('/api/v1/alerts/user-alerts', {
       method: 'POST',

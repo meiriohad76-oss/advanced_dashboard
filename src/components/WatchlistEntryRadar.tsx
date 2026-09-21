@@ -1189,7 +1189,7 @@ export function WatchlistEntryRadar({
                                   borderRadius: '4px',
                                 }}
                               >
-                                {rec.metric === 'PRICE' ? `$${rec.targetValue.toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue}`}
+                                {rec.metric === 'PRICE' ? `$${(Number(rec.targetValue ?? (rec as any).target_value) || 0).toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue ?? (rec as any).target_value ?? ''}`}
                               </span>
                               {rec.potentialDeltaPct != null && (
                                 <span style={{ fontSize: '11px', fontWeight: 700, color: rec.potentialDeltaPct >= 0 ? 'var(--green)' : 'var(--red)' }}>
@@ -1292,25 +1292,26 @@ export function WatchlistEntryRadar({
 
                       {candidate.candidateAlerts.map((alt) => {
                         const isTriggered = alt.status === 'TRIGGERED'
+                        const altTarget = typeof alt.targetValue === 'number' && !isNaN(alt.targetValue) ? alt.targetValue : (Number(alt.targetValue ?? (alt as any).target_value) || 0)
                         let condText = ''
                         if (alt.metric === 'PRICE') {
-                          condText = alt.condition === 'BELOW' ? `Price ≤ $${alt.targetValue.toFixed(2)}` : `Price ≥ $${alt.targetValue.toFixed(2)}`
+                          condText = alt.condition === 'BELOW' ? `Price ≤ $${altTarget.toFixed(2)}` : `Price ≥ $${altTarget.toFixed(2)}`
                         } else if (alt.metric === 'RSI') {
-                          condText = `RSI ${alt.condition === 'BELOW' ? '≤' : '≥'} ${alt.targetValue}`
+                          condText = `RSI ${alt.condition === 'BELOW' ? '≤' : '≥'} ${altTarget}`
                         } else {
-                          condText = `${alt.metric} ${alt.condition} ${alt.targetValue}`
+                          condText = `${alt.metric} ${alt.condition} ${altTarget}`
                         }
 
                         let distanceText = ''
                         if (alt.metric === 'PRICE' && candidate.price > 0) {
-                          const diff = candidate.price - alt.targetValue
+                          const diff = candidate.price - altTarget
                           if (isTriggered) {
                             distanceText = 'Trigger Met!'
                           } else if (alt.condition === 'BELOW') {
                             const pct = (diff / candidate.price) * 100
                             distanceText = diff > 0 ? `$${diff.toFixed(2)} (${pct.toFixed(1)}%) above` : 'Target hit!'
                           } else {
-                            const diffAbove = alt.targetValue - candidate.price
+                            const diffAbove = altTarget - candidate.price
                             const pct = (diffAbove / candidate.price) * 100
                             distanceText = diffAbove > 0 ? `$${diffAbove.toFixed(2)} (${pct.toFixed(1)}%) to trigger` : 'Target hit!'
                           }
@@ -1629,7 +1630,7 @@ export function WatchlistEntryRadar({
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '11px', fontWeight: 700 }}>{rec.title}</span>
                         <span style={{ fontSize: '11px', color: 'var(--accent)' }}>
-                          ({rec.metric === 'PRICE' ? `$${rec.targetValue.toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue}`})
+                          ({rec.metric === 'PRICE' ? `$${(Number(rec.targetValue ?? (rec as any).target_value) || 0).toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue ?? (rec as any).target_value ?? ''}`})
                         </span>
                       </div>
                       <span style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 600 }}>Click to Apply ➜</span>

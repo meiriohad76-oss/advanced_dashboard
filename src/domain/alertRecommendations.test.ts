@@ -100,4 +100,34 @@ describe('alertRecommendations domain service', () => {
     expect(symbols.has('NVDA')).toBe(true)
     expect(symbols.has('CRM')).toBe(true)
   })
+
+  it('safely handles backend snake_case recommendations without throwing in getAlertPlaybook', async () => {
+    const { getAlertPlaybook } = await import('./alertPlaybook')
+    const backendRec = {
+      id: 'rec-SCHY-profit-target',
+      symbol: 'SCHY',
+      name: 'Schwab International Dividend',
+      category: 'PROFIT_TARGET' as const,
+      title: '15% Technical Target',
+      rationale: 'Technical momentum target at $37.39 (+15.0% expansion).',
+      metric: 'PRICE' as const,
+      condition: 'ABOVE' as const,
+      target_value: 37.39,
+      current_value: 32.51,
+      severity: 'info' as const,
+      status: 'PENDING' as const,
+      created_at: '2026-09-21T13:35:56Z',
+    }
+
+    // @ts-expect-error test snake_case from backend
+    const userAlert = convertRecommendationToUserAlert(backendRec)
+    expect(userAlert.targetValue).toBe(37.39)
+    expect(userAlert.status).toBe('ARMED')
+
+    // Verify getAlertPlaybook executes without throwing
+    const playbook = getAlertPlaybook(userAlert)
+    expect(playbook).toBeDefined()
+    expect(playbook.whatHappened).toContain('$37.39')
+  })
 })
+

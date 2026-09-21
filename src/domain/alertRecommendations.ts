@@ -237,17 +237,23 @@ export function convertRecommendationToUserAlert(
   rec: RecommendedAlert,
   customOverrides?: Partial<UserAlert>
 ): UserAlert {
+  const rawTarget = customOverrides?.targetValue !== undefined
+    ? customOverrides.targetValue
+    : (rec.targetValue ?? rec.target_value ?? 0)
+  const targetVal = typeof rawTarget === 'number' && !isNaN(rawTarget) ? rawTarget : (Number(rawTarget) || 0)
+
   return {
     id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-    symbol: rec.symbol.toUpperCase(),
-    metric: customOverrides?.metric || rec.metric,
-    condition: customOverrides?.condition || rec.condition,
-    targetValue: customOverrides?.targetValue !== undefined ? Number(customOverrides.targetValue) : rec.targetValue,
-    severity: customOverrides?.severity || rec.severity,
+    symbol: (rec.symbol || '').toUpperCase(),
+    metric: customOverrides?.metric || rec.metric || 'PRICE',
+    condition: customOverrides?.condition || rec.condition || 'ABOVE',
+    targetValue: targetVal,
+    severity: customOverrides?.severity || rec.severity || 'info',
     status: 'ARMED',
     createdAt: new Date().toISOString(),
-    title: customOverrides?.title || rec.title,
+    title: customOverrides?.title || rec.title || 'Armed Trigger',
     category: customOverrides?.category || rec.category,
-    rationale: customOverrides?.rationale || rec.rationale,
+    rationale: customOverrides?.rationale || rec.rationale || '',
   }
 }
+

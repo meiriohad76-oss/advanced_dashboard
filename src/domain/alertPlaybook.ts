@@ -88,9 +88,9 @@ export function getAlertPlaybook(
 
   // Case B: UserAlert on a specific stock
   const ua = alert as UserAlert
-  const metric = ua.metric
-  const condition = ua.condition
-  const target = ua.targetValue
+  const metric = ua.metric || 'PRICE'
+  const condition = ua.condition || 'ABOVE'
+  const target = typeof ua.targetValue === 'number' && !isNaN(ua.targetValue) ? ua.targetValue : (Number(ua.targetValue) || 0)
   const isAbove = condition.includes('ABOVE')
 
   // 1. STOP LOSS / DRAWDOWN

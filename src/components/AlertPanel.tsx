@@ -257,16 +257,17 @@ export function AlertPanel({
             const playbook = getAlertPlaybook(ua, holding)
             const isTriggered = ua.status === 'TRIGGERED'
             const isInd = ua.metric === 'MACD' || ua.metric.startsWith('SMA')
-            const isAbove = ua.condition.includes('ABOVE')
+            const isAbove = (ua.condition || '').includes('ABOVE')
+            const targetVal = typeof ua.targetValue === 'number' && !isNaN(ua.targetValue) ? ua.targetValue : (Number(ua.targetValue ?? (ua as any).target_value) || 0)
             const labelStr = isInd
               ? `${ua.symbol} · ${ua.metric} ${isAbove ? 'Bullish Crossover (Above)' : 'Bearish Crossover (Below)'}`
               : ua.metric === 'PRICE'
-              ? `${ua.symbol} · Price ${isAbove ? '>' : '<'} $${ua.targetValue.toFixed(2)}`
+              ? `${ua.symbol} · Price ${isAbove ? '>' : '<'} $${targetVal.toFixed(2)}`
               : ua.metric === 'RSI'
-              ? `${ua.symbol} · RSI ${isAbove ? '> ' + ua.targetValue + ' (Overbought)' : '< ' + ua.targetValue + ' (Oversold)'}`
+              ? `${ua.symbol} · RSI ${isAbove ? '> ' + targetVal + ' (Overbought)' : '< ' + targetVal + ' (Oversold)'}`
               : ua.metric === 'VOLUME'
-              ? `${ua.symbol} · Volume > ${ua.targetValue}x`
-              : `${ua.symbol} · Drawdown > ${ua.targetValue}%`
+              ? `${ua.symbol} · Volume > ${targetVal}x`
+              : `${ua.symbol} · Drawdown > ${targetVal}%`
 
             return (
               <div 

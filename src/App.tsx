@@ -246,7 +246,7 @@ function AssetDrawer({
           type: isStop ? 'stop_loss' : isTarget ? 'profit_target' : 'custom',
           price: ua.targetValue,
           label: `Alert ${ua.condition}`,
-          actionDirective: ua.playbookDirective || `Action required when price moves ${ua.condition.toLowerCase()} $${ua.targetValue.toFixed(2)}`,
+          actionDirective: ua.playbookDirective || `Action required when price moves ${(ua.condition || '').toLowerCase()} $${(Number(ua.targetValue) || 0).toFixed(2)}`,
         })
       }
     })
@@ -373,7 +373,7 @@ function AssetDrawer({
                         <strong style={{ fontSize: '12px' }}>{rec.title}</strong>
                       </div>
                       <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--foreground)' }}>
-                        {rec.metric === 'PRICE' ? `$${rec.targetValue.toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue}`}
+                        {rec.metric === 'PRICE' ? `$${(Number(rec.targetValue ?? (rec as any).target_value) || 0).toFixed(2)}` : `${rec.metric} ${rec.condition} ${rec.targetValue ?? (rec as any).target_value ?? ''}`}
                         {rec.potentialDeltaPct != null && (
                           <span style={{ marginLeft: '6px', color: rec.potentialDeltaPct >= 0 ? 'var(--green)' : 'var(--red)', fontSize: '11px' }}>
                             ({rec.potentialDeltaPct >= 0 ? '+' : ''}{rec.potentialDeltaPct.toFixed(1)}%)
@@ -1621,7 +1621,14 @@ export default function App() {
       const saved = localStorage.getItem('atlas_user_alerts')
       if (saved) {
         const parsed: UserAlert[] = JSON.parse(saved)
-        return parsed.filter((a) => a && !a.id.startsWith('u-init-') && a.id !== 'u-init-1' && a.id !== 'u-init-2')
+        return parsed
+          .filter((a) => a && !a.id.startsWith('u-init-') && a.id !== 'u-init-1' && a.id !== 'u-init-2')
+          .map((a: any) => ({
+            ...a,
+            targetValue: typeof a.targetValue === 'number' && !isNaN(a.targetValue)
+              ? a.targetValue
+              : Number(a.targetValue ?? a.target_value ?? 0) || 0,
+          }))
       }
     } catch { /* ignore */ }
     return []
@@ -1912,7 +1919,18 @@ export default function App() {
     try {
       const data = await api.getAlertRecommendations()
       if (Array.isArray(data) && data.length > 0) {
-        setRecommendations(data)
+        const normalized: RecommendedAlert[] = data.map((r: any) => ({
+          ...r,
+          targetValue: typeof r.targetValue === 'number' && !isNaN(r.targetValue) ? r.targetValue : (Number(r.targetValue ?? r.target_value) || 0),
+          target_value: typeof r.targetValue === 'number' && !isNaN(r.targetValue) ? r.targetValue : (Number(r.targetValue ?? r.target_value) || 0),
+          currentValue: typeof r.currentValue === 'number' && !isNaN(r.currentValue) ? r.currentValue : (Number(r.currentValue ?? r.current_value) || 0),
+          current_value: typeof r.currentValue === 'number' && !isNaN(r.currentValue) ? r.currentValue : (Number(r.currentValue ?? r.current_value) || 0),
+          potentialDeltaPct: r.potentialDeltaPct ?? r.potential_delta_pct ?? null,
+          potential_delta_pct: r.potentialDeltaPct ?? r.potential_delta_pct ?? null,
+          createdAt: r.createdAt ?? r.created_at ?? new Date().toISOString(),
+          created_at: r.createdAt ?? r.created_at ?? new Date().toISOString(),
+        }))
+        setRecommendations(normalized)
         return
       }
     } catch {
@@ -1939,7 +1957,13 @@ export default function App() {
         setUserAlerts((prev) => {
           const map = new Map<string, UserAlert>()
           prev.forEach((a) => map.set(a.id, a))
-          serverAlerts.forEach((a) => map.set(a.id, a))
+          serverAlerts.forEach((a: any) => {
+            const normalized: UserAlert = {
+              ...a,
+              targetValue: typeof a.targetValue === 'number' && !isNaN(a.targetValue) ? a.targetValue : (Number(a.targetValue ?? a.target_value) || 0),
+            }
+            map.set(normalized.id, normalized)
+          })
           return Array.from(map.values())
         })
       }
@@ -1957,9 +1981,10 @@ export default function App() {
       try { localStorage.setItem('atlas_rec_statuses', JSON.stringify(next)) } catch { /* ignore */ }
       return next
     })
+    const targetVal = typeof newAlert.targetValue === 'number' && !isNaN(newAlert.targetValue) ? newAlert.targetValue : (Number(newAlert.targetValue) || 0)
     setLiveToast({
       title: `Trigger Armed: ${rec.symbol}`,
-      detail: `Armed ${rec.title} (${rec.metric} ${rec.condition} ${rec.targetValue}).`,
+      detail: `Armed ${rec.title} (${newAlert.metric} ${newAlert.condition} ${newAlert.metric === 'PRICE' ? `$${targetVal.toFixed(2)}` : targetVal}).`,
       symbol: rec.symbol,
     })
     try {
@@ -1995,7 +2020,11 @@ export default function App() {
   }, [])
 
   const handleChangeRecommendation = useCallback(async (rec: RecommendedAlert, customized: UserAlert) => {
-    setUserAlerts((prev) => [customized, ...prev.filter((a) => a.id !== customized.id)])
+    const safeAlert: UserAlert = {
+      ...customized,
+      targetValue: typeof customized.targetValue === 'number' && !isNaN(customized.targetValue) ? customized.targetValue : (Number(customized.targetValue) || 0),
+    }
+    setUserAlerts((prev) => [safeAlert, ...prev.filter((a) => a.id !== safeAlert.id)])
     setRecommendations((prev) =>
       prev.map((r) => (r.id === rec.id ? { ...r, status: 'ACKNOWLEDGED' as const } : r))
     )
@@ -2006,16 +2035,16 @@ export default function App() {
     })
     setLiveToast({
       title: `Custom Trigger Armed: ${rec.symbol}`,
-      detail: `${customized.metric} ${customized.condition} ${customized.targetValue}`,
+      detail: `${safeAlert.metric} ${safeAlert.condition} ${safeAlert.metric === 'PRICE' ? `$${safeAlert.targetValue.toFixed(2)}` : safeAlert.targetValue}`,
       symbol: rec.symbol,
     })
     try {
       await api.actOnAlertRecommendation(rec.id, 'change', {
         symbol: rec.symbol,
         category: rec.category,
-        custom_alert: customized,
+        custom_alert: safeAlert,
       })
-      await api.saveUserAlert(customized)
+      await api.saveUserAlert(safeAlert)
     } catch { /* offline-first */ }
   }, [])
 
