@@ -420,6 +420,7 @@ function AssetDrawer({
                             style={{
                               flexShrink: 0,
                               whiteSpace: 'nowrap',
+                              width: 'auto',
                               padding: '6px 10px',
                               fontSize: '11px',
                               display: 'inline-flex',
