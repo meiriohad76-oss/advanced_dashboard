@@ -394,18 +394,20 @@ export function RecommendedTriggersView({
 
                       {/* 2. Change / Customize */}
                       <button
-                        className="icon-button"
+                        type="button"
+                        className="secondary-button"
                         onClick={() => setEditingRec(rec)}
                         style={{
                           flexShrink: 0,
                           whiteSpace: 'nowrap',
+                          width: 'auto',
                           border: '1px solid var(--line)',
                           borderRadius: '6px',
-                          padding: '6px 10px',
+                          padding: '6px 12px',
                           fontSize: '11px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
+                          gap: '5px',
                           color: 'var(--accent-dark)',
                           background: 'var(--accent-soft)',
                           cursor: 'pointer',
@@ -457,9 +459,10 @@ export function RecommendedTriggersView({
                       </span>
                       {onRestore && (
                         <button
-                          className="icon-button"
+                          type="button"
+                          className="secondary-button"
                           onClick={() => onRestore(rec)}
-                          style={{ fontSize: '10px', color: 'var(--accent-dark)', display: 'flex', alignItems: 'center', gap: '3px', cursor: 'pointer' }}
+                          style={{ fontSize: '10px', color: 'var(--accent-dark)', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', padding: '4px 8px', width: 'auto' }}
                         >
                           <RotateCcw size={10} /> Restore
                         </button>
@@ -615,7 +618,7 @@ export function ChangeRecommendationModal({ recommendation, onClose, onSave }: C
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-          <button type="button" className="icon-button" onClick={onClose} style={{ flex: 1, padding: '9px', justifyContent: 'center', border: '1px solid var(--line)' }}>
+          <button type="button" className="secondary-button" onClick={onClose} style={{ flex: 1, padding: '9px', justifyContent: 'center', border: '1px solid var(--line)', width: 'auto' }}>
             Cancel
           </button>
           <button type="submit" className="ask-button" style={{ flex: 2, justifyContent: 'center' }}>
