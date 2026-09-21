@@ -139,23 +139,30 @@ def generate_ticker_recommendations(
 
     # 3. Stop-Loss / Capital Preservation (strongly recommended for owned holdings)
     if is_owned:
-        cost = avg_cost if (avg_cost and avg_cost > 0) else price
-        stop_price = round(price * 0.94, 2)  # -6% trailing stop below current price
-        delta_pct = -6.0
-        cost_str = f" (entry cost ${cost:.2f})" if cost != price else ""
+        has_bought_price = avg_cost is not None and avg_cost > 0
+        base_price = avg_cost if has_bought_price else price
+        stop_price = round(base_price * 0.94, 2)
+        delta_pct = round(((stop_price - price) / price) * 100.0, 1)
+        rationale = (
+            f"Capital protection stop at ${stop_price:.2f} (6.0% below bought price ${avg_cost:.2f}). "
+            f"Enforces downside risk management against cost basis."
+            if has_bought_price
+            else f"Capital protection stop at ${stop_price:.2f} (6.0% below entry price ${price:.2f}). "
+            f"Enforces downside discipline."
+        )
         recs.append(
             RecommendedAlert(
                 id=f"rec-{symbol_upper}-stop-loss",
                 symbol=symbol_upper,
                 name=name or symbol_upper,
                 category="STOP_LOSS",
-                title="Protective Trailing Stop (6%)",
-                rationale=f"Risk management baseline. Set an automated warning if price drops below ${stop_price:.2f} (6.0% below current price ${price:.2f}{cost_str}) to enforce capital discipline.",
+                title="Protective Stop-Loss (6% from Buy)" if has_bought_price else "Protective Stop-Loss (6%)",
+                rationale=rationale,
                 metric="PRICE",
                 condition="BELOW",
                 target_value=stop_price,
                 current_value=round(price, 2),
-                potential_delta_pct=round(delta_pct, 1),
+                potential_delta_pct=delta_pct,
                 severity="critical",
                 status="PENDING",
             )

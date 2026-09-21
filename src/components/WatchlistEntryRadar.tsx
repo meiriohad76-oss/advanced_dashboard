@@ -69,6 +69,7 @@ export function WatchlistEntryRadar({
   const [schedulerStatus, setSchedulerStatus] = useState<SchedulerStatus | null>(null)
   const [syncingNow, setSyncingNow] = useState(false)
   const [syncMsg, setSyncMsg] = useState<string | null>(null)
+  const [lastQuotesTime, setLastQuotesTime] = useState<Date | null>(null)
 
   // Quick-add state
   const [newSymbol, setNewSymbol] = useState('')
@@ -175,6 +176,7 @@ export function WatchlistEntryRadar({
       // 1. Fetch live quotes in batch
       const quotesRes = await api.marketQuotes(symbols).catch(() => ({} as Record<string, Quote>))
       setQuotes((prev) => ({ ...prev, ...quotesRes }))
+      setLastQuotesTime(new Date())
 
       // 2. Build local seeded ratings and upgrade with backend ratings
       const newRatings: Record<string, TickerRatings> = {}
@@ -203,6 +205,12 @@ export function WatchlistEntryRadar({
     if (items.length > 0) {
       const symbols = items.map((it) => it.symbol.toUpperCase())
       fetchMarketAndRatings(symbols)
+
+      // Auto-refresh quotes every 60 seconds while viewing the Watchlist tab
+      const interval = setInterval(() => {
+        fetchMarketAndRatings(symbols)
+      }, 60000)
+      return () => clearInterval(interval)
     }
   }, [items])
 
@@ -545,15 +553,44 @@ export function WatchlistEntryRadar({
             </button>
           )}
 
+          {/* Live Market Quote Freshness Pill */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'var(--surface-hover)',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              border: '1px solid var(--border)',
+              fontSize: '12px',
+            }}
+            title="Real-time quote feed timestamp"
+          >
+            <span
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: 'var(--green)',
+                display: 'inline-block',
+              }}
+            />
+            <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>
+              Quotes: {lastQuotesTime ? lastQuotesTime.toLocaleTimeString() : 'Live'}
+            </span>
+          </div>
+
           <button
             type="button"
             className="secondary-button"
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             onClick={() => fetchMarketAndRatings(items.map((it) => it.symbol.toUpperCase()))}
             disabled={refreshing || syncingNow}
+            title="Force immediate real-time quotes refresh across all candidate tickers"
           >
             <RefreshCw size={14} className={refreshing ? 'spinning' : ''} />
-            {refreshing ? 'Refreshing...' : 'Refresh Quotes'}
+            {refreshing ? 'Refreshing...' : '⚡ Refresh Quotes'}
           </button>
         </div>
       </div>

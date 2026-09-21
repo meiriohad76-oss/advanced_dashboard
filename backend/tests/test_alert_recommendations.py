@@ -38,13 +38,13 @@ def test_generate_ticker_recommendations_owned():
     sl = next(r for r in recs if r.category == "STOP_LOSS")
     assert sl.condition == "BELOW"
     assert sl.severity == "critical"
-    assert sl.target_value < 120.0
-    assert sl.target_value == round(120.0 * 0.94, 2)
-    assert sl.potential_delta_pct == -6.0
+    assert sl.target_value == round(100.0 * 0.94, 2)  # Calculated from bought price $100
+    assert sl.potential_delta_pct == -21.7
+    assert sl.title == "Protective Stop-Loss (6% from Buy)"
 
 
 def test_generate_ticker_recommendations_owned_in_drawdown():
-    # Verify holding in drawdown (cost > price) sets stop BELOW current market price, never above
+    # Verify holding sets stop from bought price (cost basis $28.35)
     recs = generate_ticker_recommendations(
         symbol="PLTR",
         name="Palantir Technologies",
@@ -57,10 +57,10 @@ def test_generate_ticker_recommendations_owned_in_drawdown():
         is_owned=True,
     )
     sl = next(r for r in recs if r.category == "STOP_LOSS")
-    assert sl.target_value < 15.37
-    assert sl.target_value == round(15.37 * 0.94, 2)
-    assert sl.potential_delta_pct == -6.0
-    assert "below current price $15.37" in sl.rationale
+    assert sl.target_value == 26.65  # 28.35 * 0.94 = 26.65
+    assert sl.potential_delta_pct == 73.4
+    assert sl.title == "Protective Stop-Loss (6% from Buy)"
+    assert "below bought price $28.35" in sl.rationale
 
 
 def test_generate_ticker_recommendations_watchlist_candidate():

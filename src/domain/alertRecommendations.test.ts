@@ -52,20 +52,20 @@ describe('alertRecommendations domain service', () => {
     expect(pt.status).toBe('PENDING')
 
     const sl = recs.find((r) => r.category === 'STOP_LOSS')!
-    expect(sl.targetValue).toBeLessThan(150.0)
-    expect(sl.targetValue).toBe(141.0)
-    expect(sl.potentialDeltaPct).toBe(-6.0)
+    expect(sl.targetValue).toBe(112.8) // 120.0 * 0.94 = 112.8 (from bought price $120)
+    expect(sl.potentialDeltaPct).toBe(-24.8)
     expect(sl.severity).toBe('critical')
+    expect(sl.title).toBe('Protective Stop-Loss (6% from Buy)')
   })
 
-  it('sets stop-loss below current price even when holding is in a severe drawdown', () => {
-    // Current price is $15.37, cost basis is $28.35
+  it('calculates stop-loss from bought price (cost basis) rather than current price', () => {
+    // Current price is $15.37, bought price (cost basis) is $28.35
     const recs = generateTickerRecommendations('PLTR', 'Palantir', 15.37, 28.35, 42.0, false, true, 1.1, undefined, true)
     const sl = recs.find((r) => r.category === 'STOP_LOSS')!
-    expect(sl.targetValue).toBeLessThan(15.37)
-    expect(sl.targetValue).toBe(14.45) // 15.37 * 0.94 = 14.4478 -> 14.45
-    expect(sl.potentialDeltaPct).toBe(-6.0)
-    expect(sl.rationale).toContain('6.0% below current price $15.37')
+    expect(sl.targetValue).toBe(26.65) // 28.35 * 0.94 = 26.649 -> 26.65
+    expect(sl.potentialDeltaPct).toBe(73.4)
+    expect(sl.title).toBe('Protective Stop-Loss (6% from Buy)')
+    expect(sl.rationale).toContain('6.0% below bought price $28.35')
   })
 
   it('converts recommendation to an armed UserAlert seamlessly', () => {

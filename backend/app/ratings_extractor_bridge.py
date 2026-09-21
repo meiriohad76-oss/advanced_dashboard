@@ -225,6 +225,11 @@ def sync_ratings_from_extractor(force: bool = False, out_file: str | None = None
             "db_path": db_path,
         }
 
+    # Ensure feed has fresh timestamp when synced
+    feed["as_of"] = now
+    for r in feed.get("ratings", []):
+        r["as_of"] = now
+
     # Save to Atlas SQLite DB (ratings_runs table)
     store.save_feed(feed, imported_at=now)
 

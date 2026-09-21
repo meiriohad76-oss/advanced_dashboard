@@ -98,16 +98,21 @@ export function generateTickerRecommendations(
 
   // 3. Stop-Loss (for owned) or Breakout (for watchlist)
   if (isOwned) {
-    const stopPrice = Number((price * 0.94).toFixed(2))
-    const deltaPct = -6.0
-    const costContext = avgCost && avgCost > 0 ? ` (entry cost $${avgCost.toFixed(2)})` : ''
+    const hasBoughtPrice = avgCost != null && avgCost > 0
+    const basePrice = hasBoughtPrice ? avgCost : price
+    const stopPrice = Number((basePrice * 0.94).toFixed(2))
+    const deltaPct = Number((((stopPrice - price) / price) * 100).toFixed(1))
+    const rationale = hasBoughtPrice
+      ? `Capital protection stop at $${stopPrice.toFixed(2)} (6.0% below bought price $${avgCost.toFixed(2)}). Enforces downside risk management against cost basis.`
+      : `Capital protection stop at $${stopPrice.toFixed(2)} (6.0% below entry price $${price.toFixed(2)}). Enforces downside discipline.`
+
     recs.push({
       id: `rec-${sym}-stop-loss`,
       symbol: sym,
       name: name || sym,
       category: 'STOP_LOSS',
-      title: 'Protective Trailing Stop (6%)',
-      rationale: `Capital protection trailing stop at $${stopPrice.toFixed(2)} (6.0% below current price $${price.toFixed(2)})${costContext}. Enforces downside discipline.`,
+      title: hasBoughtPrice ? 'Protective Stop-Loss (6% from Buy)' : 'Protective Stop-Loss (6%)',
+      rationale,
       metric: 'PRICE',
       condition: 'BELOW',
       targetValue: stopPrice,
