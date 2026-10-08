@@ -29,6 +29,7 @@ import { buildTickerRatings } from '../domain/ratings'
 import { assessCandidateEntry } from '../domain/entryAnalysis'
 import { generateTickerRecommendations } from '../domain/alertRecommendations'
 import { ChangeRecommendationModal } from './RecommendedTriggers'
+import { OrderStagingModal } from './OrderStagingModal'
 import type { Holding, Quote, RecommendedAlert, SchedulerStatus, TickerRatings, UserAlert, WatchlistData, WatchlistItem } from '../types'
 
 interface WatchlistEntryRadarProps {
@@ -92,6 +93,18 @@ export function WatchlistEntryRadar({
 
   // Recommendation customization modal state
   const [customizingRec, setCustomizingRec] = useState<RecommendedAlert | null>(null)
+
+  // Order staging modal state
+  const [stagingCandidate, setStagingCandidate] = useState<{
+    symbol: string
+    name?: string
+    price: number
+    triggerPrice?: number
+  } | null>(null)
+
+  const portfolioTotalValue = useMemo(() => {
+    return existingHoldings.reduce((sum, h) => sum + (h.quantity * h.price), 0) || 100000
+  }, [existingHoldings])
 
   const recommendationsBySymbol = useMemo(() => {
     const map: Record<string, RecommendedAlert[]> = {}
@@ -1101,6 +1114,33 @@ export function WatchlistEntryRadar({
                     )}
                     <button
                       type="button"
+                      className="secondary-button"
+                      title={`Stage Alpaca bracket buy order for ${candidate.symbol}`}
+                      style={{
+                        padding: '6px 11px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        background: candidate.assessment.score >= 80 ? 'rgba(16, 185, 129, 0.15)' : undefined,
+                        borderColor: candidate.assessment.score >= 80 ? '#10b981' : undefined,
+                        color: candidate.assessment.score >= 80 ? '#10b981' : undefined,
+                      }}
+                      onClick={() =>
+                        setStagingCandidate({
+                          symbol: candidate.symbol,
+                          name: candidate.name,
+                          price: candidate.price,
+                          triggerPrice: candidate.targetPrice || candidate.price,
+                        })
+                      }
+                    >
+                      <Zap size={13} color={candidate.assessment.score >= 80 ? '#10b981' : 'var(--accent-dark)'} />
+                      <span>Stage Order</span>
+                    </button>
+                    <button
+                      type="button"
                       className="icon-button"
                       title="Remove from Radar"
                       style={{ padding: '6px', color: 'var(--muted)' }}
@@ -1742,6 +1782,22 @@ export function WatchlistEntryRadar({
           onSave={(customizedAlert) => {
             onChangeRecommendation?.(customizingRec, customizedAlert)
             setCustomizingRec(null)
+          }}
+        />
+      )}
+
+      {/* Order Staging Modal */}
+      {stagingCandidate && (
+        <OrderStagingModal
+          symbol={stagingCandidate.symbol}
+          name={stagingCandidate.name}
+          currentPrice={stagingCandidate.price}
+          triggerPrice={stagingCandidate.triggerPrice}
+          portfolioValue={portfolioTotalValue}
+          onClose={() => setStagingCandidate(null)}
+          onOrderExecuted={(receipt) => {
+            setAlertSuccessMsg(`⚡ Alpaca Order #${receipt.id.slice(0, 8)} for ${receipt.qty} ${receipt.symbol} staged (${receipt.status.toUpperCase()})`)
+            setTimeout(() => setAlertSuccessMsg(null), 6000)
           }}
         />
       )}

@@ -218,8 +218,30 @@ export const api = {
   testNotifications: () => request<import('../types').NotificationTestResult>('/api/v1/notifications/test', { method: 'POST' }),
   brokerAlpacaStatus: () => request<BrokerAlpacaStatus>('/api/v1/broker/alpaca/status'),
   brokerAlpacaSync: () => request<BrokerAlpacaSyncResult>('/api/v1/broker/alpaca/sync', { method: 'POST' }),
-  placeBrokerOrder: (order: { symbol: string; quantity: number; side: 'buy' | 'sell'; type?: string; limit_price?: number }) =>
-    request<Record<string, unknown>>('/api/v1/broker/alpaca/order', {
+  placeBrokerOrder: (order: {
+    symbol: string
+    quantity: number
+    side: 'buy' | 'sell'
+    type?: string
+    limit_price?: number
+    order_class?: string
+    take_profit_price?: number
+    stop_loss_price?: number
+    simulate?: boolean
+    time_in_force?: string
+  }) =>
+    request<{
+      id: string
+      symbol: string
+      qty: number
+      side: string
+      type: string
+      order_class?: string
+      status: string
+      simulated: boolean
+      created_at: string
+      message?: string
+    }>('/api/v1/broker/alpaca/order', {
       method: 'POST',
       body: JSON.stringify(order),
     }),
