@@ -60,3 +60,15 @@ def test_multi_portfolio_lifecycle(tmp_path, monkeypatch):
     
     res_list_after = client.get("/api/v1/portfolios/saved")
     assert res_list_after.json()["data"]["total_saved"] == 1
+
+
+def test_portfolios_saved_create(tmp_path, monkeypatch):
+    db_path = str(tmp_path / "test_create.db")
+    monkeypatch.setenv("ATLAS_DB", db_path)
+
+    res = client.post("/api/v1/portfolios/saved", json={"name": "Momentum Swing Book"})
+    assert res.status_code == 200
+    data = res.json()["data"]
+    assert data["name"] == "Momentum Swing Book"
+    assert data["total_saved"] >= 1
+

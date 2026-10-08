@@ -361,6 +361,30 @@ async def portfolios_saved_activate(portfolio_id: int) -> dict:
     return demo_state()
 
 
+@app.post("/api/v1/portfolios/saved")
+def portfolios_saved_create(payload: dict) -> dict:
+    """Save the current active portfolio snapshot under a custom user-defined name."""
+    name = payload.get("name", "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Portfolio name cannot be empty")
+    src = _portfolio_source()
+    holdings = current_holdings()
+    data = {
+        "holdings": [h.model_dump(by_alias=True) for h in holdings],
+        "has_signal_inputs": src.get("has_signal_inputs", True),
+        "warnings": [],
+    }
+    imported_at = store.save_list("portfolio", data, name=name)
+    portfolios = store.list_saved_portfolios("portfolio")
+    return envelope({
+        "id": next((p["id"] for p in portfolios if p["name"] == name), None),
+        "name": name,
+        "imported_at": imported_at,
+        "total_saved": len(portfolios),
+        "portfolios": portfolios,
+    })
+
+
 @app.patch("/api/v1/portfolios/saved/{portfolio_id}")
 def portfolios_saved_rename(portfolio_id: int, payload: dict) -> dict:
     """Rename a saved portfolio."""
@@ -1168,11 +1192,12 @@ def portfolio_rebalance(max_position: float = 12.0, max_sector: float = 30.0) ->
 
 @app.post("/api/v1/portfolio/rebalance/execute")
 async def portfolio_rebalance_execute(payload: dict) -> dict:
-    """Execute selected rebalancing orders through Alpaca paper broker."""
+    """Execute selected rebalancing orders through Alpaca paper broker with simulation fallback."""
     orders = payload.get("orders", [])
     if not orders:
         raise HTTPException(status_code=400, detail="No orders provided for execution")
 
+    simulate = bool(payload.get("simulate", False))
     results = []
     for o in orders:
         try:
@@ -1182,6 +1207,7 @@ async def portfolio_rebalance_execute(payload: dict) -> dict:
                 side=o["side"],
                 order_type="market",
                 time_in_force="day",
+                simulate=simulate,
             )
             results.append({"symbol": o["symbol"], "success": True, "details": trade_res})
         except Exception as exc:
@@ -1190,6 +1216,7 @@ async def portfolio_rebalance_execute(payload: dict) -> dict:
     return envelope({
         "executed_count": sum(1 for r in results if r["success"]),
         "failed_count": sum(1 for r in results if not r["success"]),
+        "simulated": simulate,
         "results": results,
     })
 

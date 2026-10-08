@@ -9,7 +9,8 @@ import {
   Loader2,
   X,
   FileSpreadsheet,
-  AlertCircle
+  AlertCircle,
+  Save
 } from 'lucide-react'
 import { api } from '../api/client'
 import { PortfolioSource, SavedPortfolioItem } from '../types'
@@ -51,6 +52,27 @@ export const PortfolioSwitcher: React.FC<PortfolioSwitcherProps> = ({
   const [editingName, setEditingName] = useState('')
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isSavingCurrent, setIsSavingCurrent] = useState(false)
+  const [newBookName, setNewBookName] = useState('')
+
+  const handleSaveCurrentBook = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newBookName.trim()) return
+    setActionBusy('upload')
+    setErrorMessage(null)
+    try {
+      await api.saveCurrentPortfolio(newBookName.trim())
+      setIsSavingCurrent(false)
+      setNewBookName('')
+      await onPortfolioChanged()
+      await loadSavedPortfolios()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save portfolio snapshot.'
+      setErrorMessage(msg)
+    } finally {
+      setActionBusy(null)
+    }
+  }
 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -472,8 +494,37 @@ export const PortfolioSwitcher: React.FC<PortfolioSwitcherProps> = ({
             )}
           </div>
 
-          {/* Switcher Footer: Upload New Portfolio */}
-          <div className="portfolio-switcher-footer">
+          {/* Switcher Footer: Save Current Snapshot & Upload New Portfolio */}
+          <div className="portfolio-switcher-footer" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {isSavingCurrent ? (
+              <form onSubmit={handleSaveCurrentBook} style={{ display: 'flex', gap: '6px', padding: '6px', background: 'var(--subtle)', borderRadius: '6px' }}>
+                <input
+                  type="text"
+                  placeholder="Portfolio profile name…"
+                  value={newBookName}
+                  onChange={(e) => setNewBookName(e.target.value)}
+                  style={{ flex: 1, padding: '4px 8px', fontSize: '11px', borderRadius: '4px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--ink)' }}
+                  autoFocus
+                />
+                <button type="submit" className="banner-primary" style={{ padding: '4px 8px', fontSize: '11px' }}>
+                  Save
+                </button>
+                <button type="button" className="secondary-button" onClick={() => setIsSavingCurrent(false)} style={{ padding: '4px 8px', fontSize: '11px' }}>
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <button
+                type="button"
+                className="portfolio-switcher-upload-btn"
+                onClick={() => setIsSavingCurrent(true)}
+                style={{ marginBottom: '2px' }}
+              >
+                <Save size={14} />
+                <span>Save Active Book Snapshot…</span>
+              </button>
+            )}
+
             <button
               type="button"
               className="portfolio-switcher-upload-btn"

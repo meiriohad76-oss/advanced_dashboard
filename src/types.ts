@@ -617,5 +617,41 @@ export interface IntradayTrigger {
   detected_at: string
 }
 
+export interface SavedPortfolio {
+  id: number
+  name: string
+  imported_at: string
+  count: number
+  total_value: number
+  is_active: boolean
+}
+
+export interface SavedPortfoliosResponse {
+  portfolios: SavedPortfolio[]
+  total_saved: number
+  active_id: number | null
+}
+
+export interface RebalanceExecutionReceipt {
+  executed_count: number
+  failed_count: number
+  simulated?: boolean
+  results: Array<{
+    symbol: string
+    success: boolean
+    details?: {
+      id?: string
+      client_order_id?: string
+      symbol?: string
+      qty?: number
+      side?: string
+      status?: string
+      simulated?: boolean
+      message?: string
+    }
+    error?: string
+  }>
+}
+
 
 

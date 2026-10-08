@@ -2,6 +2,19 @@
 
 Captured feature ideas not yet scheduled. Newest first.
 
+## BL-012 · Multi-Portfolio Book Switcher + 1-Click Batch Rebalance + Catalyst Radar + Telegram Bot Integration
+
+**Status:** Done (2026-10-08) · **Area:** Full Stack (Backend + Frontend)
+
+### Delivered
+- **Multi-Portfolio Profile & Snapshot Management**: Added backend `POST /api/v1/portfolios/saved` to save the active portfolio state under a custom user-defined name without requiring a CSV upload. Integrated inline portfolio snapshot creation, activation, renaming, and deletion in `PortfolioSwitcher.tsx`.
+- **1-Click Batch Portfolio Rebalance Execution**: Enhanced `RebalanceModal.tsx` with simulation fallback toggle (`simulate`), pre-flight trade metrics (Total Buys, Total Sells, Net Cash Impact), batch Alpaca paper broker execution, and post-execution receipt view with per-order status and IDs.
+- **Earnings & Dividend Catalyst Radar**: Enriched `HoldingRow.tsx` with imminent earnings badges (`⚠️ Xd` if <= 7 days, `📅 Xd` if <= 14 days), and added an **Imminent Catalysts & Dividend Flow** snapshot card on `OverviewPage.tsx` displaying upcoming earnings reports and annual/monthly passive income run-rate.
+- **Telegram Interactive Trade Bot Integration**: Added "📱 Send to Telegram" button to `OrderStagingModal.tsx`, dispatching interactive trade conviction prompts with inline execution/dismiss buttons via `/api/v1/notifications/telegram/send-trade-prompt`.
+- **Codebase Housekeeping**: Purged legacy runner scripts and markers (`session6-*`, `session7-*`, `session8-*`).
+
+---
+
 ## BL-011 · Ultra-robust CSV Importer + Systemic Correlation + Extractor Poller + Alert Webhooks
 
 **Status:** Done (2026-09-14, 8th session) · **Area:** Full Stack (Backend + Frontend)

@@ -12,6 +12,7 @@ interface HoldingRowProps {
   onSelect: (holding: Holding) => void
   density?: TableDensity
   onStageOrder?: (holding: Holding) => void
+  catalyst?: { daysUntil: number; timing?: string }
 }
 
 const formatCurrency = (value: number, compact = false) =>
@@ -43,6 +44,7 @@ export function HoldingRow({
   onSelect,
   density = 'comfortable',
   onStageOrder,
+  catalyst,
 }: HoldingRowProps) {
   const assessment = assessHolding(holding)
   const marketValue = holding.quantity * holding.price
@@ -115,7 +117,25 @@ export function HoldingRow({
           {holding.symbol.slice(0, 1)}
         </span>
         <span style={{ display: 'grid', lineHeight: 1.2 }}>
-          <strong style={{ fontSize: isCompact ? '12px' : '13px' }}>{holding.symbol}</strong>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <strong style={{ fontSize: isCompact ? '12px' : '13px' }}>{holding.symbol}</strong>
+            {catalyst && catalyst.daysUntil <= 14 && (
+              <span
+                title={`Earnings in ${catalyst.daysUntil} days (${catalyst.timing ?? 'AMC'})`}
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  padding: '1px 4px',
+                  borderRadius: '3px',
+                  background: catalyst.daysUntil <= 7 ? 'var(--red-soft)' : 'var(--accent-soft)',
+                  color: catalyst.daysUntil <= 7 ? 'var(--red)' : 'var(--accent-dark)',
+                  letterSpacing: '0.02em',
+                }}
+              >
+                {catalyst.daysUntil <= 7 ? '⚠️' : '📅'} {catalyst.daysUntil}d
+              </span>
+            )}
+          </span>
           {!isCompact && holding.name && holding.name !== holding.symbol && (
             <small style={{ fontSize: '10px', color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '110px' }}>
               {holding.name}

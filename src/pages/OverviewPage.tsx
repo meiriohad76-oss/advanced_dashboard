@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Activity,
   AlertTriangle,
   ArrowRight,
+  Calendar,
   ChevronRight,
   CircleDollarSign,
   Database,
@@ -12,6 +13,7 @@ import {
   Target,
   TrendingUp,
 } from 'lucide-react'
+import { api } from '../api/client'
 import { InteractiveSparkline } from '../components/InteractiveSparkline'
 import { TimeframeSelector } from '../components/TimeframeSelector'
 import { Tooltip } from '../components/Tooltip'
@@ -70,6 +72,30 @@ export function OverviewPage({
   onNavigate,
 }: OverviewPageProps) {
   const [timeframe, setTimeframe] = useState<TimeframeKey>('1Y')
+  const [upcomingEvents, setUpcomingEvents] = useState<Array<{ symbol: string; name: string; days_until: number; timing: string; implied_move_pct?: number }>>([])
+  const [dividendSummary, setDividendSummary] = useState<{ total_annual_income: number; portfolio_yield_pct: number } | null>(null)
+
+  useEffect(() => {
+    let active = true
+    Promise.all([
+      api.catalystsEarnings().catch(() => null),
+      api.catalystsDividends().catch(() => null),
+    ]).then(([earn, div]) => {
+      if (!active) return
+      if (earn?.events) {
+        setUpcomingEvents(earn.events.filter((e) => e.days_until <= 21).slice(0, 4))
+      }
+      if (div?.summary) {
+        setDividendSummary({
+          total_annual_income: div.summary.total_annual_income,
+          portfolio_yield_pct: div.summary.portfolio_yield_pct,
+        })
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const ranked = useMemo(() => {
     return holdings
@@ -330,6 +356,98 @@ export function OverviewPage({
               </span>
               <time>1h</time>
             </button>
+          </div>
+        </section>
+
+        {/* Imminent Catalysts & Dividend Cashflow */}
+        <section className="panel" style={{ gridColumn: '1 / -1' }}>
+          <div className="section-heading">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--accent-soft)', color: 'var(--accent-dark)', display: 'grid', placeItems: 'center' }}>
+                <Calendar size={16} />
+              </span>
+              <div>
+                <span className="eyebrow">CATALYST INTELLIGENCE</span>
+                <h2>Imminent Catalysts &amp; Dividend Flow</h2>
+              </div>
+            </div>
+            {onNavigate && (
+              <button className="text-button" onClick={() => onNavigate('Catalysts')}>
+                Full Calendar <ArrowRight size={14} />
+              </button>
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginTop: '12px' }}>
+            {upcomingEvents.length > 0 ? (
+              upcomingEvents.map((evt) => {
+                const isUrgent = evt.days_until <= 7
+                const h = holdings.find((item) => item.symbol === evt.symbol)
+                return (
+                  <div
+                    key={evt.symbol}
+                    onClick={() => h && onSelect(h)}
+                    style={{
+                      background: 'var(--subtle)',
+                      border: '1px solid var(--line)',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: h ? 'pointer' : 'default',
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <strong style={{ fontSize: '14px', color: 'var(--ink)' }}>{evt.symbol}</strong>
+                        <span style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                          background: isUrgent ? 'var(--red-soft)' : 'var(--accent-soft)',
+                          color: isUrgent ? 'var(--red)' : 'var(--accent-dark)',
+                        }}>
+                          {isUrgent ? '⚠️ ' : '📅 '}{evt.days_until} days
+                        </span>
+                      </div>
+                      <small style={{ color: 'var(--muted)', fontSize: '11px', display: 'block', marginTop: '2px' }}>
+                        Earnings ({evt.timing}) · {evt.implied_move_pct ? `±${evt.implied_move_pct}% move` : 'Reporting soon'}
+                      </small>
+                    </div>
+                    {h && <ChevronRight size={16} color="var(--muted)" />}
+                  </div>
+                )
+              })
+            ) : (
+              <div style={{ padding: '16px', color: 'var(--muted)', fontSize: '12px', background: 'var(--subtle)', borderRadius: '8px' }}>
+                No earnings catalysts reported in the next 21 days for portfolio holdings.
+              </div>
+            )}
+
+            {dividendSummary && (
+              <div style={{
+                background: 'var(--subtle)',
+                border: '1px solid var(--line)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 650, letterSpacing: '0.04em' }}>DIVIDEND RUN-RATE</span>
+                  <strong style={{ fontSize: '13px', color: 'var(--accent-dark)' }}>{dividendSummary.portfolio_yield_pct.toFixed(2)}% Yld</strong>
+                </div>
+                <strong style={{ fontSize: '18px', color: 'var(--ink)', marginTop: '2px', fontVariantNumeric: 'tabular-nums' }}>
+                  ${Math.round(dividendSummary.total_annual_income).toLocaleString()}/yr
+                </strong>
+                <small style={{ color: 'var(--muted)', fontSize: '10px', marginTop: '2px' }}>
+                  ~${Math.round(dividendSummary.total_annual_income / 12).toLocaleString()}/mo passive cashflow
+                </small>
+              </div>
+            )}
           </div>
         </section>
       </div>

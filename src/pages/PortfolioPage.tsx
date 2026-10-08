@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { LayoutGrid, Scale, Search, Table, Zap } from 'lucide-react'
+import { api } from '../api/client'
 import { HoldingRow, type TableDensity } from '../components/HoldingRow'
 import { SectorTreemap } from '../components/SectorTreemap'
 import { Tooltip } from '../components/Tooltip'
@@ -41,6 +42,24 @@ export function PortfolioPage({
   const [sortKey, setSortKey] = useState<PortfolioSortKey>('weight')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [viewMode, setViewMode] = useState<'table' | 'treemap'>('table')
+  const [catalystMap, setCatalystMap] = useState<Record<string, { daysUntil: number; timing?: string }>>({})
+
+  useEffect(() => {
+    let active = true
+    api.catalystsEarnings()
+      .then((res) => {
+        if (!active || !res?.events) return
+        const map: Record<string, { daysUntil: number; timing?: string }> = {}
+        res.events.forEach((e) => {
+          map[e.symbol] = { daysUntil: e.days_until, timing: e.timing }
+        })
+        setCatalystMap(map)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
 
   // Table density mode: persistent
   const [density, setDensity] = useState<TableDensity>(() => {
@@ -379,6 +398,7 @@ export function PortfolioPage({
                 onSelect={onSelect}
                 density={density}
                 onStageOrder={onStageOrder}
+                catalyst={catalystMap[holding.symbol]}
               />
             ))}
           </>

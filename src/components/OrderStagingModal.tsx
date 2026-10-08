@@ -6,6 +6,7 @@ import {
   DollarSign,
   Percent,
   Scale,
+  Send,
   Shield,
   ShieldAlert,
   Target,
@@ -129,6 +130,38 @@ export function OrderStagingModal({
       setErrorMsg(msg)
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const [sendingTelegram, setSendingTelegram] = useState(false)
+  const [telegramMsg, setTelegramMsg] = useState<string | null>(null)
+
+  const handleSendTelegram = async () => {
+    if (sharesToOrder <= 0) {
+      setErrorMsg('Please specify at least 1 share.')
+      return
+    }
+    setSendingTelegram(true)
+    setTelegramMsg(null)
+    setErrorMsg(null)
+    try {
+      const res = await api.telegramSendTradePrompt({
+        symbol: symbol.toUpperCase(),
+        qty: sharesToOrder,
+        side: 'buy',
+        price: effectivePrice,
+        take_profit_price: useBracket ? brackets.takeProfitPrice : undefined,
+        stop_loss_price: useBracket ? brackets.stopLossPrice : undefined,
+      })
+      if (res && typeof res === 'object' && 'success' in res && (res as any).success === false) {
+        setTelegramMsg(`Telegram: ${(res as any).error || 'Failed to dispatch (verify bot settings in System tab)'}`)
+      } else {
+        setTelegramMsg('📱 Interactive trade prompt dispatched to Telegram!')
+      }
+    } catch (err: unknown) {
+      setTelegramMsg(`Telegram dispatch: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setSendingTelegram(false)
     }
   }
 
@@ -610,16 +643,52 @@ export function OrderStagingModal({
                 </div>
               )}
 
+              {telegramMsg && (
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    background: telegramMsg.includes('dispatched') ? 'var(--accent-soft)' : 'var(--subtle)',
+                    border: '1px solid var(--line)',
+                    color: telegramMsg.includes('dispatched') ? 'var(--accent-dark)' : 'var(--ink)',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <Send size={15} />
+                  <span>{telegramMsg}</span>
+                </div>
+              )}
+
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '6px' }}>
-                <button type="button" className="secondary-button" onClick={onClose} disabled={submitting}>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: '6px' }}>
+                <button type="button" className="secondary-button" onClick={onClose} disabled={submitting || sendingTelegram}>
                   Cancel
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={handleSendTelegram}
+                  disabled={submitting || sendingTelegram}
+                  style={{
+                    padding: '9px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: 'var(--ink)',
+                  }}
+                  title="Send interactive trade prompt with execute/dismiss buttons to Telegram bot"
+                >
+                  <Send size={14} className={sendingTelegram ? 'spin' : ''} />
+                  {sendingTelegram ? 'Sending…' : '📱 Send to Telegram'}
                 </button>
                 <button
                   type="button"
                   className="banner-primary"
                   onClick={handleExecute}
-                  disabled={submitting}
+                  disabled={submitting || sendingTelegram}
                   style={{
                     padding: '9px 18px',
                     display: 'flex',

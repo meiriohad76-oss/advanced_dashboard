@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Scale, CheckCircle2, RefreshCw, X, ArrowUpRight, ArrowDownRight, Zap } from 'lucide-react'
+import { Scale, CheckCircle2, RefreshCw, X, ArrowUpRight, ArrowDownRight, Zap, Check, AlertTriangle } from 'lucide-react'
 import { api } from '../api/client'
 import { ModalOverlay } from './ModalOverlay'
-import type { RebalanceResponse } from '../types'
+import type { RebalanceResponse, RebalanceExecutionReceipt } from '../types'
 
 interface RebalanceModalProps {
   onClose: () => void
@@ -17,6 +17,8 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
   const [resultMessage, setResultMessage] = useState<string | null>(null)
   const [maxPosition, setMaxPosition] = useState<number>(12)
   const [maxSector, setMaxSector] = useState<number>(30)
+  const [simulate, setSimulate] = useState<boolean>(true)
+  const [receipt, setReceipt] = useState<RebalanceExecutionReceipt | null>(null)
 
   const loadRebalance = useCallback((pos = maxPosition, sec = maxSector) => {
     setLoading(true)
@@ -69,12 +71,10 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
       }))
 
     try {
-      const res = await api.executeRebalance(toExecute)
-      setResultMessage(`Executed ${res.executed_count} orders via Alpaca Paper Broker!`)
+      const res = await api.executeRebalance(toExecute, simulate)
+      setReceipt(res)
+      setResultMessage(`Executed ${res.executed_count} orders via ${res.simulated ? 'Alpaca Simulation Mode' : 'Alpaca Paper Broker'}!`)
       if (onSuccess) onSuccess()
-      setTimeout(() => {
-        loadRebalance()
-      }, 1500)
     } catch (err) {
       setResultMessage(`Execution error: ${String(err)}`)
     } finally {
@@ -144,135 +144,223 @@ export function RebalanceModal({ onClose, onSuccess }: RebalanceModalProps) {
         </div>
       </div>
 
-      {resultMessage && (
-        <div style={{ marginBottom: '12px', padding: '10px', borderRadius: '8px', background: resultMessage.includes('Executed') ? 'var(--accent-soft)' : 'var(--subtle)', border: '1px solid var(--line)', fontSize: '12px', color: 'var(--ink)' }}>
-          {resultMessage}
-        </div>
-      )}
+      {receipt ? (
+        <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '10px', padding: '16px', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            <span style={{ width: '32px', height: '32px', borderRadius: '50%', background: receipt.failed_count === 0 ? 'var(--accent-soft)' : 'var(--red-soft)', color: receipt.failed_count === 0 ? 'var(--accent-dark)' : 'var(--red)', display: 'grid', placeItems: 'center' }}>
+              {receipt.failed_count === 0 ? <Check size={18} /> : <AlertTriangle size={18} />}
+            </span>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--ink)' }}>
+                Rebalance Batch Execution Complete
+              </h3>
+              <small style={{ color: 'var(--muted)', fontSize: '11px' }}>
+                {receipt.executed_count} orders executed {receipt.simulated ? '· Simulated Mode' : '· Live Alpaca Paper Trading'}
+                {receipt.failed_count > 0 && ` · ${receipt.failed_count} failed`}
+              </small>
+            </div>
+          </div>
 
-      {loading ? (
-        <div style={{ padding: '36px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
-          <RefreshCw size={16} className="spin" /> Calculating optimal rebalancing delta…
-        </div>
-      ) : orders.length === 0 ? (
-        <div style={{ padding: '36px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
-          <CheckCircle2 size={24} color="var(--accent-dark)" style={{ margin: '0 auto 8px auto', display: 'block' }} />
-          Portfolio is balanced! Current weights match target allocations within tolerance.
-        </div>
-      ) : (
-        <>
-          <div style={{ maxHeight: '360px', overflowY: 'auto', border: '1px solid var(--line)', borderRadius: '8px', marginBottom: '14px', background: 'var(--panel)' }}>
+          <div style={{ maxHeight: '280px', overflowY: 'auto', border: '1px solid var(--line)', borderRadius: '6px', marginBottom: '14px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', color: 'var(--ink)' }}>
               <thead>
-                <tr style={{ background: 'var(--subtle)', borderBottom: '1px solid var(--line)', textAlign: 'left', color: 'var(--muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  <th style={{ padding: '8px 10px', width: '32px' }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedSymbols.size === orders.length && orders.length > 0}
-                      onChange={toggleAll}
-                    />
-                  </th>
-                  <th style={{ padding: '8px 10px' }}>Asset</th>
-                  <th style={{ padding: '8px 10px' }}>Weight (Cur → Target)</th>
-                  <th style={{ padding: '8px 10px' }}>Action</th>
-                  <th style={{ padding: '8px 10px' }}>Est. Amount</th>
-                  <th style={{ padding: '8px 10px' }}>Model Rationale</th>
+                <tr style={{ background: 'var(--subtle)', borderBottom: '1px solid var(--line)', textAlign: 'left', color: 'var(--muted)', fontSize: '10px', textTransform: 'uppercase' }}>
+                  <th style={{ padding: '6px 10px' }}>Symbol</th>
+                  <th style={{ padding: '6px 10px' }}>Status</th>
+                  <th style={{ padding: '6px 10px' }}>Side / Qty</th>
+                  <th style={{ padding: '6px 10px' }}>Order ID / Result</th>
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o) => {
-                  const isBuy = o.side === 'buy'
-                  const isChecked = selectedSymbols.has(o.symbol)
-                  return (
-                    <tr
-                      key={o.symbol}
-                      style={{
-                        borderBottom: '1px solid var(--line)',
-                        background: isChecked ? 'var(--panel)' : 'var(--subtle)',
-                        opacity: isChecked ? 1 : 0.6,
-                        color: 'var(--ink)',
-                      }}
-                    >
-                      <td style={{ padding: '8px 10px' }}>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleSelect(o.symbol)}
-                        />
-                      </td>
-                      <td style={{ padding: '8px 10px' }}>
-                        <strong style={{ color: 'var(--ink)', fontSize: '13px' }}>{o.symbol}</strong>
-                        <small style={{ display: 'block', fontSize: '10px', color: 'var(--muted)' }}>{o.sector}</small>
-                      </td>
-                      <td style={{ padding: '8px 10px', fontVariantNumeric: 'tabular-nums' }}>
-                        <span style={{ color: 'var(--muted)' }}>{o.current_weight.toFixed(1)}%</span> → <strong style={{ color: 'var(--ink)' }}>{o.target_weight.toFixed(1)}%</strong>
-                        <span
-                          style={{
-                            marginLeft: '6px',
-                            fontSize: '10px',
-                            fontWeight: 700,
-                            color: isBuy ? 'var(--accent-dark)' : 'var(--red)',
-                          }}
-                        >
-                          {isBuy ? '+' : ''}{o.delta_weight.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td style={{ padding: '8px 10px' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '3px',
-                            padding: '2px 7px',
-                            borderRadius: '4px',
-                            fontSize: '10px',
-                            fontWeight: 700,
-                            background: isBuy ? 'var(--accent-soft)' : 'var(--red-soft)',
-                            color: isBuy ? 'var(--accent-dark)' : 'var(--red)',
-                          }}
-                        >
-                          {isBuy ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                          {o.side.toUpperCase()} {o.quantity} shs
-                        </span>
-                      </td>
-                      <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
-                        ${Math.round(o.estimated_amount).toLocaleString()}
-                      </td>
-                      <td style={{ padding: '8px 10px', fontSize: '11px', color: 'var(--muted)' }}>
-                        {o.reason}
-                      </td>
-                    </tr>
-                  )
-                })}
+                {receipt.results.map((r) => (
+                  <tr key={r.symbol} style={{ borderBottom: '1px solid var(--line)' }}>
+                    <td style={{ padding: '6px 10px', fontWeight: 650 }}>{r.symbol}</td>
+                    <td style={{ padding: '6px 10px' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        background: r.success ? 'var(--accent-soft)' : 'var(--red-soft)',
+                        color: r.success ? 'var(--accent-dark)' : 'var(--red)',
+                      }}>
+                        {r.success ? 'FILLED' : 'FAILED'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '6px 10px', fontVariantNumeric: 'tabular-nums' }}>
+                      {r.details?.side?.toUpperCase()} {r.details?.qty} shs
+                    </td>
+                    <td style={{ padding: '6px 10px', fontSize: '11px', color: 'var(--muted)', fontFamily: 'monospace' }}>
+                      {r.details?.id ? r.details.id.slice(0, 18) + '…' : (r.error || 'OK')}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
-              Selected {selectedSymbols.size} of {orders.length} trade proposals
-            </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={onClose}
-                style={{ padding: '8px 14px', fontSize: '12px' }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="banner-primary"
-                onClick={handleExecute}
-                disabled={executing || selectedSymbols.size === 0}
-                style={{ padding: '8px 18px', fontSize: '12px' }}
-              >
-                <Zap size={14} className={executing ? 'spin' : ''} />
-                {executing ? 'Executing…' : `Execute ${selectedSymbols.size} Trades via Alpaca`}
-              </button>
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <button
+              type="button"
+              className="banner-primary"
+              onClick={() => {
+                setReceipt(null)
+                loadRebalance()
+                onClose()
+              }}
+              style={{ padding: '8px 16px', fontSize: '12px' }}
+            >
+              Done &amp; Dismiss
+            </button>
           </div>
+        </div>
+      ) : (
+        <>
+          {resultMessage && (
+            <div style={{ marginBottom: '12px', padding: '10px', borderRadius: '8px', background: resultMessage.includes('Executed') ? 'var(--accent-soft)' : 'var(--subtle)', border: '1px solid var(--line)', fontSize: '12px', color: 'var(--ink)' }}>
+              {resultMessage}
+            </div>
+          )}
+
+          {loading ? (
+            <div style={{ padding: '36px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
+              <RefreshCw size={16} className="spin" /> Calculating optimal rebalancing delta…
+            </div>
+          ) : orders.length === 0 ? (
+            <div style={{ padding: '36px', textAlign: 'center', color: 'var(--muted)', fontSize: '13px' }}>
+              <CheckCircle2 size={24} color="var(--accent-dark)" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+              Portfolio is balanced! Current weights match target allocations within tolerance.
+            </div>
+          ) : (
+            <>
+              <div style={{ maxHeight: '360px', overflowY: 'auto', border: '1px solid var(--line)', borderRadius: '8px', marginBottom: '14px', background: 'var(--panel)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', color: 'var(--ink)' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--subtle)', borderBottom: '1px solid var(--line)', textAlign: 'left', color: 'var(--muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      <th style={{ padding: '8px 10px', width: '32px' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedSymbols.size === orders.length && orders.length > 0}
+                          onChange={toggleAll}
+                        />
+                      </th>
+                      <th style={{ padding: '8px 10px' }}>Asset</th>
+                      <th style={{ padding: '8px 10px' }}>Weight (Cur → Target)</th>
+                      <th style={{ padding: '8px 10px' }}>Action</th>
+                      <th style={{ padding: '8px 10px' }}>Est. Amount</th>
+                      <th style={{ padding: '8px 10px' }}>Model Rationale</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((o) => {
+                      const isBuy = o.side === 'buy'
+                      const isChecked = selectedSymbols.has(o.symbol)
+                      return (
+                        <tr
+                          key={o.symbol}
+                          style={{
+                            borderBottom: '1px solid var(--line)',
+                            background: isChecked ? 'var(--panel)' : 'var(--subtle)',
+                            opacity: isChecked ? 1 : 0.6,
+                            color: 'var(--ink)',
+                          }}
+                        >
+                          <td style={{ padding: '8px 10px' }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleSelect(o.symbol)}
+                            />
+                          </td>
+                          <td style={{ padding: '8px 10px' }}>
+                            <strong style={{ color: 'var(--ink)', fontSize: '13px' }}>{o.symbol}</strong>
+                            <small style={{ display: 'block', fontSize: '10px', color: 'var(--muted)' }}>{o.sector}</small>
+                          </td>
+                          <td style={{ padding: '8px 10px', fontVariantNumeric: 'tabular-nums' }}>
+                            <span style={{ color: 'var(--muted)' }}>{o.current_weight.toFixed(1)}%</span> → <strong style={{ color: 'var(--ink)' }}>{o.target_weight.toFixed(1)}%</strong>
+                            <span
+                              style={{
+                                marginLeft: '6px',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                color: isBuy ? 'var(--accent-dark)' : 'var(--red)',
+                              }}
+                            >
+                              {isBuy ? '+' : ''}{o.delta_weight.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 10px' }}>
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                padding: '2px 7px',
+                                borderRadius: '4px',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                background: isBuy ? 'var(--accent-soft)' : 'var(--red-soft)',
+                                color: isBuy ? 'var(--accent-dark)' : 'var(--red)',
+                              }}
+                            >
+                              {isBuy ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                              {o.side.toUpperCase()} {o.quantity} shs
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
+                            ${Math.round(o.estimated_amount).toLocaleString()}
+                          </td>
+                          <td style={{ padding: '8px 10px', fontSize: '11px', color: 'var(--muted)' }}>
+                            {o.reason}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                    Selected {selectedSymbols.size} of {orders.length} trade proposals
+                  </span>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', cursor: 'pointer', color: 'var(--muted)' }}>
+                    <input
+                      type="checkbox"
+                      checked={simulate}
+                      onChange={(e) => setSimulate(e.target.checked)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <span>Simulate Mode (Offline Safe)</span>
+                  </label>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={onClose}
+                    style={{ padding: '8px 14px', fontSize: '12px' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="banner-primary"
+                    onClick={handleExecute}
+                    disabled={executing || selectedSymbols.size === 0}
+                    style={{ padding: '8px 18px', fontSize: '12px' }}
+                  >
+                    <Zap size={14} className={executing ? 'spin' : ''} />
+                    {executing ? 'Executing…' : `Execute ${selectedSymbols.size} Trades`}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </>
       )}
     </ModalOverlay>

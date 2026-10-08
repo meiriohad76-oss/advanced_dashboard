@@ -104,6 +104,11 @@ export const api = {
     }),
   deleteSavedPortfolio: (id: number) =>
     request<{ deleted_id: number; status: string }>(`/api/v1/portfolios/saved/${id}`, { method: 'DELETE' }),
+  saveCurrentPortfolio: (name: string) =>
+    request<{ id: number; name: string; imported_at: string; total_saved: number; portfolios: import('../types').SavedPortfolioItem[] }>('/api/v1/portfolios/saved', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    }),
   watchlist: () => request<WatchlistData>('/api/v1/watchlist'),
   addWatchlistSymbol: (symbol: string, note?: string, name?: string, sector?: string) =>
     request<{ item: import('../types').WatchlistItem; watchlist: WatchlistData }>('/api/v1/watchlist/items', {
@@ -249,10 +254,10 @@ export const api = {
     request<import('../types').RebalanceResponse>(
       `/api/v1/portfolio/rebalance?max_position=${encodeURIComponent(maxPosition)}&max_sector=${encodeURIComponent(maxSector)}`
     ),
-  executeRebalance: (orders: Array<{ symbol: string; quantity: number; side: string }>) =>
-    request<{ executed_count: number; failed_count: number; results: unknown[] }>('/api/v1/portfolio/rebalance/execute', {
+  executeRebalance: (orders: Array<{ symbol: string; quantity: number; side: string }>, simulate = false) =>
+    request<import('../types').RebalanceExecutionReceipt>('/api/v1/portfolio/rebalance/execute', {
       method: 'POST',
-      body: JSON.stringify({ orders }),
+      body: JSON.stringify({ orders, simulate }),
     }),
   correlationMatrix: (maxSymbols = 10) =>
     request<import('../types').CorrelationMatrixResponse>(`/api/v1/analytics/correlation?max_symbols=${encodeURIComponent(maxSymbols)}`),
