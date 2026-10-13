@@ -7,6 +7,7 @@ import {
   Radar,
   ServerCog,
   Settings,
+  ShieldAlert,
   Upload,
   X,
   Zap,
@@ -22,6 +23,7 @@ import { ImportPage } from './components/DataPages'
 import { DecisionModal } from './components/DecisionModal'
 import { MorningBriefingModal } from './components/MorningBriefingModal'
 import { NotificationSettingsModal } from './components/NotificationSettingsModal'
+import { OrderStagingModal } from './components/OrderStagingModal'
 import { RatingsBanner } from './components/RatingsBanner'
 import { RebalanceModal } from './components/RebalanceModal'
 import { ReportModal } from './components/ReportModal'
@@ -34,9 +36,15 @@ import {
   convertRecommendationToUserAlert,
   generateAllRecommendations,
 } from './domain/alertRecommendations'
+import {
+  assessHoldingDiscipline,
+  calculateDisciplineScorecard,
+  type HoldingDiscipline,
+} from './domain/discipline'
 import { getOrBuildHolding } from './domain/portfolioHelper'
 import { AlertsPage } from './pages/AlertsPage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
+import { DisciplinePage } from './pages/DisciplinePage'
 import { OverviewPage } from './pages/OverviewPage'
 import { PortfolioPage } from './pages/PortfolioPage'
 import { SignalsPage } from './pages/SignalsPage'
@@ -52,6 +60,7 @@ import type {
 
 type Page =
   | 'Overview'
+  | 'Discipline'
   | 'Portfolio'
   | 'Signals'
   | 'Catalysts'
@@ -63,6 +72,7 @@ type Page =
 
 const navItems = [
   { label: 'Overview' as Page, icon: LayoutDashboard },
+  { label: 'Discipline' as Page, icon: ShieldAlert },
   { label: 'Portfolio' as Page, icon: BriefcaseBusiness },
   { label: 'Signals' as Page, icon: Radar },
   { label: 'Catalysts' as Page, icon: Calendar },
@@ -133,6 +143,11 @@ export default function App() {
   const [briefingOpen, setBriefingOpen] = useState(false)
   const [backtestOpen, setBacktestOpen] = useState(false)
   const [backtestTicker, setBacktestTicker] = useState<string | undefined>(undefined)
+  const [stagingOrder, setStagingOrder] = useState<{
+    symbol: string
+    currentPrice: number
+    triggerPrice?: number
+  } | null>(null)
 
   const handleOpenBacktest = (symbol?: string) => {
     setBacktestTicker(symbol)
@@ -285,6 +300,10 @@ export default function App() {
       }
     })
   }, [baseHoldings, liveStreaming, liveTicks])
+
+  const portfolioTotalValue = useMemo(() => {
+    return holdings.reduce((sum, h) => sum + (h.quantity * h.price), 0)
+  }, [holdings])
 
   const isCustomPortfolio = source?.source === 'uploaded' || source?.source === 'alpaca'
   const alerts = apiAlerts ?? (isCustomPortfolio ? [] : scenario ? [scenarioAlert, ...baseAlerts] : baseAlerts)
@@ -580,7 +599,121 @@ export default function App() {
 
   const pendingRecsCount = recommendations.filter((r) => r.status === 'PENDING').length
 
+  const disciplineItems = useMemo(() => {
+    return holdings
+      .map((h) => assessHoldingDiscipline(h, userAlerts, recommendations))
+      .filter((item): item is HoldingDiscipline => item !== null)
+  }, [holdings, userAlerts, recommendations])
+
+  const disciplineScorecard = useMemo(() => {
+    return calculateDisciplineScorecard(disciplineItems)
+  }, [disciplineItems])
+
+  const handleArmAllStops = useCallback(async () => {
+    const unprotectedItems = disciplineItems.filter((i) => !i.isStopArmed)
+    if (unprotectedItems.length === 0) return
+
+    const newAlerts: UserAlert[] = unprotectedItems.map((item) => ({
+      id: `stop-${item.holding.symbol}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      symbol: item.holding.symbol,
+      metric: 'STOP_LOSS',
+      condition: 'BELOW',
+      targetValue: item.stopLossPrice,
+      severity: 'critical',
+      status: 'ARMED',
+      createdAt: new Date().toISOString(),
+      category: 'STOP_LOSS',
+      title: `${item.holding.symbol} Protective Stop Loss`,
+      rationale: `Capital defense stop anchored to cost basis $${item.costBasis.toFixed(2)} (-6% downside target $${item.stopLossPrice.toFixed(2)}).`,
+      playbookDirective: `Execute stop-loss defense exit at or below $${item.stopLossPrice.toFixed(2)}`,
+    }))
+
+    setUserAlerts((prev) => [...newAlerts, ...prev])
+    setLiveToast({
+      title: 'Shield Activated',
+      detail: `Armed protective stops on ${newAlerts.length} positions (-6% defense).`,
+      symbol: 'SHIELD',
+    })
+
+    for (const a of newAlerts) {
+      api.saveUserAlert(a).catch(() => {})
+    }
+  }, [disciplineItems])
+
+  const handleArmIndividualStop = useCallback(
+    async (item: HoldingDiscipline) => {
+      const newAlert: UserAlert = {
+        id: `stop-${item.holding.symbol}-${Date.now()}`,
+        symbol: item.holding.symbol,
+        metric: 'STOP_LOSS',
+        condition: 'BELOW',
+        targetValue: item.stopLossPrice,
+        severity: 'critical',
+        status: 'ARMED',
+        createdAt: new Date().toISOString(),
+        category: 'STOP_LOSS',
+        title: `${item.holding.symbol} Stop Loss Defense`,
+        rationale: `Capital defense stop at $${item.stopLossPrice.toFixed(2)} (-6% from cost basis $${item.costBasis.toFixed(2)}).`,
+        playbookDirective: `Protect capital: exit position if price breaches $${item.stopLossPrice.toFixed(2)}`,
+      }
+
+      setUserAlerts((prev) => [newAlert, ...prev.filter((a) => a.id !== newAlert.id)])
+      setLiveToast({
+        title: `Stop-Loss Armed: ${item.holding.symbol}`,
+        detail: `Protective stop set at $${item.stopLossPrice.toFixed(2)}.`,
+        symbol: item.holding.symbol,
+      })
+      api.saveUserAlert(newAlert).catch(() => {})
+    },
+    []
+  )
+
+  const handleArmIndividualTakeProfit = useCallback(
+    async (item: HoldingDiscipline) => {
+      const newAlert: UserAlert = {
+        id: `tp-${item.holding.symbol}-${Date.now()}`,
+        symbol: item.holding.symbol,
+        metric: 'PRICE',
+        condition: 'ABOVE',
+        targetValue: item.takeProfitPrice,
+        severity: 'info',
+        status: 'ARMED',
+        createdAt: new Date().toISOString(),
+        category: 'PROFIT_TARGET',
+        title: `${item.holding.symbol} Take-Profit Objective`,
+        rationale: `Profit target objective at $${item.takeProfitPrice.toFixed(2)} (+15% gain target).`,
+        playbookDirective: `Harvest gains or trim 50% at target $${item.takeProfitPrice.toFixed(2)}`,
+      }
+
+      setUserAlerts((prev) => [newAlert, ...prev.filter((a) => a.id !== newAlert.id)])
+      setLiveToast({
+        title: `Profit Target Armed: ${item.holding.symbol}`,
+        detail: `Target objective set at $${item.takeProfitPrice.toFixed(2)}.`,
+        symbol: item.holding.symbol,
+      })
+      api.saveUserAlert(newAlert).catch(() => {})
+    },
+    []
+  )
+
   const renderPage = () => {
+    if (page === 'Discipline') {
+      return (
+        <DisciplinePage
+          holdings={holdings}
+          userAlerts={userAlerts}
+          recommendations={recommendations}
+          onSelectHolding={setSelected}
+          onArmAllStops={handleArmAllStops}
+          onArmIndividualStop={handleArmIndividualStop}
+          onArmIndividualTakeProfit={handleArmIndividualTakeProfit}
+          onOpenOrderStaging={(sym, price, trigger) =>
+            setStagingOrder({ symbol: sym, currentPrice: price, triggerPrice: trigger })
+          }
+          onOpenDecision={(h) => setDecisionHolding(h)}
+        />
+      )
+    }
     if (page === 'Portfolio') {
       return (
         <PortfolioPage
@@ -672,6 +805,9 @@ export default function App() {
             >
               <Icon size={18} />
               <span>{label}</span>
+              {label === 'Discipline' && disciplineScorecard.urgentActionsCount > 0 && (
+                <b style={{ background: 'var(--red)', color: 'white' }}>{disciplineScorecard.urgentActionsCount}</b>
+              )}
               {label === 'Alerts' && (scenario || userAlerts.length > 0 || pendingRecsCount > 0) && (
                 <b>{userAlerts.length + (pendingRecsCount > 0 ? pendingRecsCount : scenario ? 1 : 0)}</b>
               )}
@@ -817,6 +953,23 @@ export default function App() {
 
       {backtestOpen && (
         <BacktestModal initialSymbol={backtestTicker} onClose={() => setBacktestOpen(false)} />
+      )}
+
+      {stagingOrder && (
+        <OrderStagingModal
+          symbol={stagingOrder.symbol}
+          currentPrice={stagingOrder.currentPrice}
+          triggerPrice={stagingOrder.triggerPrice}
+          portfolioValue={portfolioTotalValue}
+          onClose={() => setStagingOrder(null)}
+          onOrderExecuted={(receipt) => {
+            setLiveToast({
+              title: `Order Executed: ${receipt.symbol}`,
+              detail: `${receipt.side.toUpperCase()} ${receipt.qty} shs · ${receipt.status} ${receipt.simulated ? '(Paper Simulation)' : ''}`,
+              symbol: receipt.symbol,
+            })
+          }}
+        />
       )}
 
       {paletteOpen && (

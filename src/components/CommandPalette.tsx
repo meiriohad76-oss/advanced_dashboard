@@ -11,6 +11,7 @@ import {
   Scale,
   Search,
   ServerCog,
+  ShieldAlert,
   Sun,
   Upload,
   X,
@@ -149,6 +150,17 @@ export function CommandPalette({
         onSelect: () => {
           onClose()
           onNavigate('Overview')
+        },
+      },
+      {
+        id: 'nav-discipline',
+        title: 'Discipline Cockpit',
+        subtitle: 'Downside stop-loss defense, capital at risk & take-profit targets',
+        category: 'Navigation',
+        icon: ShieldAlert,
+        onSelect: () => {
+          onClose()
+          onNavigate('Discipline')
         },
       },
       {
